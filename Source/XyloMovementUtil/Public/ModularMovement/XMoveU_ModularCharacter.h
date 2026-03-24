@@ -6,6 +6,10 @@
 #include "GeneralizedPrediction/XMoveU_PredictionCharacter.h"
 #include "XMoveU_ModularCharacter.generated.h"
 
+
+/**
+ *
+ */
 UCLASS()
 class XYLOMOVEMENTUTIL_API AXMoveU_ModularCharacter : public AXMoveU_PredictionCharacter
 {

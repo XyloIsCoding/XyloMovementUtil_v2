@@ -7,6 +7,9 @@
 #include "XMoveU_ModularMovementComponent.generated.h"
 
 
+/**
+ * Adds modular system for CustomMovementModes, LayeredMoves, and JumpProfiles
+ */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class XYLOMOVEMENTUTIL_API UXMoveU_ModularMovementComponent : public UXMoveU_PredictionMovementComponent
 {
