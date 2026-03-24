@@ -1,0 +1,23 @@
+﻿{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "XyloMovementUtil",
+	"Description": "",
+	"Category": "Other",
+	"CreatedBy": "Xylo",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "XyloMovementUtil",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
