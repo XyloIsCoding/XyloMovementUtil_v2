@@ -29,6 +29,14 @@ public:
 	virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
 	virtual void UpdateCharacterStateAfterMovement(float DeltaSeconds) override;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/*
+	 * UXMoveU_PredictionMovementComponent Interface
+	 */
+
+protected:
+	virtual void GetPredictionManagers(TArray<UXMoveU_PredictionManager*>& OutPredictionManagers) const override;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +56,13 @@ public:
 	
 protected:
 	UPROPERTY()
-	TArray<TScriptInterface<IXMoveU_MovementSyncedObjectInterface>> MovementSyncedObjects;
+	TArray<TWeakObjectPtr<UObject>> MovementSyncedObjects;
+
+	/** As of now we must keep a strong reference to all prediction managers, otherwise we are going to get crashes due
+	 * to serialization. Furthermore, rollbacks would miss since the prediction proxy would not be there to roll back
+	 * the associated values. */
+	UPROPERTY()
+	TArray<TObjectPtr<UXMoveU_PredictionManager>> MovementSyncedPredictionManagers; // @FutureMeProblem: find a way to let this be a weak pointer.
 	
 	// ~MovementSyncedObjects
 /*====================================================================================================================*/

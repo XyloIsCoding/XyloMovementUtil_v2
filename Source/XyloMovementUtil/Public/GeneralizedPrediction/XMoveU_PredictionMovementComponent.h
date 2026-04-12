@@ -95,6 +95,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Pawn|Components|CharacterMovement|Prediction")
 	virtual void RegisterPredictionManager(UXMoveU_PredictionManager* NewPredictionManager);
 protected:
+	virtual void GetPredictionManagers(TArray<UXMoveU_PredictionManager*>& OutPredictionManagers) const;
+	
 	UPROPERTY()
 	TArray<TObjectPtr<UXMoveU_PredictionManager>> PredictionManagers;
 

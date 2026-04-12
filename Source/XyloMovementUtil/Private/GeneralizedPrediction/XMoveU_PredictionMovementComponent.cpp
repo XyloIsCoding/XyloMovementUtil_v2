@@ -632,7 +632,9 @@ void UXMoveU_PredictionMovementComponent::ExecuteOnPredictionManagers(const UCha
 	}
 	
 	bool bStopExecution = false;
-	for (UXMoveU_PredictionManager* PredictionManager : PredictionMoveComp->PredictionManagers)
+	TArray<UXMoveU_PredictionManager*> PredictionManagers;
+	PredictionMoveComp->GetPredictionManagers(PredictionManagers);
+	for (UXMoveU_PredictionManager* PredictionManager : PredictionManagers)
 	{
 		if (IsValid(PredictionManager))
 		{
@@ -659,7 +661,9 @@ void UXMoveU_PredictionMovementComponent::ExecuteOnPredictionProxies(const UChar
 	}
 	
 	bool bStopExecution = false;
-	for (UXMoveU_PredictionManager* PredictionManager : PredictionMoveComp->PredictionManagers)
+	TArray<UXMoveU_PredictionManager*> PredictionManagers;
+	PredictionMoveComp->GetPredictionManagers(PredictionManagers);
+	for (UXMoveU_PredictionManager* PredictionManager : PredictionManagers)
 	{
 		if (IsValid(PredictionManager))
 		{
@@ -682,6 +686,11 @@ void UXMoveU_PredictionMovementComponent::RegisterPredictionManager(UXMoveU_Pred
 
 	PredictionManagers.Add(NewPredictionManager);
 	NewPredictionManager->OnRegistered(this);
+}
+
+void UXMoveU_PredictionMovementComponent::GetPredictionManagers(TArray<UXMoveU_PredictionManager*>& OutPredictionManagers) const
+{
+	OutPredictionManagers.Append(PredictionManagers);
 }
 
 // ~CustomPrediction

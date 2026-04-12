@@ -4,6 +4,7 @@
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
 
 #include "XyloMovementUtil.h"
+#include "GeneralizedPrediction/CustomPrediction/XMoveU_PredictionManager.h"
 #include "ModularMovement/MovementSyncedObject/XMoveU_MovementSyncedObjectInterface.h"
 
 
@@ -33,6 +34,18 @@ void UXMoveU_ModularMovementComponent::UpdateCharacterStateAfterMovement(float D
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
+ * UXMoveU_PredictionMovementComponent Interface
+ */
+
+void UXMoveU_ModularMovementComponent::GetPredictionManagers(TArray<UXMoveU_PredictionManager*>& OutPredictionManagers) const
+{
+	Super::GetPredictionManagers(OutPredictionManagers);
+	OutPredictionManagers.Append(MovementSyncedPredictionManagers);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
  * UXMoveU_ModularMovementComponent
  */
 
@@ -57,10 +70,18 @@ void UXMoveU_ModularMovementComponent::RegisterMovementSyncedObject(UObject* InO
 	MovementSyncedObjects.Add(InObject);
 	MoveSyncedObject->OnRegistered(this);
 
-	// Just check for nullptr since prediction managers are optional. The register function already checks for IsValid.
+	// Just check for nullptr since prediction managers are optional.
 	if (InPredictionManager)
 	{
-		RegisterPredictionManager(InPredictionManager);
+		if (!IsValid(InPredictionManager))
+		{
+			UE_LOG(LogXyloMovementUtil, Warning, TEXT("UXMoveU_ModularMovementComponent::RegisterMovementSyncedObject >> PredictionManager is not valid"))
+			return;
+		}
+
+		// Register Synced Prediction Manager
+		MovementSyncedPredictionManagers.Add(InPredictionManager);
+		InPredictionManager->OnRegistered(this);
 	}
 }
 
@@ -69,11 +90,11 @@ void UXMoveU_ModularMovementComponent::TickSyncedObjectsBeforeMovement(float Del
 	FXMoveU_MovementSyncParams Params;
 	Params.MovementComponent = this;
 	
-	for (TScriptInterface<IXMoveU_MovementSyncedObjectInterface> MoveSyncObject : MovementSyncedObjects)
+	for (TWeakObjectPtr<UObject> MoveSyncObject : MovementSyncedObjects)
 	{
-		if (IsValid(MoveSyncObject.GetObject()))
+		if (IXMoveU_MovementSyncedObjectInterface* MoveSyncedObjInterface = Cast<IXMoveU_MovementSyncedObjectInterface>(MoveSyncObject.Get()))
 		{
-			MoveSyncObject->TickBeforeMovement(Params, DeltaSeconds);
+			MoveSyncedObjInterface->TickBeforeMovement(Params, DeltaSeconds);
 		}
 	}
 }
@@ -83,11 +104,11 @@ void UXMoveU_ModularMovementComponent::TickSyncedObjectsAfterMovement(float Delt
 	FXMoveU_MovementSyncParams Params;
 	Params.MovementComponent = this;
 	
-	for (TScriptInterface<IXMoveU_MovementSyncedObjectInterface> MoveSyncObject : MovementSyncedObjects)
+	for (TWeakObjectPtr<UObject> MoveSyncObject : MovementSyncedObjects)
 	{
-		if (IsValid(MoveSyncObject.GetObject()))
+		if (IXMoveU_MovementSyncedObjectInterface* MoveSyncedObjInterface = Cast<IXMoveU_MovementSyncedObjectInterface>(MoveSyncObject.Get()))
 		{
-			MoveSyncObject->TickAfterMovement(Params, DeltaSeconds);
+			MoveSyncedObjInterface->TickAfterMovement(Params, DeltaSeconds);
 		}
 	}
 }
