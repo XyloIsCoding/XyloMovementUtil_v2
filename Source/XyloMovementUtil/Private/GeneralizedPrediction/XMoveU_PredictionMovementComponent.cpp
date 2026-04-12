@@ -15,17 +15,17 @@
 #include "Net/PerfCountersHelpers.h"
 
 
-// @AfterUpdatingEngine: Check if engine provided an actual setter for this.
+// @XMoveU - @AfterUpdatingEngine: Check if engine provided an actual setter for this.
 UE_DEFINE_PRIVATE_MEMBER_PTR(TWeakObjectPtr<UPrimitiveComponent>, GLastServerMovementBase, UCharacterMovementComponent, LastServerMovementBase);
 
 
 // Mirrors the declarations in UCharacterMovementComponent
-// @AfterUpdatingEngine: check that the declarations are still the same in UCharacterMovementComponent.
+// @XMoveU - @AfterUpdatingEngine: check that the declarations are still the same in UCharacterMovementComponent.
 static const FString PerfCounter_NumServerMoves = TEXT("NumServerMoves");
 static const FString PerfCounter_NumServerMoveCorrections = TEXT("NumServerMoveCorrections");
 
 // Caches CVars from base class and provides getters
-// @AfterUpdatingEngine: check that CVars did not change.
+// @XMoveU - @AfterUpdatingEngine: check that CVars did not change.
 namespace CharacterMovementCVars
 {
 	static IConsoleVariable* CVar_ClientAuthorityThresholdOnBaseChange = IConsoleManager::Get().FindConsoleVariable(TEXT("p.ClientAuthorityThresholdOnBaseChange"));
@@ -91,6 +91,13 @@ FNetworkPredictionData_Client* UXMoveU_PredictionMovementComponent::GetPredictio
  * UCharacterMovementComponent Interface
  */
 
+void UXMoveU_PredictionMovementComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	RegisterPredictionManager(DefaultPredictionManager);
+}
+
 void UXMoveU_PredictionMovementComponent::ServerMove_PerformMovement(const FCharacterNetworkMoveData& MoveData)
 {
 	ServerGetClientInputs(MoveData);
@@ -149,11 +156,11 @@ bool UXMoveU_PredictionMovementComponent::ClientUpdatePositionAfterServerUpdate(
 	return bReplayedMoves;
 }
 
-// @AfterUpdatingEngine: Here we are rewriting the super function split up in smaller more manageable functions.
+// @XMoveU - @AfterUpdatingEngine: Here we are rewriting the super function split up in smaller more manageable functions.
 // We need to check that implementation did not change, and in case update this one. 
 void UXMoveU_PredictionMovementComponent::ServerMoveHandleClientError(float ClientTimeStamp, float DeltaTime, const FVector& Accel, const FVector& RelativeClientLocation, UPrimitiveComponent* ClientMovementBase, FName ClientBaseBoneName, uint8 ClientMovementMode)
 {
-	// @-----
+	// @XMoveU - @CopiedFromSuper
 	if (!ShouldUsePackedMovementRPCs())
 	{
 		if (RelativeClientLocation == FVector(1.f,2.f,3.f)) // first part of double servermove
@@ -178,13 +185,13 @@ void UXMoveU_PredictionMovementComponent::ServerMoveHandleClientError(float Clie
 	}
 
 	// Offset may be relative to base component
-	FVector ClientLoc = CalculateClientWorldLocation(RelativeClientLocation, ClientMovementBase, ClientBaseBoneName); // @CHANGE: Compacted into function
+	FVector ClientLoc = CalculateClientWorldLocation(RelativeClientLocation, ClientMovementBase, ClientBaseBoneName); // @XMoveU - @Change: Compacted into function
 
 	FVector ServerLoc = UpdatedComponent->GetComponentLocation();
 
 	// Client may send a null movement base when walking on bases with no relative location (to save bandwidth).
 	// In this case don't check movement base in error conditions, use the server one (which avoids an error based on differing bases). Position will still be validated.
-	TryUseServerBaseForClientBase(ClientMovementBase, ClientBaseBoneName, ClientMovementMode); // @CHANGE: Compacted into function
+	TryUseServerBaseForClientBase(ClientMovementBase, ClientBaseBoneName, ClientMovementMode); // @XMoveU - @Change: Compacted into function
 
 	// If base location is out of sync on server and client, changing base can result in a jarring correction.
 	// So in the case that the base has just changed on server or client, server trusts the client (within a threshold)
@@ -199,27 +206,27 @@ void UXMoveU_PredictionMovementComponent::ServerMoveHandleClientError(float Clie
 	bool bFallingWithinAcceptableError = false;
 
 	// Potentially trust the client a little when landing
-	if (ShouldDeferServerCorrectionsWhenFalling()) // @CHANGE: Compacted into function
+	if (ShouldDeferServerCorrectionsWhenFalling()) // @XMoveU - @Change: Compacted into function
 	{
-		// @CHANGE: Compacted into function (this implementation assumes server falling state is not changed before being called. Which does not in engine's code)
+		// @XMoveU - @Change: Compacted into function (this implementation assumes server falling state is not changed before being called. Which does not in engine's code)
 		bFallingWithinAcceptableError = IsFallingWithinAcceptableError(ClientLoc, ClientMovementMode, bUseLastBase, ServerLoc, MovementBase, RelativeLocation, RelativeVelocity);
 	}
 
 	// Compute the client error from the server's position
 	// If client has accumulated a noticeable positional error, correct them.
 	bNetworkLargeClientCorrection = ServerData->bForceClientUpdate;
-	// @CHANGE: added ServerCheckGenericClientError.
+	// @XMoveU - @Change: added ServerCheckGenericClientError.
 	bool bGenericError = ServerCheckGenericClientError(ClientTimeStamp, DeltaTime, Accel, ClientLoc, RelativeClientLocation, ClientMovementBase, ClientBaseBoneName, ClientMovementMode, bFallingWithinAcceptableError || bIgnoreClientMovementErrorChecksAndCorrection);
 	if (ServerData->bForceClientUpdate || bGenericError || (!bFallingWithinAcceptableError && ServerCheckClientError(ClientTimeStamp, DeltaTime, Accel, ClientLoc, RelativeClientLocation, ClientMovementBase, ClientBaseBoneName, ClientMovementMode)))
 	{
-		// @CHANGE: Compacted into function
+		// @XMoveU - @Change: Compacted into function
 		ServerPrepareCorrection(ClientTimeStamp, DeltaTime, Accel, ClientLoc, ServerLoc, bUseLastBase, MovementBase, MovementBaseBoneName, RelativeLocation, RelativeVelocity);
 	}
 	else
 	{
 		if (ServerShouldUseAuthoritativePosition(ClientTimeStamp, DeltaTime, Accel, ClientLoc, RelativeClientLocation, ClientMovementBase, ClientBaseBoneName, ClientMovementMode))
 		{
-			// @CHANGE: Compacted into function
+			// @XMoveU - @Change: Compacted into function
 			ServerUseAuthoritativePosition(ClientTimeStamp, DeltaTime, Accel, ClientLoc, ClientMovementBase, ClientBaseBoneName, ClientMovementMode);
 		}
 
@@ -239,7 +246,7 @@ void UXMoveU_PredictionMovementComponent::ServerMoveHandleClientError(float Clie
 	bLastClientIsFalling = bClientIsFalling;
 	bLastServerIsFalling = bServerIsFalling;
 	bLastServerIsWalking = MovementMode == MOVE_Walking;
-	// ~@-----
+	// ~@XMoveU - @CopiedFromSuper
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -257,7 +264,8 @@ bool UXMoveU_PredictionMovementComponent::IsFallingWithinAcceptableError(const F
 	
 	bool bFallingWithinAcceptableError = false;
 
-	// @-----
+	// @XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
+	
 	// Teleports and other movement modes mean we should just trust the server like we normally would
 	if (bTeleportedSinceLastUpdate || (MovementMode != MOVE_Walking && MovementMode != MOVE_Falling))
 	{
@@ -390,7 +398,7 @@ bool UXMoveU_PredictionMovementComponent::IsFallingWithinAcceptableError(const F
 			ServerWorldLocation = ServerWorldLocation - LocDiff.GetSafeNormal() * FMath::Clamp(MaxServerClientErrorWhileFalling - CharacterMovementCVars::Get_MaxFallingCorrectionLeashBuffer(), 0.f, MaxServerClientErrorWhileFalling);
 		}
 	}
-	// ~@-----
+	// ~@XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 
 	return bFallingWithinAcceptableError;
 }
@@ -400,7 +408,7 @@ void UXMoveU_PredictionMovementComponent::ServerPrepareCorrection(float ClientTi
 	FNetworkPredictionData_Server_Character* ServerData = GetPredictionData_Server_Character();
 	bool bDeferServerCorrectionsWhenFalling = ShouldDeferServerCorrectionsWhenFalling();
 	
-	// @-----
+	// @XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 	ServerData->PendingAdjustment.NewVel = Velocity;
 	ServerData->PendingAdjustment.NewBase = ServerMovementBase;
 	ServerData->PendingAdjustment.NewBaseBoneName = ServerBaseBoneName;
@@ -460,12 +468,12 @@ void UXMoveU_PredictionMovementComponent::ServerPrepareCorrection(float ClientTi
 #if USE_SERVER_PERF_COUNTERS
 	PerfCountersIncrement(PerfCounter_NumServerMoveCorrections);
 #endif
-	// ~@-----
+	// ~@XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 }
 
 void UXMoveU_PredictionMovementComponent::ServerUseAuthoritativePosition(float ClientTimeStamp, float DeltaTime, const FVector& Accel, const FVector& ClientWorldLocation, UPrimitiveComponent* ClientMovementBase, FName ClientBaseBoneName, uint8 ClientMovementMode)
 {
-	// @-----
+	// @XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 	const FVector LocDiff = UpdatedComponent->GetComponentLocation() - ClientWorldLocation; //-V595
 	if (!LocDiff.IsZero() || ClientMovementMode != PackNetworkMovementMode() || GetMovementBase() != ClientMovementBase || (CharacterOwner && CharacterOwner->GetBasedMovement().BoneName != ClientBaseBoneName))
 	{
@@ -486,23 +494,23 @@ void UXMoveU_PredictionMovementComponent::ServerUseAuthoritativePosition(float C
 		LastUpdateRotation = UpdatedComponent ? UpdatedComponent->GetComponentQuat() : FQuat::Identity;
 		LastUpdateVelocity = Velocity;
 	}
-	// ~@-----
+	// ~@XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 }
 
 bool UXMoveU_PredictionMovementComponent::ShouldDeferServerCorrectionsWhenFalling()
 {
-	// @-----
+	// @XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 	const float ClientAuthorityThreshold = CharacterMovementCVars::Get_ClientAuthorityThresholdOnBaseChange();
 	const float MaxFallingCorrectionLeash = CharacterMovementCVars::Get_MaxFallingCorrectionLeash();
 	const bool bDeferServerCorrectionsWhenFalling = ClientAuthorityThreshold > 0.f || MaxFallingCorrectionLeash > 0.f;
-	// ~@-----
+	// ~@XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 	
 	return bDeferServerCorrectionsWhenFalling;
 }
 
 FVector UXMoveU_PredictionMovementComponent::CalculateClientWorldLocation(const FVector& RelativeClientLocation, UPrimitiveComponent* ClientMovementBase, FName ClientBaseBoneName)
 {
-	// @-----
+	// @XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 	FVector ClientLoc = RelativeClientLocation;
 	if (MovementBaseUtility::UseRelativeLocation(ClientMovementBase))
 	{
@@ -512,14 +520,14 @@ FVector UXMoveU_PredictionMovementComponent::CalculateClientWorldLocation(const 
 	{
 		ClientLoc = FRepMovement::RebaseOntoLocalOrigin(ClientLoc, this);
 	}
-	// ~@-----
+	// ~@XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 	
 	return ClientLoc;
 }
 
 void UXMoveU_PredictionMovementComponent::TryUseServerBaseForClientBase(UPrimitiveComponent*& ClientMovementBase, FName& ClientBaseBoneName, uint8 ClientMovementMode)
 {
-	// @-----
+	// @XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 	if (ClientMovementBase == nullptr)
 	{
 		TEnumAsByte<EMovementMode> NetMovementMode(MOVE_None);
@@ -532,7 +540,7 @@ void UXMoveU_PredictionMovementComponent::TryUseServerBaseForClientBase(UPrimiti
 			ClientBaseBoneName = CharacterOwner->GetBasedMovement().BoneName;
 		}
 	}
-	// ~@-----
+	// ~@XMoveU - @CopiedFromSuper::ServerMoveHandleClientError
 }
 
 // ~ServerMoveHandleClientError Helpers
@@ -690,6 +698,7 @@ void UXMoveU_PredictionMovementComponent::RegisterPredictionManager(UXMoveU_Pred
 
 void UXMoveU_PredictionMovementComponent::GetPredictionManagers(TArray<UXMoveU_PredictionManager*>& OutPredictionManagers) const
 {
+	OutPredictionManagers.Add(DefaultPredictionManager);
 	OutPredictionManagers.Append(PredictionManagers);
 }
 

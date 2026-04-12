@@ -31,6 +31,9 @@ protected:
 	 */
 
 public:
+	virtual void OnRegistered() {}
+
+public:
 	virtual bool IsFlyingMode() const { return MovementModeType == EXMoveU_MovementModeType::Flying; }
 	virtual bool IsFallingMode() const { return MovementModeType == EXMoveU_MovementModeType::Falling; }
 	virtual bool IsGroundMode() const { return MovementModeType == EXMoveU_MovementModeType::Ground; }

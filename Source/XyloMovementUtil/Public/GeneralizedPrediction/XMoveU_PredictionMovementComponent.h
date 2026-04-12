@@ -41,6 +41,9 @@ private:
 	/*
 	 * UCharacterMovementComponent Interface
 	 */
+
+public:
+	virtual void BeginPlay() override;
 	
 public:
 	virtual void ServerMove_PerformMovement(const FCharacterNetworkMoveData& MoveData) override;
@@ -87,18 +90,25 @@ protected:
 
 /*====================================================================================================================*/
 	// CustomPrediction
+
+public:
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|Prediction", BlueprintCallable)
+	virtual void RegisterPredictionManager(UXMoveU_PredictionManager* NewPredictionManager);
 	
 public:
 	static void ExecuteOnPredictionManagers(const UCharacterMovementComponent* MoveComp, TFunctionRef<void(UXMoveU_PredictionManager*, bool&)> InFunction);
 	static void ExecuteOnPredictionProxies(const UCharacterMovementComponent* MoveComp, TFunctionRef<void(FXMoveU_PredictionProxy&, bool&)> InFunction);
-public:
-	UFUNCTION(BlueprintCallable, Category="Pawn|Components|CharacterMovement|Prediction")
-	virtual void RegisterPredictionManager(UXMoveU_PredictionManager* NewPredictionManager);
+
 protected:
+	/** Override to add Prediction Managers from other sources. */
 	virtual void GetPredictionManagers(TArray<UXMoveU_PredictionManager*>& OutPredictionManagers) const;
-	
+
+protected:
 	UPROPERTY()
 	TArray<TObjectPtr<UXMoveU_PredictionManager>> PredictionManagers;
+
+	UPROPERTY(Category="Prediction", EditDefaultsOnly, Instanced)
+	TObjectPtr<UXMoveU_PredictionManager> DefaultPredictionManager;
 
 	// ~CustomPrediction
 /*====================================================================================================================*/

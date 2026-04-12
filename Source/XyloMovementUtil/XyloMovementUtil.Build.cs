@@ -28,6 +28,7 @@ public class XyloMovementUtil : ModuleRules
 				"Core", 
 				"Engine",
 				"NetCore",
+				"GameplayTags",
 				// ... add other public dependencies that you statically link with here ...
 			}
 		);
