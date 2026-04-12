@@ -2,6 +2,8 @@
 
 #include "XyloMovementUtil.h"
 
+DEFINE_LOG_CATEGORY(LogXyloMovementUtil);
+
 #define LOCTEXT_NAMESPACE "FXyloMovementUtilModule"
 
 void FXyloMovementUtilModule::StartupModule()

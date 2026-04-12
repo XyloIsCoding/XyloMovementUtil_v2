@@ -13,7 +13,10 @@ struct FXMoveU_CharacterNetworkMoveData;
 struct FXMoveU_CharacterMoveResponseDataContainer;
 
 /**
- * 
+ * This is the main protagonist of the generalised prediction system. Once registered to a movement component, it
+ * presents a complete interface to CMC's prediction system.
+ * It also allows to register prediction proxy structs, which are used to handle the whole prediction cycle of a
+ * variable atomically.
  */
 UCLASS(BlueprintType, DisplayName="Prediction Manager")
 class XYLOMOVEMENTUTIL_API UXMoveU_PredictionManager : public UObject

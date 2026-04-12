@@ -3,6 +3,7 @@
 
 #include "GeneralizedPrediction/XMoveU_PredictionMovementComponent.h"
 
+#include "XyloMovementUtil.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameNetworkManager.h"
@@ -675,6 +676,7 @@ void UXMoveU_PredictionMovementComponent::RegisterPredictionManager(UXMoveU_Pred
 {
 	if (!IsValid(NewPredictionManager))
 	{
+		UE_LOG(LogXyloMovementUtil, Warning, TEXT("UXMoveU_PredictionMovementComponent::RegisterPredictionManager >> NewPredictionManager is not valid"))
 		return;
 	}
 

@@ -4,6 +4,8 @@
 
 #include "Modules/ModuleManager.h"
 
+XYLOMOVEMENTUTIL_API DECLARE_LOG_CATEGORY_EXTERN(LogXyloMovementUtil, Log, All);
+
 class FXyloMovementUtilModule : public IModuleInterface
 {
 public:

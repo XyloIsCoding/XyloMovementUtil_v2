@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GeneralizedPrediction/XMoveU_PredictionMovementComponent.h"
+#include "MovementSyncedObject/XMoveU_MovementSyncedObjectInterface.h"
 #include "XMoveU_ModularMovementComponent.generated.h"
 
 
@@ -17,4 +18,40 @@ class XYLOMOVEMENTUTIL_API UXMoveU_ModularMovementComponent : public UXMoveU_Pre
 
 public:
 	UXMoveU_ModularMovementComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/*
+	 * UCharacterMovementComponent Interface
+	 */
+	
+public:
+	virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
+	virtual void UpdateCharacterStateAfterMovement(float DeltaSeconds) override;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/*
+	 * UXMoveU_ModularMovementComponent
+	 */
+
+/*====================================================================================================================*/
+	// MovementSyncedObjects
+
+public:
+	UFUNCTION(BlueprintCallable, Category="Pawn|Components|CharacterMovement|SyncedObjects")
+	virtual void RegisterMovementSyncedObject(UObject* InObject, UXMoveU_PredictionManager* InPredictionManager);
+
+	virtual void TickSyncedObjectsBeforeMovement(float DeltaSeconds);
+	virtual void TickSyncedObjectsAfterMovement(float DeltaSeconds);
+	
+protected:
+	UPROPERTY()
+	TArray<TScriptInterface<IXMoveU_MovementSyncedObjectInterface>> MovementSyncedObjects;
+	
+	// ~MovementSyncedObjects
+/*====================================================================================================================*/
+	
+	
 };
