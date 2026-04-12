@@ -11,6 +11,11 @@
 #include "ModularMovement/MovementSyncedObject/XMoveU_MovementSyncedObjectInterface.h"
 
 
+DEFINE_LOG_CATEGORY_STATIC(LogNavMeshMovement, Log, All);
+
+DECLARE_CYCLE_STAT(TEXT("Char ProcessLanded"), STAT_CharProcessLanded, STATGROUP_Character);
+
+
 UXMoveU_ModularMovementComponent::UXMoveU_ModularMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -31,58 +36,74 @@ void UXMoveU_ModularMovementComponent::BeginPlay()
 
 void UXMoveU_ModularMovementComponent::UpdateCharacterStateBeforeMovement(float DeltaSeconds)
 {
+	UpdateJumpBeforeMovement(DeltaSeconds);
+	UpdateCrouchBeforeMovement(DeltaSeconds);
+
 	TickSyncedObjectsBeforeMovement(DeltaSeconds);
-	Super::UpdateCharacterStateBeforeMovement(DeltaSeconds);
 }
 
 void UXMoveU_ModularMovementComponent::UpdateCharacterStateAfterMovement(float DeltaSeconds)
 {
+	UpdateCrouchAfterMovement(DeltaSeconds);
+
 	TickSyncedObjectsAfterMovement(DeltaSeconds);
-	Super::UpdateCharacterStateAfterMovement(DeltaSeconds);
 }
+
+void UXMoveU_ModularMovementComponent::Crouch(bool bClientSimulation)
+{
+	Super::Crouch(bClientSimulation);
+}
+
+void UXMoveU_ModularMovementComponent::UnCrouch(bool bClientSimulation)
+{
+	Super::UnCrouch(bClientSimulation);
+}
+
+/*====================================================================================================================*/
+// CustomMovementModesIntegration
 
 bool UXMoveU_ModularMovementComponent::IsFlying() const
 {
+	// @XMoveU - @SameAsSuper
 	if (!UpdatedComponent) return false;
 	if (MovementMode == MOVE_Flying) return true;
-
-	// @XMoveU - @Change
+	// ~@XMoveU - @SameAsSuper
+	
 	UXMoveU_MovementMode* CurrentMovementMode = GetCurrentCustomMovementMode();
 	return CurrentMovementMode ? CurrentMovementMode->IsFlyingMode() : false;
-	// ~@XMoveU - @Change
 }
 
 bool UXMoveU_ModularMovementComponent::IsFalling() const
 {
+	// @XMoveU - @SameAsSuper
 	if (!UpdatedComponent) return false;
 	if (MovementMode == MOVE_Falling) return true;
-
-	// @XMoveU - @Change
+	// ~@XMoveU - @SameAsSuper
+	
 	UXMoveU_MovementMode* CurrentMovementMode = GetCurrentCustomMovementMode();
 	return CurrentMovementMode ? CurrentMovementMode->IsFallingMode() : false;
-	// ~@XMoveU - @Change
 }
 
 bool UXMoveU_ModularMovementComponent::IsSwimming() const
 {
+	// @XMoveU - @SameAsSuper
 	if (!UpdatedComponent) return false;
 	if (MovementMode == MOVE_Swimming) return true;
-
-	// @XMoveU - @Change
+	// ~@XMoveU - @SameAsSuper
+	
 	UXMoveU_MovementMode* CurrentMovementMode = GetCurrentCustomMovementMode();
 	return CurrentMovementMode ? CurrentMovementMode->IsSwimmingMode() : false;
-	// ~@XMoveU - @Change
 }
 
 bool UXMoveU_ModularMovementComponent::IsMovingOnGround() const
 {
+	// @XMoveU - @SameAsSuper
 	if (!UpdatedComponent) return false;
 	if (MovementMode == MOVE_NavWalking || MovementMode == MOVE_Walking) return true;
-
-	// @XMoveU - @Change
+	// ~@XMoveU - @SameAsSuper
+	
 	UXMoveU_MovementMode* CurrentMovementMode = GetCurrentCustomMovementMode();
 	return CurrentMovementMode ? CurrentMovementMode->IsGroundMode() : false;
-	// ~@XMoveU - @Change
 }
 
 float UXMoveU_ModularMovementComponent::GetMaxSpeed() const
@@ -300,41 +321,125 @@ void UXMoveU_ModularMovementComponent::OnMovementModeChanged(EMovementMode Previ
 	// ~@XMoveU - @CopiedFromSuper
 }
 
-void UXMoveU_ModularMovementComponent::ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations)
+bool UXMoveU_ModularMovementComponent::CanCrouchInCurrentState() const
 {
-	Super::ProcessLanded(Hit, remainingTime, Iterations);
+	// @XMoveU - @SameAsSuper
+	if (!CanEverCrouch()) return false;
+	if (!UpdatedComponent || UpdatedComponent->IsSimulatingPhysics()) return false;
+
+	if (MovementMode != MOVE_Custom)
+	{
+		return IsMovingOnGround() || IsFalling();
+	}
+	// ~@XMoveU - @SameAsSuper
+	
+	UXMoveU_MovementMode* CurrentMovementMode = GetCurrentCustomMovementMode();
+	return CurrentMovementMode ? CurrentMovementMode->CanCrouchInCurrentMode() : false;
 }
 
-void UXMoveU_ModularMovementComponent::SetPostLandedPhysics(const FHitResult& Hit)
+// ~CustomMovementModesIntegration
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+// HooksForImprovedInterface
+
+bool UXMoveU_ModularMovementComponent::CanAttemptJump() const
 {
-	Super::SetPostLandedPhysics(Hit);
+	// @XMoveU - @SameAsSuper
+	if (!IsJumpAllowed()) return false;
+	return CanJumpInCurrentState(); // ~@XMoveU - @Change: delegating mode dependent check to other function.
+	// ~@XMoveU - @SameAsSuper
 }
 
 bool UXMoveU_ModularMovementComponent::DoJump(bool bReplayingMoves, float DeltaTime)
 {
-	return Super::DoJump(bReplayingMoves, DeltaTime);
+	// @XMoveU - @CopiedFromSuper
+	if ( CharacterOwner && CharacterOwner->CanJump() )
+	{
+		// Don't jump if we can't move up/down.
+		if (!bConstrainToPlane || !FMath::IsNearlyEqual(FMath::Abs(GetGravitySpaceZ(PlaneConstraintNormal)), 1.f))
+		{
+			// @XMoveU - @Change: Delegated Jump logic to ApplyJumpImpulse, and allowing override of post jump movement mode
+			if (ApplyJumpImpulse(bReplayingMoves, DeltaTime))
+			{
+				EvaluatePostJumpedTransitions();
+				return true;
+			}
+			// ~@XMoveU - @Change
+		}
+	}
+	
+	return false;
+	// ~@XMoveU - @CopiedFromSuper
 }
 
-
-bool UXMoveU_ModularMovementComponent::CanAttemptJump() const
+void UXMoveU_ModularMovementComponent::ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations)
 {
-	return Super::CanAttemptJump();
+	// @XMoveU - @CopiedFromSuper
+	SCOPE_CYCLE_COUNTER(STAT_CharProcessLanded);
+
+	OnLanded(Hit, remainingTime, Iterations); // @XMoveU - @Change
+	
+	if( CharacterOwner && CharacterOwner->ShouldNotifyLanded(Hit) )
+	{
+		CharacterOwner->Landed(Hit);
+	}
+	if( IsFalling() )
+	{
+		if (GetGroundMovementMode() == MOVE_NavWalking)
+		{
+			// verify navmesh projection and current floor
+			// otherwise movement will be stuck in infinite loop:
+			// navwalking -> (no navmesh) -> falling -> (standing on something) -> navwalking -> ....
+
+			const FVector TestLocation = GetActorFeetLocation();
+			FNavLocation NavLocation;
+
+			const bool bHasNavigationData = FindNavFloor(TestLocation, NavLocation);
+			if (!bHasNavigationData || NavLocation.NodeRef == INVALID_NAVNODEREF)
+			{
+				SetGroundMovementMode(MOVE_Walking);
+				UE_LOG(LogNavMeshMovement, Verbose, TEXT("ProcessLanded(): %s tried to go to NavWalking but couldn't find NavMesh! Using Walking instead."), *GetNameSafe(CharacterOwner));
+			}
+		}
+
+		SetPostLandedPhysics(Hit);
+	}
+
+	PostLanded(Hit, remainingTime, Iterations); // @XMoveU - @Change
+	
+	IPathFollowingAgentInterface* PFAgent = GetPathFollowingAgent();
+	if (PFAgent)
+	{
+		PFAgent->OnLanded();
+	}
+
+	StartNewPhysics(remainingTime, Iterations);
+	// ~@XMoveU - @CopiedFromSuper
 }
 
-bool UXMoveU_ModularMovementComponent::CanCrouchInCurrentState() const
+void UXMoveU_ModularMovementComponent::SetPostLandedPhysics(const FHitResult& Hit)
 {
-	return Super::CanCrouchInCurrentState();
+	// @XMoveU - @SameAsSuper
+	if (!CharacterOwner)
+	{
+		return;
+	}
+
+	const FVector PreImpactAccel = Acceleration + (IsFalling() ? -GetGravityDirection() * GetGravityZ() : FVector::ZeroVector);
+	const FVector PreImpactVelocity = Velocity;
+
+	EvaluatePostLandedTransitions(Hit); // @XMoveU - @Change: moved transition logic to its own function
+
+	if (IsMovingOnGround())
+	{
+		ApplyImpactPhysicsForces(Hit, PreImpactAccel, PreImpactVelocity);
+	}
+	// ~@XMoveU - @SameAsSuper
 }
 
-void UXMoveU_ModularMovementComponent::Crouch(bool bClientSimulation)
-{
-	Super::Crouch(bClientSimulation);
-}
-
-void UXMoveU_ModularMovementComponent::UnCrouch(bool bClientSimulation)
-{
-	Super::UnCrouch(bClientSimulation);
-}
+// ~HooksForImprovedInterface
+/*====================================================================================================================*/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -362,8 +467,50 @@ void UXMoveU_ModularMovementComponent::GetPredictionManagers(TArray<UXMoveU_Pred
  * UXMoveU_ModularMovementComponent
  */
 
+void UXMoveU_ModularMovementComponent::UpdateJumpBeforeMovement(float DeltaSeconds)
+{
+	// TODO
+}
+
+void UXMoveU_ModularMovementComponent::UpdateCrouchBeforeMovement(float DeltaSeconds)
+{
+	// @XMoveU - @CopiedFromSuper::UpdateCharacterStateBeforeMovement
+	
+	// Proxies get replicated crouch state.
+	if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+	{
+		// Check for a change in crouch state. Players toggle crouch by changing bWantsToCrouch.
+		const bool bIsCrouching = IsCrouching();
+		if (bIsCrouching && (!bWantsToCrouch || !CanCrouchInCurrentState()))
+		{
+			UnCrouch(false);
+		}
+		else if (!bIsCrouching && bWantsToCrouch && CanCrouchInCurrentState())
+		{
+			Crouch(false);
+		}
+	}
+	// ~@XMoveU - @CopiedFromSuper
+}
+
+void UXMoveU_ModularMovementComponent::UpdateCrouchAfterMovement(float DeltaSeconds)
+{
+	// @XMoveU - @CopiedFromSuper::UpdateCharacterStateAfterMovement
+	
+	// Proxies get replicated crouch state.
+	if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+	{
+		// Uncrouch if no longer allowed to be crouched
+		if (IsCrouching() && !CanCrouchInCurrentState())
+		{
+			UnCrouch(false);
+		}
+	}
+	// ~@XMoveU - @CopiedFromSuper
+}
+
 /*====================================================================================================================*/
-// ModularizedExpansion
+// ImprovedInterface
 
 float UXMoveU_ModularMovementComponent::GetMaxSpeedWaking() const
 {
@@ -383,18 +530,6 @@ float UXMoveU_ModularMovementComponent::GetMaxSpeedSwimming() const
 float UXMoveU_ModularMovementComponent::GetMaxSpeedFlying() const
 {
 	return MaxFlySpeed;
-}
-
-void UXMoveU_ModularMovementComponent::UpdateJumpBeforeMovement(float DeltaSeconds)
-{
-}
-
-void UXMoveU_ModularMovementComponent::UpdateCrouchBeforeMovement(float DeltaSeconds)
-{
-}
-
-void UXMoveU_ModularMovementComponent::UpdateCrouchAfterMovement(float DeltaSeconds)
-{
 }
 
 bool UXMoveU_ModularMovementComponent::TryJumpOverride()
@@ -420,13 +555,37 @@ bool UXMoveU_ModularMovementComponent::CanJumpInCurrentState() const
 	return CurrentMovementMode ? CurrentMovementMode->CanJumpInCurrentMode() : false;
 }
 
-void UXMoveU_ModularMovementComponent::OnJumped()
+bool UXMoveU_ModularMovementComponent::ApplyJumpImpulse(bool bReplayingMoves, float DeltaTime)
 {
-}
+	// @XMoveU - @CopiedFromSuper::DoJump
+	
+	// If first frame of DoJump, we want to always inject the initial jump velocity.
+	// For subsequent frames, during the time Jump is held, it depends... 
+	// bDontFallXXXX == true means we want to ensure the character's Z velocity is never less than JumpZVelocity in this period
+	// bDontFallXXXX == false means we just want to leave Z velocity alone and "let the chips fall where they may" (e.g. fall properly in physics)
 
-bool UXMoveU_ModularMovementComponent::ApplyJumpImpulse(bool bReplayingMoves)
-{
-	// TODO: actually jump
+	// NOTE: 
+	// Checking JumpCurrentCountPreJump instead of JumpCurrentCount because Character::CheckJumpInput might have
+	// incremented JumpCurrentCount just before entering this function... in order to compensate for the case when
+	// on the first frame of the jump, we're already in falling stage. So we want the original value before any 
+	// modification here.
+	// 
+	const bool bFirstJump = (CharacterOwner->JumpCurrentCountPreJump == 0);
+
+	if (bFirstJump || bDontFallBelowJumpZVelocityDuringJump)
+	{
+		if (HasCustomGravity())
+		{
+			SetGravitySpaceZ(Velocity, FMath::Max<FVector::FReal>(GetGravitySpaceZ(Velocity), JumpZVelocity));
+		}
+		else
+		{
+			Velocity.Z = FMath::Max<FVector::FReal>(Velocity.Z, JumpZVelocity);
+		}
+	}
+	
+	// ~@XMoveU - @CopiedFromSuper
+	
 	return true;
 }
 
@@ -434,14 +593,6 @@ bool UXMoveU_ModularMovementComponent::EvaluatePostJumpedTransitions()
 {
 	SetMovementMode(MOVE_Falling);
 	return true;
-}
-
-void UXMoveU_ModularMovementComponent::OnLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations)
-{
-}
-
-void UXMoveU_ModularMovementComponent::PostLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations)
-{
 }
 
 bool UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitResult& Hit)
@@ -464,12 +615,12 @@ bool UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitR
 			SetDefaultMovementMode();
 		}
 	}
-	// ~@XMoveU - @CopiedFromSuper
+	// ~@XMoveU - @CopiedFromSuper::SetPostLandedPhysics
 	
 	return true;
 }
 
-// ~ModularizedExpansion
+// ~ImprovedInterface
 /*====================================================================================================================*/
 
 /*====================================================================================================================*/
@@ -538,7 +689,6 @@ void UXMoveU_ModularMovementComponent::TickSyncedObjectsAfterMovement(float Delt
 
 // ~MovementSyncedObjects
 /*====================================================================================================================*/
-
 
 /*====================================================================================================================*/
 // MovementModes

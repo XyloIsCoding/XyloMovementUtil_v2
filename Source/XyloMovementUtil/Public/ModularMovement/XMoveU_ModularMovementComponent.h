@@ -31,11 +31,18 @@ public:
 
 public:
 	virtual void BeginPlay() override;
-	
+
 public:
 	virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
 	virtual void UpdateCharacterStateAfterMovement(float DeltaSeconds) override;
 
+public:
+	virtual void Crouch(bool bClientSimulation = false) override;
+	virtual void UnCrouch(bool bClientSimulation = false) override;
+	
+/*====================================================================================================================*/
+	// CustomMovementModesIntegration
+	
 public:
 	virtual bool IsFlying() const override;
 	virtual bool IsFalling() const override;
@@ -49,20 +56,31 @@ public:
 
 public:
 	virtual FString GetMovementName() const override;
+	
 	virtual void PhysCustom(float deltaTime, int32 Iterations) override;
+	
 protected:
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
-	virtual void ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations) override;
-	virtual void SetPostLandedPhysics(const FHitResult& Hit) override;
-	
-public:
-	virtual bool DoJump(bool bReplayingMoves, float DeltaTime) override;
-	virtual bool CanAttemptJump() const override;
 
 public:
 	virtual bool CanCrouchInCurrentState() const override;
-	virtual void Crouch(bool bClientSimulation = false) override;
-	virtual void UnCrouch(bool bClientSimulation = false) override;
+	
+	// ~CustomMovementModesIntegration
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+	// HooksForImprovedInterface
+	
+public:
+	virtual bool CanAttemptJump() const override;
+	virtual bool DoJump(bool bReplayingMoves, float DeltaTime) override;
+	
+protected:
+	virtual void ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations) override;
+	virtual void SetPostLandedPhysics(const FHitResult& Hit) override;
+
+	// ~HooksForImprovedInterface
+/*====================================================================================================================*/
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -79,8 +97,13 @@ protected:
 	 * UXMoveU_ModularMovementComponent
 	 */
 
+protected:
+	virtual void UpdateJumpBeforeMovement(float DeltaSeconds);
+	virtual void UpdateCrouchBeforeMovement(float DeltaSeconds);
+	virtual void UpdateCrouchAfterMovement(float DeltaSeconds);
+
 /*====================================================================================================================*/
-	// ModularizedExpansion
+	// ImprovedInterface
 
 public:
 	virtual float GetMaxSpeedWaking() const;
@@ -88,12 +111,9 @@ public:
 	virtual float GetMaxSpeedSwimming() const;
 	virtual float GetMaxSpeedFlying() const;
 
-protected:
-	virtual void UpdateJumpBeforeMovement(float DeltaSeconds);
-	virtual void UpdateCrouchBeforeMovement(float DeltaSeconds);
-	virtual void UpdateCrouchAfterMovement(float DeltaSeconds);
-
 public:
+	/** Override this function to intercept and stop the jump pipeline (for example for a mantle mechanic).
+	 * @remarks: Only called if using SyncedJumpInputCheck (default behaviour). */
 	virtual bool TryJumpOverride();
 
 	/** If true, JumpCurrentCount is increased before trying to perform the first jump. Useful to prevent jumping while
@@ -102,17 +122,17 @@ public:
 	
 	virtual bool CanJumpInCurrentState() const;
 	
-	virtual  void OnJumped();
+	virtual  void OnJumped() {}
 	
 protected:
-	virtual bool ApplyJumpImpulse(bool bReplayingMoves);
+	virtual bool ApplyJumpImpulse(bool bReplayingMoves, float DeltaTime);
 
 	virtual bool EvaluatePostJumpedTransitions();
 	
 protected:
-	virtual void OnLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations);
+	virtual void OnLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations) {}
 
-	virtual void PostLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations);
+	virtual void PostLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations) {}
 	
 	virtual bool EvaluatePostLandedTransitions(const FHitResult& Hit);
 
@@ -120,10 +140,10 @@ public:
 	virtual bool CanJumpWhileCrouched() const { return bCanJumpWhileCrouched; }
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character Movement: Walking")
+	UPROPERTY(Category="Character Movement: Walking", EditAnywhere, BlueprintReadWrite)
 	bool bCanJumpWhileCrouched;
 	
-// ~ModularizedExpansion
+	// ~ImprovedInterface
 /*====================================================================================================================*/
 	
 /*====================================================================================================================*/
