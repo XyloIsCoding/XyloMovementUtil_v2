@@ -546,7 +546,7 @@ bool UXMoveU_ModularMovementComponent::CanJumpInCurrentState() const
 {
 	if (MovementMode != MOVE_Custom)
 	{
-		// @XMoveU - @CopiedFromSuper::CanAttemptJump
+		// @XMoveU - @CopiedFromSuper::CanAttemptJump: but added CanJumpWhileCrouched
 		return (!bWantsToCrouch || CanJumpWhileCrouched()) && (IsMovingOnGround() || IsFalling());
 		// ~@XMoveU - @CopiedFromSuper
 	}
