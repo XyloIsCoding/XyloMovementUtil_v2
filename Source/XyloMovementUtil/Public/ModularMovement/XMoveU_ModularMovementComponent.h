@@ -9,6 +9,7 @@
 #include "XMoveU_ModularMovementComponent.generated.h"
 
 
+class UXMoveU_JumpProfile;
 class UXMoveU_MovementMode;
 struct FXMoveU_RegisteredMovementMode;
 
@@ -127,6 +128,10 @@ public:
 protected:
 	virtual bool ApplyJumpImpulse(bool bReplayingMoves, float DeltaTime);
 
+	virtual bool JumpInitialImpulse(bool bReplayingMoves, float DeltaTime);
+	
+	virtual bool JumpSustainImpulse(bool bReplayingMoves, float DeltaTime);
+
 	virtual bool EvaluatePostJumpedTransitions();
 	
 protected:
@@ -144,6 +149,23 @@ protected:
 	bool bCanJumpWhileCrouched;
 	
 	// ~ImprovedInterface
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+	// JumpProfiles
+
+public:
+	virtual void SetJumpProfileByClass(TSubclassOf<UXMoveU_JumpProfile> JumpProfileClass);
+	virtual void SetJumpProfileFromPreset(UXMoveU_JumpProfile* JumpProfilePreset);
+	virtual void ClearJumpProfile();
+	
+protected:
+	virtual void OnJumpProfileSet(UXMoveU_JumpProfile* OldJumpProfile);
+	
+	UPROPERTY(Category="Character Movement: Jumping / Falling", EditDefaultsOnly, Instanced)
+	TObjectPtr<UXMoveU_JumpProfile> JumpProfile;
+	
+	// ~JumpProfiles
 /*====================================================================================================================*/
 	
 /*====================================================================================================================*/

@@ -1,0 +1,40 @@
+// Copyright (c) 2026, XyloIsCoding. All rights reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "UObject/Object.h"
+#include "XMoveU_JumpProfile.generated.h"
+
+class UXMoveU_ModularMovementComponent;
+
+/**
+ * 
+ */
+UCLASS(BlueprintType, Blueprintable, DefaultToInstanced, EditInlineNew)
+class XYLOMOVEMENTUTIL_API UXMoveU_JumpProfile : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	virtual void ApplyJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent);
+	virtual void RemoveJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent);
+
+public:
+	virtual bool OverrideInitialImpulse() const { return false; }
+	virtual bool JumpInitialImpulse(bool bReplayingMoves, float DeltaTime) { return true; }
+
+	virtual bool OverrideSustainImpulse() const { return false; }
+	virtual bool JumpSustainImpulse(bool bReplayingMoves, float DeltaTime) { return true; }
+	
+protected:
+	UPROPERTY(Category = "Character", EditAnywhere, BlueprintReadWrite, Meta=(ClampMin=0.0, UIMin=0.0))
+	float JumpMaxHoldTime = 0.f;
+
+	UPROPERTY(Category = "Character", EditAnywhere, BlueprintReadWrite)
+	int32 JumpMaxCount = 0;
+
+protected:
+	UXMoveU_ModularMovementComponent* GetOwningMovementComponent() const;
+	ACharacter* GetOwningCharacter() const;
+};

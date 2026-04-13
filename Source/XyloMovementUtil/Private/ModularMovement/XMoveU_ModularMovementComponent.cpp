@@ -6,7 +6,9 @@
 #include "XyloMovementUtil.h"
 #include "GameFramework/Character.h"
 #include "GeneralizedPrediction/CustomPrediction/XMoveU_PredictionManager.h"
+#include "ModularMovement/XMoveU_JumpStaticLibrary.h"
 #include "ModularMovement/XMoveU_ModularCharacter.h"
+#include "ModularMovement/JumpProfile/XMoveU_JumpProfile.h"
 #include "ModularMovement/MovementMode/XMoveU_MovementMode.h"
 #include "ModularMovement/MovementMode/XMoveU_RegisteredMovementMode.h"
 #include "ModularMovement/MovementSyncedObject/XMoveU_MovementSyncedObjectInterface.h"
@@ -33,6 +35,7 @@ void UXMoveU_ModularMovementComponent::BeginPlay()
 	Super::BeginPlay();
 
 	RegisterMovementModes();
+	OnJumpProfileSet(nullptr);
 }
 
 void UXMoveU_ModularMovementComponent::UpdateCharacterStateBeforeMovement(float DeltaSeconds)
@@ -566,35 +569,46 @@ bool UXMoveU_ModularMovementComponent::CanJumpInCurrentState() const
 
 bool UXMoveU_ModularMovementComponent::ApplyJumpImpulse(bool bReplayingMoves, float DeltaTime)
 {
-	// @XMoveU - @CopiedFromSuper::DoJump
-	
-	// If first frame of DoJump, we want to always inject the initial jump velocity.
-	// For subsequent frames, during the time Jump is held, it depends... 
-	// bDontFallXXXX == true means we want to ensure the character's Z velocity is never less than JumpZVelocity in this period
-	// bDontFallXXXX == false means we just want to leave Z velocity alone and "let the chips fall where they may" (e.g. fall properly in physics)
-
-	// NOTE: 
-	// Checking JumpCurrentCountPreJump instead of JumpCurrentCount because Character::CheckJumpInput might have
-	// incremented JumpCurrentCount just before entering this function... in order to compensate for the case when
-	// on the first frame of the jump, we're already in falling stage. So we want the original value before any 
-	// modification here.
-	// 
-	const bool bFirstJump = (CharacterOwner->JumpCurrentCountPreJump == 0);
-
-	if (bFirstJump || bDontFallBelowJumpZVelocityDuringJump)
+	// First time jump is called.
+	// We are using JumpKeyHoldTime instead of "JumpCurrentCountPreJump == 0" so it gets called every time jump input
+	// is pressed. It is up to JumpProfile to filter further.
+	if (CharacterOwner->JumpKeyHoldTime == 0.f)
 	{
-		if (HasCustomGravity())
+		if (JumpProfile && JumpProfile->OverrideInitialImpulse())
 		{
-			SetGravitySpaceZ(Velocity, FMath::Max<FVector::FReal>(GetGravitySpaceZ(Velocity), JumpZVelocity));
+			return JumpProfile->JumpInitialImpulse(bReplayingMoves, DeltaTime);
 		}
-		else
-		{
-			Velocity.Z = FMath::Max<FVector::FReal>(Velocity.Z, JumpZVelocity);
-		}
+		return JumpInitialImpulse(bReplayingMoves, DeltaTime);
 	}
-	
-	// ~@XMoveU - @CopiedFromSuper
-	
+
+	// Successive iterations
+	if (JumpProfile && JumpProfile->OverrideSustainImpulse())
+	{
+		return JumpProfile->JumpSustainImpulse(bReplayingMoves, DeltaTime);
+	}
+	return JumpSustainImpulse(bReplayingMoves, DeltaTime);
+}
+
+bool UXMoveU_ModularMovementComponent::JumpInitialImpulse(bool bReplayingMoves, float DeltaTime)
+{
+	// @XMoveU - @SameAsSuper::DoJump: only handling the first jump case
+	const bool bFirstJump = (CharacterOwner->JumpCurrentCountPreJump == 0);
+	if (bFirstJump)
+	{
+		const FVector::FReal NewVerticalVelocity = FMath::Max<FVector::FReal>(HasCustomGravity() ? GetGravitySpaceZ(Velocity) : Velocity.Z, JumpZVelocity);
+		UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(this, FVector::ZeroVector, NewVerticalVelocity, 0.f, true);
+	}
+	return true;
+}
+
+bool UXMoveU_ModularMovementComponent::JumpSustainImpulse(bool bReplayingMoves, float DeltaTime)
+{
+	// @XMoveU - @SameAsSuper::DoJump: only handling the sustain case
+	if (bDontFallBelowJumpZVelocityDuringJump)
+	{
+		const FVector::FReal NewVerticalVelocity = FMath::Max<FVector::FReal>(HasCustomGravity() ? GetGravitySpaceZ(Velocity) : Velocity.Z, JumpZVelocity);
+		UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(this, FVector::ZeroVector, NewVerticalVelocity, 0.f, true);
+	}
 	return true;
 }
 
@@ -630,6 +644,55 @@ bool UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitR
 }
 
 // ~ImprovedInterface
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+// JumpProfiles
+
+void UXMoveU_ModularMovementComponent::SetJumpProfileByClass(TSubclassOf<UXMoveU_JumpProfile> JumpProfileClass)
+{
+	if (!ensureMsgf(JumpProfileClass, TEXT("UXMoveU_ModularMovementComponent::SetJumpProfileByClass >> JumpProfileClass not valid")))
+	{
+		return;
+	}
+
+	UXMoveU_JumpProfile* OldJumpProfile = JumpProfile;
+	JumpProfile = NewObject<UXMoveU_JumpProfile>(this, JumpProfileClass);
+	OnJumpProfileSet(OldJumpProfile);
+}
+
+void UXMoveU_ModularMovementComponent::SetJumpProfileFromPreset(UXMoveU_JumpProfile* JumpProfilePreset)
+{
+	if (!ensureMsgf(IsValid(JumpProfilePreset), TEXT("UXMoveU_ModularMovementComponent::SetJumpProfileFromPreset >> JumpProfilePreset not valid")))
+	{
+		return;
+	}
+
+	UXMoveU_JumpProfile* OldJumpProfile = JumpProfile;
+	JumpProfile = DuplicateObject(JumpProfilePreset, this);
+	OnJumpProfileSet(OldJumpProfile);
+}
+
+void UXMoveU_ModularMovementComponent::ClearJumpProfile()
+{
+	UXMoveU_JumpProfile* OldJumpProfile = JumpProfile;
+	JumpProfile = nullptr;
+	OnJumpProfileSet(OldJumpProfile);
+}
+
+void UXMoveU_ModularMovementComponent::OnJumpProfileSet(UXMoveU_JumpProfile* OldJumpProfile)
+{
+	if (OldJumpProfile)
+	{
+		JumpProfile->RemoveJumpProfile(this);
+	}
+	if (IsValid(JumpProfile))
+	{
+		JumpProfile->ApplyJumpProfile(this);
+	}
+}
+	
+// ~JumpProfiles
 /*====================================================================================================================*/
 
 /*====================================================================================================================*/
