@@ -763,27 +763,14 @@ void UXMoveU_ModularMovementComponent::RegisterMovementModes()
 {
 	for (FXMoveU_RegisteredMovementMode& RegisteredMoveMode : CustomMovementModes)
 	{
-		// TODO: check that both movement mode and prediction manager have this movement component as outer.
 		if (IsValid(RegisteredMoveMode.Mode))
 		{
 			RegisteredMoveMode.Mode->OnRegistered();
-
-			// TODO: remove after testing
-			if (ensureMsgf(RegisteredMoveMode.Mode->GetOuter() == this, TEXT("CustomMoveMode DOES NOT HAVE RIGHT OUTER")))
-			{
-				UE_LOG(LogXyloMovementUtil, Warning, TEXT("UXMoveU_ModularMovementComponent::RegisterMovementModes >> CustomMoveMode has right outer"))
-			}
 		}
 
 		if (IsValid(RegisteredMoveMode.PredictionManager))
 		{
 			RegisteredMoveMode.PredictionManager->OnRegistered(this);
-
-			// TODO: remove after testing
-			if (ensureMsgf(RegisteredMoveMode.PredictionManager->GetOuter() == this, TEXT("CustomModePredictionManager DOES NOT HAVE RIGHT OUTER")))
-			{
-				UE_LOG(LogXyloMovementUtil, Warning, TEXT("UXMoveU_ModularMovementComponent::RegisterMovementModes >> CustomModePredictionManager has right outer"))
-			}
 		}
 	}
 }

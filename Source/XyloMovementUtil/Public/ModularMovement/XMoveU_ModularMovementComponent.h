@@ -193,7 +193,7 @@ protected:
 	virtual void RegisterMovementModes();
 	
 protected:
-	UPROPERTY(Category="MovementModes", EditDefaultsOnly)
+	UPROPERTY(Category="Character Movement: Custom Movement", EditDefaultsOnly)
 	TArray<FXMoveU_RegisteredMovementMode> CustomMovementModes;
 	
 	// ~MovementModes
