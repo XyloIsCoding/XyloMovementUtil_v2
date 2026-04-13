@@ -12,6 +12,23 @@ UXMoveU_JumpProfile::UXMoveU_JumpProfile(const FObjectInitializer& ObjectInitial
 {
 }
 
+UXMoveU_ModularMovementComponent* UXMoveU_JumpProfile::GetOwningMovementComponent() const
+{
+	return Cast<UXMoveU_ModularMovementComponent>(GetOuter());
+}
+
+AXMoveU_ModularCharacter* UXMoveU_JumpProfile::GetOwningCharacter() const
+{
+	UXMoveU_ModularMovementComponent* MovementComponent = GetOwningMovementComponent();
+	return MovementComponent ? Cast<AXMoveU_ModularCharacter>(MovementComponent->GetCharacterOwner()) : nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * UXMoveU_JumpProfile
+ */
+
 void UXMoveU_JumpProfile::ApplyJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent)
 {
 	ACharacter* CharacterOwner = MovementComponent ? MovementComponent->GetCharacterOwner() : nullptr;
@@ -35,15 +52,4 @@ void UXMoveU_JumpProfile::RemoveJumpProfile(UXMoveU_ModularMovementComponent* Mo
 	ACharacter* DefaultCharacter = CharacterOwner->GetClass()->GetDefaultObject<ACharacter>();
 	CharacterOwner->JumpMaxCount = DefaultCharacter->JumpMaxCount;
 	CharacterOwner->JumpMaxHoldTime = DefaultCharacter->JumpMaxHoldTime;
-}
-
-UXMoveU_ModularMovementComponent* UXMoveU_JumpProfile::GetOwningMovementComponent() const
-{
-	return Cast<UXMoveU_ModularMovementComponent>(GetOuter());
-}
-
-AXMoveU_ModularCharacter* UXMoveU_JumpProfile::GetOwningCharacter() const
-{
-	UXMoveU_ModularMovementComponent* MovementComponent = GetOwningMovementComponent();
-	return MovementComponent ? Cast<AXMoveU_ModularCharacter>(MovementComponent->GetCharacterOwner()) : nullptr;
 }

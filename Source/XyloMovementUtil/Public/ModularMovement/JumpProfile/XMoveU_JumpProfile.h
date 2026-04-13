@@ -19,6 +19,15 @@ class XYLOMOVEMENTUTIL_API UXMoveU_JumpProfile : public UObject
 
 public:
 	UXMoveU_JumpProfile(const FObjectInitializer& ObjectInitializer);
+protected:
+	UXMoveU_ModularMovementComponent* GetOwningMovementComponent() const;
+	AXMoveU_ModularCharacter* GetOwningCharacter() const;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/*
+	 * UXMoveU_JumpProfile
+	 */
 	
 public:
 	virtual void ApplyJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent);
@@ -37,8 +46,4 @@ protected:
 
 	UPROPERTY(Category = "Character", EditAnywhere, BlueprintReadWrite)
 	int32 JumpMaxCount = 0;
-
-protected:
-	UXMoveU_ModularMovementComponent* GetOwningMovementComponent() const;
-	AXMoveU_ModularCharacter* GetOwningCharacter() const;
 };
