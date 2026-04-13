@@ -7,6 +7,11 @@
 #include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
 
+UXMoveU_JumpProfile::UXMoveU_JumpProfile(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
 void UXMoveU_JumpProfile::ApplyJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent)
 {
 	ACharacter* CharacterOwner = MovementComponent ? MovementComponent->GetCharacterOwner() : nullptr;

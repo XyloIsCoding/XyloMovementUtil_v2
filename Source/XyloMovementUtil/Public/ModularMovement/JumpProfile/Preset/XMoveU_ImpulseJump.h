@@ -15,7 +15,7 @@ class XYLOMOVEMENTUTIL_API UXMoveU_ImpulseJump : public UXMoveU_JumpProfile
 	GENERATED_BODY()
 	
 public:
-	UXMoveU_ImpulseJump();
+	UXMoveU_ImpulseJump(const FObjectInitializer& ObjectInitializer);
 
 public:
 	virtual bool OverrideInitialImpulse() const override;

@@ -18,6 +18,9 @@ class XYLOMOVEMENTUTIL_API UXMoveU_JumpProfile : public UObject
 	GENERATED_BODY()
 
 public:
+	UXMoveU_JumpProfile(const FObjectInitializer& ObjectInitializer);
+	
+public:
 	virtual void ApplyJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent);
 	virtual void RemoveJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent);
 

@@ -7,7 +7,8 @@
 #include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
 
-UXMoveU_ImpulseJump::UXMoveU_ImpulseJump()
+UXMoveU_ImpulseJump::UXMoveU_ImpulseJump(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	VerticalVelocity = 1400.f;
 	HorizontalVelocity = 300.f;

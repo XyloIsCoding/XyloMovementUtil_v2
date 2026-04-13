@@ -5,6 +5,10 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 
+UXMoveU_PredictionManager::UXMoveU_PredictionManager(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
 
 /*====================================================================================================================*/
 // PredictionProxies

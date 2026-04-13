@@ -7,7 +7,8 @@
 #include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
 
-UXMoveU_ThrusterJump::UXMoveU_ThrusterJump()
+UXMoveU_ThrusterJump::UXMoveU_ThrusterJump(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	InitialVerticalVelocity = 200.f;
 	InitialHorizontalVelocity = 0.f;

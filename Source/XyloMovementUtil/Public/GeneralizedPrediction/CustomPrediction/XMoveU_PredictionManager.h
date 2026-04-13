@@ -24,6 +24,9 @@ class XYLOMOVEMENTUTIL_API UXMoveU_PredictionManager : public UObject
 	GENERATED_BODY()
 
 public:
+	UXMoveU_PredictionManager(const FObjectInitializer& ObjectInitializer);
+	
+public:
 	/** Called when movement component registered this PredictionManager.
 	 * This is a good spot to create and register PredictionProxies */
 	virtual void OnRegistered(UCharacterMovementComponent* MovementComponent) {}

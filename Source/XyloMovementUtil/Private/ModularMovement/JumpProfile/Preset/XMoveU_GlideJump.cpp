@@ -7,7 +7,8 @@
 #include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
 
-UXMoveU_GlideJump::UXMoveU_GlideJump()
+UXMoveU_GlideJump::UXMoveU_GlideJump(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	InitialVelocity = 400.f;
 	
