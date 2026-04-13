@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "XMoveU_JumpProfile.generated.h"
 
+class AXMoveU_ModularCharacter;
 class UXMoveU_ModularMovementComponent;
 
 /**
@@ -36,5 +37,5 @@ protected:
 
 protected:
 	UXMoveU_ModularMovementComponent* GetOwningMovementComponent() const;
-	ACharacter* GetOwningCharacter() const;
+	AXMoveU_ModularCharacter* GetOwningCharacter() const;
 };

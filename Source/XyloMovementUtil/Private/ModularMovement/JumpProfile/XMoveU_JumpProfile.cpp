@@ -4,6 +4,7 @@
 #include "ModularMovement/JumpProfile/XMoveU_JumpProfile.h"
 
 #include "GameFramework/Character.h"
+#include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
 
 void UXMoveU_JumpProfile::ApplyJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent)
@@ -36,8 +37,8 @@ UXMoveU_ModularMovementComponent* UXMoveU_JumpProfile::GetOwningMovementComponen
 	return Cast<UXMoveU_ModularMovementComponent>(GetOuter());
 }
 
-ACharacter* UXMoveU_JumpProfile::GetOwningCharacter() const
+AXMoveU_ModularCharacter* UXMoveU_JumpProfile::GetOwningCharacter() const
 {
 	UXMoveU_ModularMovementComponent* MovementComponent = GetOwningMovementComponent();
-	return MovementComponent ? MovementComponent->GetCharacterOwner() : nullptr;
+	return MovementComponent ? Cast<AXMoveU_ModularCharacter>(MovementComponent->GetCharacterOwner()) : nullptr;
 }
