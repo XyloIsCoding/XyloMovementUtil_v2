@@ -7,6 +7,11 @@
 #include "XMoveU_ModularCharacter.generated.h"
 
 
+namespace CharacterCVars
+{
+	int32 Get_UseLegacyDoJump();
+}
+
 /**
  *
  */
@@ -17,4 +22,44 @@ class XYLOMOVEMENTUTIL_API AXMoveU_ModularCharacter : public AXMoveU_PredictionC
 
 public:
 	AXMoveU_ModularCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	/*
+	 * ACharacter Interface
+	 */
+
+public:
+	virtual void CheckJumpInput(float DeltaTime) override;
+protected:
+	virtual bool CanJumpInternal_Implementation() const override;
+    	 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+         
+	/*
+	 * AXMoveU_ModularCharacter
+	 */
+	
+/*====================================================================================================================*/
+	// JumpExtension
+	
+public:
+	/** Like CheckJumpInput, but called from UpdateCharacterStateBeforeMovement */
+	virtual void CheckJumpInputSynced(float DeltaTime);
+protected:
+	/** Virtual version of JumpIsAllowedInternal (called instead of it) */
+	virtual bool JumpIsAllowed() const;
+
+public:
+	bool ShouldUseDefaultCheckJumpInput() const { return bUseDefaultCheckJumpInput; }
+protected:
+	/** If true uses CheckJumpInput, otherwise CheckJumpInputSynced is used. The latter has the same logic as the first,
+	 * but it is called in UpdateCharacterStateBeforeMovement */
+	UPROPERTY(Category = "Character", EditAnywhere)
+	bool bUseDefaultCheckJumpInput = false;
+
+	// ~JumpExtension
+/*====================================================================================================================*/
+
+	
 };

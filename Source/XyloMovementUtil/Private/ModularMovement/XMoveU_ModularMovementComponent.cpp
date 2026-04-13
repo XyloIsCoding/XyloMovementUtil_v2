@@ -6,6 +6,7 @@
 #include "XyloMovementUtil.h"
 #include "GameFramework/Character.h"
 #include "GeneralizedPrediction/CustomPrediction/XMoveU_PredictionManager.h"
+#include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/MovementMode/XMoveU_MovementMode.h"
 #include "ModularMovement/MovementMode/XMoveU_RegisteredMovementMode.h"
 #include "ModularMovement/MovementSyncedObject/XMoveU_MovementSyncedObjectInterface.h"
@@ -469,7 +470,15 @@ void UXMoveU_ModularMovementComponent::GetPredictionManagers(TArray<UXMoveU_Pred
 
 void UXMoveU_ModularMovementComponent::UpdateJumpBeforeMovement(float DeltaSeconds)
 {
-	// TODO
+	// Do not use custom CheckJumpInput if default one is requested.
+	AXMoveU_ModularCharacter* Char = Cast<AXMoveU_ModularCharacter>(CharacterOwner);
+	if (Char->ShouldUseDefaultCheckJumpInput()) return;
+	
+	// Proxies do not check jump input in default cmc, neither should we.
+	if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+	{
+		Char->CheckJumpInputSynced(DeltaSeconds);
+	}
 }
 
 void UXMoveU_ModularMovementComponent::UpdateCrouchBeforeMovement(float DeltaSeconds)
