@@ -41,7 +41,7 @@ public:
 	
 protected:
 	UPROPERTY(Category="MovementModeType", EditDefaultsOnly, BlueprintReadWrite)
-	EXMoveU_MovementModeType MovementModeType;
+	EXMoveU_MovementModeType MovementModeType = EXMoveU_MovementModeType::None;
 
 public:
 	virtual float GetModeMaxSpeed() const { return 0.f; }

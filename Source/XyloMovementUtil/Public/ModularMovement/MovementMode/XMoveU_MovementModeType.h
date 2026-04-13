@@ -12,6 +12,7 @@
 UENUM()
 enum class EXMoveU_MovementModeType : uint8
 {
+	None,
 	Ground,
 	Falling,
 	Flying,
