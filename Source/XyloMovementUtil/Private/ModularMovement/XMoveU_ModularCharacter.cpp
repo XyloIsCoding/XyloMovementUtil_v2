@@ -92,7 +92,10 @@ void AXMoveU_ModularCharacter::CheckJumpInputSynced(float DeltaTime)
 				JumpCurrentCount++;
 			}
 
+			// @XMoveU - @AfterUpdatingEngine: Check if legacy DoJump is still a thing.
+			PRAGMA_DISABLE_DEPRECATION_WARNINGS
 			const bool bDidJump = CanJump() && (CharacterCVars::Get_UseLegacyDoJump())? GetCharacterMovement()->DoJump(bClientUpdating) : GetCharacterMovement()->DoJump(bClientUpdating, DeltaTime);
+			PRAGMA_ENABLE_DEPRECATION_WARNINGS
 			if (bDidJump)
 			{
 				// Transition from not (actively) jumping to jumping.
