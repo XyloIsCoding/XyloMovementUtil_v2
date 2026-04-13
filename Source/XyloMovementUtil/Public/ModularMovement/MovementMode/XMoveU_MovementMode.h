@@ -13,7 +13,7 @@ class UXMoveU_ModularMovementComponent;
 /**
  * 
  */
-UCLASS(BlueprintType, Blueprintable, DefaultToInstanced, EditInlineNew)
+UCLASS(BlueprintType, Blueprintable, DefaultToInstanced, EditInlineNew, Abstract)
 class XYLOMOVEMENTUTIL_API UXMoveU_MovementMode : public UObject
 {
 	GENERATED_BODY()
