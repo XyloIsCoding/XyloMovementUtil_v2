@@ -18,7 +18,7 @@ struct FXMoveU_CharacterMoveResponseDataContainer;
  * It also allows to register prediction proxy structs, which are used to handle the whole prediction cycle of a
  * variable atomically.
  */
-UCLASS(DisplayName="Prediction Manager", BlueprintType, Blueprintable, DefaultToInstanced, EditInlineNew)
+UCLASS(DisplayName="Prediction Manager", BlueprintType, Blueprintable, DefaultToInstanced, EditInlineNew, Abstract)
 class XYLOMOVEMENTUTIL_API UXMoveU_PredictionManager : public UObject
 {
 	GENERATED_BODY()
