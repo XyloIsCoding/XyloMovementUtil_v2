@@ -110,11 +110,13 @@ void UXMoveU_LayeredMovementMode::ReplicateStateToSimProxies()
 
 void UXMoveU_LayeredMovementMode::EnterMode(bool bClientSimulation)
 {
+	SetModeState(true);
 	OnEnteredMode();
 }
 
 void UXMoveU_LayeredMovementMode::LeaveMode(bool bClientSimulation)
 {
+	SetModeState(false);
 	OnLeftMode();
 }
 

@@ -53,11 +53,14 @@ protected:
 
 /*====================================================================================================================*/
 	// LayeredMovementModeInterface
+
+public:
+	virtual void ModifyMaxSpeed(float& OutMaxSpeed) const {}
 	
 public:
-	virtual bool ShouldEnterMode(float DeltaSeconds) { return false; }
-	virtual bool ShouldLeaveMode(float DeltaSeconds) { return false; }
-	virtual bool ShouldForceLeaveMode(float DeltaSeconds) { return false; }
+	virtual bool ShouldEnterMode(float DeltaSeconds) const { return false; }
+	virtual bool ShouldLeaveMode(float DeltaSeconds) const { return false; }
+	virtual bool ShouldForceLeaveMode(float DeltaSeconds) const { return false; }
 
 public:
 	virtual void EnterMode(bool bClientSimulation);
