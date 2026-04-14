@@ -184,8 +184,8 @@ protected:
 	TArray<TWeakObjectPtr<UObject>> MovementSyncedObjects;
 
 	/** As of now we must keep a strong reference to all prediction managers, otherwise we are going to get crashes due
-	 * to serialization. Furthermore, rollbacks would miss since the prediction proxy would not be there to roll back
-	 * the associated values. */
+	 * to serialization if they get garbage collected. Furthermore, rollbacks would miss since the prediction proxy
+	 * would not be there to roll back the associated values. */
 	UPROPERTY()
 	TArray<TObjectPtr<UXMoveU_PredictionManager>> MovementSyncedPredictionManagers; // @XMoveU - @FutureMeProblem: find a way to let this be a weak pointer.
 	
