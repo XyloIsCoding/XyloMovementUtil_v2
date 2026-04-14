@@ -40,6 +40,9 @@ protected:
 public:
 	virtual void OnRegistered() {}
 
+/*====================================================================================================================*/
+	// MovementModeType
+	
 public:
 	virtual bool IsFlyingMode() const { return MovementModeType == EXMoveU_MovementModeType::Flying; }
 	virtual bool IsFallingMode() const { return MovementModeType == EXMoveU_MovementModeType::Falling; }
@@ -50,6 +53,12 @@ protected:
 	UPROPERTY(Category="MovementModeType", EditDefaultsOnly, BlueprintReadWrite)
 	EXMoveU_MovementModeType MovementModeType = EXMoveU_MovementModeType::None;
 
+	// ~MovementModeType
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+	// MovementModeInterface
+	
 public:
 	virtual float GetModeMaxSpeed() const { return 0.f; }
 	virtual float GetModeMaxBrakingDeceleration() const { return 0.f; }
@@ -63,4 +72,8 @@ public:
 	virtual void OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) {}
 	virtual void OnLeftMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) {}
 	virtual void PhysUpdate(float DeltaTime, int32 Iterations) {}
+
+	// ~MovementModeInterface
+/*====================================================================================================================*/
+	
 };
