@@ -788,7 +788,8 @@ UXMoveU_MovementMode* UXMoveU_ModularMovementComponent::GetCustomMovementMode(EM
 
 	if (CustomMovementModes.IsValidIndex(InCustomMode - 1))
 	{
-		return CustomMovementModes[InCustomMode - 1].Mode;
+		UXMoveU_MovementMode* MoveMode = CustomMovementModes[InCustomMode - 1].Mode;
+		return IsValid(MoveMode) ? MoveMode : nullptr;
 	}
 
 	UE_LOG(LogXyloMovementUtil, Error, TEXT("UXMoveU_ModularMovementComponent::GetCustomMovementMode >> No movement mode registered with id [%i]"), InCustomMode)
@@ -801,7 +802,7 @@ UXMoveU_MovementMode* UXMoveU_ModularMovementComponent::GetCustomMovementModeByT
 	{
 		if (MovementModeTag.MatchesTagExact(CustomMode.Tag))
 		{
-			return CustomMode.Mode;
+			return IsValid(CustomMode.Mode) ? CustomMode.Mode : nullptr;
 		}
 	}
 
@@ -847,6 +848,10 @@ void UXMoveU_ModularMovementComponent::RegisterMovementModes()
 			{
 				PredictionManager->OnRegistered(this);
 			}
+		}
+		else
+		{
+			UE_LOG(LogXyloMovementUtil, Error, TEXT("UXMoveU_ModularMovementComponent::RegisterMovementModes >> No MovementMode Object associated with tag [%s]"), *RegisteredMoveMode.Tag.ToString())
 		}
 	}
 }
