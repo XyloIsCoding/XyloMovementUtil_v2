@@ -95,7 +95,10 @@ void UXMoveU_PredictionMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RegisterPredictionManager(DefaultPredictionManager);
+	if (DefaultPredictionManager)
+	{
+		RegisterPredictionManager(DefaultPredictionManager);
+	}
 }
 
 void UXMoveU_PredictionMovementComponent::ServerMove_PerformMovement(const FCharacterNetworkMoveData& MoveData)
