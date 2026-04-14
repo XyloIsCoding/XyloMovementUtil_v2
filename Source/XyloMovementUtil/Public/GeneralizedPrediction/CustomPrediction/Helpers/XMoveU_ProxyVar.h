@@ -26,7 +26,8 @@ namespace XMoveU
 		
 		TProxyVarInterface() {}
 		virtual ~TProxyVarInterface() {}
-		
+
+		virtual bool IsValid() const = 0;
 		virtual ReturnConstType Get() const = 0;
 		virtual void Set(ParamType NewValue) = 0;
 	};
@@ -52,7 +53,12 @@ namespace XMoveU
 		}
 		
 		TProxyVar_Object(Class* InObject, T Class::* InMemberPtr) : Object(InObject), MemberPtr(InMemberPtr) {}
-		
+
+		virtual bool IsValid() const override
+		{
+			return Object.IsValid();
+		}
+
 		virtual ReturnConstType Get() const override
 		{
 			Class* Obj = Object.Get();
@@ -99,14 +105,17 @@ namespace XMoveU
 			return MakeShared<TProxyVar_Lambda>(InProxyVar);
 		}
 		
-		TProxyVar_Lambda(TFunction<ReturnConstType()> InGetter, TFunction<void(ParamType)> InSetter)
+		TProxyVar_Lambda(UObject* InContext, TFunction<ReturnConstType()> InGetter, TFunction<void(ParamType)> InSetter)
+			: Object(InContext)
 		{
 			Getter = InGetter;
 			Setter = InSetter;
 		}
 
-		TFunction<ReturnConstType()> Getter;
-		TFunction<void(ParamType)> Setter;
+		virtual bool IsValid() const override
+		{
+			return Object.IsValid();
+		}
 		
 		virtual ReturnConstType Get() const override
 		{
@@ -117,5 +126,10 @@ namespace XMoveU
 		{
 			Setter(NewValue);
 		}
+
+	private:
+		TWeakObjectPtr<UObject> Object;
+		TFunction<ReturnConstType()> Getter;
+		TFunction<void(ParamType)> Setter;
 	};
 }
