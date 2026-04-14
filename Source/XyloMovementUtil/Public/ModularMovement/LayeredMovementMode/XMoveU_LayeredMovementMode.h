@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "XMoveU_LayeredMove.generated.h"
+#include "XMoveU_LayeredMovementMode.generated.h"
 
 class UXMoveU_PredictionManager;
 class AXMoveU_ModularCharacter;
@@ -14,12 +14,12 @@ class UXMoveU_ModularMovementComponent;
  * 
  */
 UCLASS(BlueprintType, Blueprintable, DefaultToInstanced, EditInlineNew, Abstract)
-class XYLOMOVEMENTUTIL_API UXMoveU_LayeredMove : public UObject
+class XYLOMOVEMENTUTIL_API UXMoveU_LayeredMovementMode : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	UXMoveU_LayeredMove(const FObjectInitializer& ObjectInitializer);
+	UXMoveU_LayeredMovementMode(const FObjectInitializer& ObjectInitializer);
 protected:
 	UXMoveU_ModularMovementComponent* GetOwningMoveComp() const;
 	AXMoveU_ModularCharacter* GetOwningCharacter() const;
@@ -33,7 +33,7 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/*
-	 * UXMoveU_LayeredMove
+	 * UXMoveU_LayeredMovementMode
 	 */
 
 public:
