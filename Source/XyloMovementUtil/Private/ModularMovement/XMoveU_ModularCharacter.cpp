@@ -40,13 +40,11 @@ void AXMoveU_ModularCharacter::GetLifetimeReplicatedProps(TArray<class FLifetime
 
 void AXMoveU_ModularCharacter::CheckJumpInput(float DeltaTime)
 {
+	// We only call super if we are using the default jump input check.
+	// The custom sync version is called in UpdateCharacterStateBeforeMovement.
 	if (bUseDefaultCheckJumpInput)
 	{
 		Super::CheckJumpInput(DeltaTime);
-	}
-	else
-	{
-		CheckJumpInputSynced(DeltaTime);
 	}
 }
 
