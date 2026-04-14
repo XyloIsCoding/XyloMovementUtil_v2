@@ -156,6 +156,7 @@ protected:
 	// JumpProfiles
 
 public:
+	UXMoveU_JumpProfile* GetJumpProfile() const { return JumpProfile; }
 	virtual void SetJumpProfileByClass(TSubclassOf<UXMoveU_JumpProfile> JumpProfileClass);
 	virtual void SetJumpProfileFromPreset(UXMoveU_JumpProfile* JumpProfilePreset);
 	virtual void ClearJumpProfile();
@@ -163,6 +164,7 @@ public:
 protected:
 	virtual void OnJumpProfileSet(UXMoveU_JumpProfile* OldJumpProfile);
 	
+private:
 	UPROPERTY(Category="Character Movement: Jumping / Falling", EditDefaultsOnly, Instanced)
 	TObjectPtr<UXMoveU_JumpProfile> JumpProfile;
 	
@@ -215,7 +217,7 @@ public:
 protected:
 	virtual void RegisterMovementModes();
 	
-protected:
+private:
 	UPROPERTY(Category="Character Movement: Custom Movement", EditDefaultsOnly)
 	TArray<FXMoveU_RegisteredMovementMode> CustomMovementModes;
 	
@@ -231,7 +233,7 @@ public:
 protected:
 	virtual void RegisterLayeredMovementModes();
 	
-protected:
+private:
 	UPROPERTY(Category="Character Movement: Custom Movement", EditDefaultsOnly)
 	TArray<FXMoveU_RegisteredLayeredMovementMode> LayeredMovementModes;
 
