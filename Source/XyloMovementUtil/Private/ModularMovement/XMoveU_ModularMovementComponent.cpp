@@ -857,11 +857,18 @@ void UXMoveU_ModularMovementComponent::RegisterMovementModes()
 
 void UXMoveU_ModularMovementComponent::ReplicateLayeredMovementModeStatesToSimProxies(uint32 OldStates)
 {
-	for (FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	for (auto It = LayeredMovementModes.CreateIterator(); It; ++It)
 	{
+		FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove = *It;
 		if (IsValid(RegisteredLayeredMove.Mode))
 		{
-			RegisteredLayeredMove.Mode->ReplicateStateToSimProxies();
+			uint32 ModeIndex = It.GetIndex();
+			bool bWasInMode = ((OldStates & (1 << ModeIndex)) != 0);
+			bool bIsInMode = RegisteredLayeredMove.Mode->IsInMode();
+			if (bWasInMode != bIsInMode)
+			{
+				RegisteredLayeredMove.Mode->ReplicateStateToSimProxies();
+			}
 		}
 	}
 }
