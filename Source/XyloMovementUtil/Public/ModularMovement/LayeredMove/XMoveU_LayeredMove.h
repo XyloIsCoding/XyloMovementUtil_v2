@@ -36,5 +36,7 @@ protected:
 	 * UXMoveU_LayeredMove
 	 */
 
+public:
+	virtual void OnRegistered() {}
 	
 };

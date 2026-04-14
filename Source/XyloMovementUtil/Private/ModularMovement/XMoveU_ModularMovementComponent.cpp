@@ -9,6 +9,8 @@
 #include "ModularMovement/XMoveU_JumpStaticLibrary.h"
 #include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/JumpProfile/XMoveU_JumpProfile.h"
+#include "ModularMovement/LayeredMove/XMoveU_LayeredMove.h"
+#include "ModularMovement/LayeredMove/XMoveU_RegisteredLayeredMove.h"
 #include "ModularMovement/MovementMode/XMoveU_MovementMode.h"
 #include "ModularMovement/MovementMode/XMoveU_RegisteredMovementMode.h"
 #include "ModularMovement/MovementSyncedObject/XMoveU_MovementSyncedObjectInterface.h"
@@ -849,4 +851,25 @@ void UXMoveU_ModularMovementComponent::RegisterMovementModes()
 // ~MovementModes
 /*====================================================================================================================*/
 	
+/*====================================================================================================================*/
+// LayeredMoves
 
+void UXMoveU_ModularMovementComponent::RegisterLayeredMoves()
+{
+	for (FXMoveU_RegisteredLayeredMove& RegisteredLayeredMove : LayeredMoves)
+	{
+		if (IsValid(RegisteredLayeredMove.Move))
+		{
+			RegisteredLayeredMove.Move->OnRegistered();
+			
+			UXMoveU_PredictionManager* PredictionManager = RegisteredLayeredMove.Move->GetPredictionManager();
+			if (IsValid(PredictionManager))
+			{
+				PredictionManager->OnRegistered(this);
+			}
+		}
+	}
+}
+
+// ~LayeredMoves
+/*====================================================================================================================*/

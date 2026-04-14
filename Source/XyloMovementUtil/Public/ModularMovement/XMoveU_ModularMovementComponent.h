@@ -9,6 +9,7 @@
 #include "XMoveU_ModularMovementComponent.generated.h"
 
 
+struct FXMoveU_RegisteredLayeredMove;
 class UXMoveU_JumpProfile;
 class UXMoveU_MovementMode;
 struct FXMoveU_RegisteredMovementMode;
@@ -219,6 +220,19 @@ protected:
 	TArray<FXMoveU_RegisteredMovementMode> CustomMovementModes;
 	
 	// ~MovementModes
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+	// LayeredMoves
+
+protected:
+	virtual void RegisterLayeredMoves();
+	
+protected:
+	UPROPERTY(Category="Character Movement: Custom Movement", EditDefaultsOnly)
+	TArray<FXMoveU_RegisteredLayeredMove> LayeredMoves;
+
+	// ~LayeredMoves
 /*====================================================================================================================*/
 	
 };

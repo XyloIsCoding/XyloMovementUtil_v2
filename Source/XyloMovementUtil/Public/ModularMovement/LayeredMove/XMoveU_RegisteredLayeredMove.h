@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "XMoveU_RegisteredMovementMode.generated.h"
+#include "XMoveU_RegisteredLayeredMove.generated.h"
 
-class UXMoveU_MovementMode;
+class UXMoveU_LayeredMove;
 
 /**
  * 
  */
 USTRUCT()
-struct XYLOMOVEMENTUTIL_API FXMoveU_RegisteredMovementMode
+struct XYLOMOVEMENTUTIL_API FXMoveU_RegisteredLayeredMove
 {
 	GENERATED_BODY()
 
@@ -20,5 +20,5 @@ struct XYLOMOVEMENTUTIL_API FXMoveU_RegisteredMovementMode
 	FGameplayTag Tag;
 
 	UPROPERTY(EditAnywhere, Instanced)
-	TObjectPtr<UXMoveU_MovementMode> Mode;
+	TObjectPtr<UXMoveU_LayeredMove> Move;
 };
