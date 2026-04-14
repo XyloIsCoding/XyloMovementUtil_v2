@@ -30,8 +30,8 @@ protected:
 	 */
 	
 public:
-	virtual void ApplyJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent);
-	virtual void RemoveJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent);
+	virtual void ApplyJumpProfile();
+	virtual void RemoveJumpProfile();
 
 public:
 	virtual bool OverrideInitialImpulse() const { return false; }

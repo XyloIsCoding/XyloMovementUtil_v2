@@ -29,9 +29,9 @@ AXMoveU_ModularCharacter* UXMoveU_JumpProfile::GetOwningCharacter() const
  * UXMoveU_JumpProfile
  */
 
-void UXMoveU_JumpProfile::ApplyJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent)
+void UXMoveU_JumpProfile::ApplyJumpProfile()
 {
-	ACharacter* CharacterOwner = MovementComponent ? MovementComponent->GetCharacterOwner() : nullptr;
+	ACharacter* CharacterOwner = GetOwningCharacter();
 	if (!CharacterOwner)
 	{
 		return;
@@ -41,9 +41,9 @@ void UXMoveU_JumpProfile::ApplyJumpProfile(UXMoveU_ModularMovementComponent* Mov
 	CharacterOwner->JumpMaxHoldTime = JumpMaxHoldTime;
 }
 
-void UXMoveU_JumpProfile::RemoveJumpProfile(UXMoveU_ModularMovementComponent* MovementComponent)
+void UXMoveU_JumpProfile::RemoveJumpProfile()
 {
-	ACharacter* CharacterOwner = MovementComponent ? MovementComponent->GetCharacterOwner() : nullptr;
+	ACharacter* CharacterOwner = GetOwningCharacter();
 	if (!CharacterOwner)
 	{
 		return;

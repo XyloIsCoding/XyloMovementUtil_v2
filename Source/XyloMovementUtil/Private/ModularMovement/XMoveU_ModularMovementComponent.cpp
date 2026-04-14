@@ -694,11 +694,11 @@ void UXMoveU_ModularMovementComponent::OnJumpProfileSet(UXMoveU_JumpProfile* Old
 {
 	if (OldJumpProfile)
 	{
-		JumpProfile->RemoveJumpProfile(this);
+		JumpProfile->RemoveJumpProfile();
 	}
 	if (IsValid(JumpProfile))
 	{
-		JumpProfile->ApplyJumpProfile(this);
+		JumpProfile->ApplyJumpProfile();
 	}
 }
 	
