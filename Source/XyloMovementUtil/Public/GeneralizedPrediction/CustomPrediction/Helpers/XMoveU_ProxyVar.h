@@ -55,20 +55,23 @@ namespace XMoveU
 		
 		virtual ReturnConstType Get() const override
 		{
-			check(Object.IsValid());
-			return (*Object).*MemberPtr;
+			Class* Obj = Object.Get();
+			check(Obj);
+			return (*Obj).*MemberPtr;
 		}
 		
 		ReturnType Get()
 		{
-			check(Object.IsValid());
-			return (*Object).*MemberPtr;
+			Class* Obj = Object.Get();
+			check(Obj);
+			return (*Obj).*MemberPtr;
 		}
 		
 		virtual void Set(ParamType NewValue) override
 		{
-			check(Object.IsValid());
-			(*Object).*MemberPtr = NewValue;
+			Class* Obj = Object.Get();
+			check(Obj);
+			(*Obj).*MemberPtr = NewValue;
 		}
 
 	private:
