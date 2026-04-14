@@ -461,7 +461,14 @@ void UXMoveU_ModularMovementComponent::GetPredictionManagers(TArray<UXMoveU_Pred
 	// From CustomMovementModes
 	for (const FXMoveU_RegisteredMovementMode& RegisteredMoveMode : CustomMovementModes)
 	{
-		OutPredictionManagers.Add(RegisteredMoveMode.PredictionManager);
+		if (IsValid(RegisteredMoveMode.Mode))
+		{
+			UXMoveU_PredictionManager* PredictionManager = RegisteredMoveMode.Mode->GetPredictionManager();
+			if (IsValid(PredictionManager))
+			{
+				OutPredictionManagers.Add(PredictionManager);
+			}
+		}
 	}
 }
 
@@ -829,11 +836,12 @@ void UXMoveU_ModularMovementComponent::RegisterMovementModes()
 		if (IsValid(RegisteredMoveMode.Mode))
 		{
 			RegisteredMoveMode.Mode->OnRegistered();
-		}
-
-		if (IsValid(RegisteredMoveMode.PredictionManager))
-		{
-			RegisteredMoveMode.PredictionManager->OnRegistered(this);
+			
+			UXMoveU_PredictionManager* PredictionManager = RegisteredMoveMode.Mode->GetPredictionManager();
+			if (IsValid(PredictionManager))
+			{
+				PredictionManager->OnRegistered(this);
+			}
 		}
 	}
 }

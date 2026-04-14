@@ -92,7 +92,7 @@ protected:
 	// CustomPrediction
 
 public:
-	UFUNCTION(Category="Pawn|Components|CharacterMovement|Prediction", BlueprintCallable)
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|Networking", BlueprintCallable)
 	virtual void RegisterPredictionManager(UXMoveU_PredictionManager* NewPredictionManager);
 	
 public:

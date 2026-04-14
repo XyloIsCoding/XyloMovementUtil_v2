@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "XMoveU_LayeredMove.generated.h"
 
+class UXMoveU_PredictionManager;
 class AXMoveU_ModularCharacter;
 class UXMoveU_ModularMovementComponent;
 
@@ -22,6 +23,12 @@ public:
 protected:
 	UXMoveU_ModularMovementComponent* GetOwningMoveComp() const;
 	AXMoveU_ModularCharacter* GetOwningCharacter() const;
+
+public:
+	UXMoveU_PredictionManager* GetPredictionManager() const { return PredictionManager; }
+protected:
+	UPROPERTY(Category="Networking", EditDefaultsOnly, Instanced)
+	TObjectPtr<UXMoveU_PredictionManager> PredictionManager;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

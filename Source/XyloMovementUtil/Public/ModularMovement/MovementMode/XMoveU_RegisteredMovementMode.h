@@ -22,7 +22,4 @@ struct XYLOMOVEMENTUTIL_API FXMoveU_RegisteredMovementMode
 
 	UPROPERTY(EditAnywhere, Instanced)
 	TObjectPtr<UXMoveU_MovementMode> Mode;
-
-	UPROPERTY(EditDefaultsOnly, Instanced)
-	TObjectPtr<UXMoveU_PredictionManager> PredictionManager;
 };
