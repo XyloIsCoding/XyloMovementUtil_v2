@@ -37,7 +37,7 @@ protected:
 	 */
 
 public:
-	virtual void OnRegistered() {}
+	virtual void OnRegistered(uint32 InModeIndex);
 
 public:
 	virtual void RequestMode(bool bWantsToEnterMode);
@@ -47,7 +47,9 @@ public:
 	virtual void ReplicateStateToSimProxies();
 protected:
 	bool bModeRequested = false;
+	/** The index this mode was registered with. Used to access the mode state on the character */
 	uint32 ModeIndex = 0;
+	bool bRegistered = false;
 
 /*====================================================================================================================*/
 	// LayeredMovementModeInterface

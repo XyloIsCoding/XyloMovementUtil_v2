@@ -868,11 +868,12 @@ void UXMoveU_ModularMovementComponent::ReplicateLayeredMovementModeStatesToSimPr
 
 void UXMoveU_ModularMovementComponent::RegisterLayeredMovementModes()
 {
-	for (FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	for (auto It = LayeredMovementModes.CreateIterator(); It; ++It)
 	{
+		FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove = *It;
 		if (IsValid(RegisteredLayeredMove.Mode))
 		{
-			RegisteredLayeredMove.Mode->OnRegistered(); // TODO: assign ModeIndex
+			RegisteredLayeredMove.Mode->OnRegistered(It.GetIndex());
 			
 			UXMoveU_PredictionManager* PredictionManager = RegisteredLayeredMove.Mode->GetPredictionManager();
 			if (IsValid(PredictionManager))

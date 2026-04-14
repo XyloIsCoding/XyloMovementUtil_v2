@@ -28,6 +28,12 @@ AXMoveU_ModularCharacter* UXMoveU_LayeredMovementMode::GetOwningCharacter() cons
  * UXMoveU_LayeredMovementMode
  */
 
+void UXMoveU_LayeredMovementMode::OnRegistered(uint32 InModeIndex)
+{
+	ModeIndex = InModeIndex;
+	bRegistered = true;
+}
+
 void UXMoveU_LayeredMovementMode::RequestMode(bool bWantsToEnterMode)
 {
 	bModeRequested = bWantsToEnterMode;
@@ -40,6 +46,8 @@ bool UXMoveU_LayeredMovementMode::WantsToBeInMode() const
 
 void UXMoveU_LayeredMovementMode::SetModeState(bool bIsInMode)
 {
+	checkf(bRegistered, TEXT("UXMoveU_LayeredMovementMode must be registered to a UXMoveU_ModularMovementComponent"))
+	
 	if (AXMoveU_ModularCharacter* Character = GetOwningCharacter())
 	{
 		if (bIsInMode)
@@ -62,6 +70,8 @@ void UXMoveU_LayeredMovementMode::SetModeState(bool bIsInMode)
 
 bool UXMoveU_LayeredMovementMode::IsInMode() const
 {
+	checkf(bRegistered, TEXT("UXMoveU_LayeredMovementMode must be registered to a UXMoveU_ModularMovementComponent"))
+	
 	if (AXMoveU_ModularCharacter* Character = GetOwningCharacter())
 	{
 		// true:
