@@ -24,6 +24,7 @@ DECLARE_CYCLE_STAT(TEXT("Char ProcessLanded"), STAT_CharProcessLanded, STATGROUP
 UXMoveU_ModularMovementComponent::UXMoveU_ModularMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	bCanJumpWhileCrouched = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
