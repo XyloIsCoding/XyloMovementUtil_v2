@@ -38,6 +38,7 @@ void UXMoveU_ModularMovementComponent::BeginPlay()
 	Super::BeginPlay();
 
 	RegisterMovementModes();
+	RegisterLayeredMovementModes();
 	OnJumpProfileSet(nullptr);
 }
 
@@ -117,30 +118,36 @@ bool UXMoveU_ModularMovementComponent::IsMovingOnGround() const
 
 float UXMoveU_ModularMovementComponent::GetMaxSpeed() const
 {
-	// @XMoveU - @CopiedFromSuper
+	float OutMaxSpeed = 0.f;
+	
+	// @XMoveU - @CopiedFromSuper: but setting OutMaxSpeed instead of returning
 	switch(MovementMode)
 	{
 	case MOVE_Walking:
 	case MOVE_NavWalking:
-		return GetMaxSpeedWaking();
+		OutMaxSpeed = GetMaxSpeedWaking(); break;
 	case MOVE_Falling:
-		return GetMaxSpeedFalling();
+		OutMaxSpeed = GetMaxSpeedFalling(); break;
 	case MOVE_Swimming:
-		return GetMaxSpeedSwimming();
+		OutMaxSpeed = GetMaxSpeedSwimming(); break;
 	case MOVE_Flying:
-		return GetMaxSpeedFlying();
+		OutMaxSpeed = GetMaxSpeedFlying(); break;
 	case MOVE_Custom:
 		{
 			// @XMoveU - @Change
 			UXMoveU_MovementMode* CurrentMovementMode = GetCurrentCustomMovementMode();
-			return CurrentMovementMode ? CurrentMovementMode->GetModeMaxSpeed() : 0.f;
+			OutMaxSpeed = CurrentMovementMode ? CurrentMovementMode->GetModeMaxSpeed() : 0.f;
+			break;
 			// ~@XMoveU - @Change
 		}
 	case MOVE_None:
 	default:
-		return 0.f;
+		OutMaxSpeed = 0.f; break;
 	}
 	// ~@XMoveU - @CopiedFromSuper
+
+	ApplyLayeredMovementModesSpeedModifier(OutMaxSpeed);
+	return OutMaxSpeed;
 }
 
 float UXMoveU_ModularMovementComponent::GetMinAnalogSpeed() const
@@ -881,7 +888,21 @@ void UXMoveU_ModularMovementComponent::RequestLayeredMovementMode(const FGamepla
 		}
 	}
 
-	UE_LOG(LogXyloMovementUtil, Error, TEXT("UXMoveU_ModularMovementComponent::RequestLayeredMovementMode >> No layered movement mode registered with tag [%s]"), *LayeredMovementModeTag.ToString())
+	UE_LOG(LogXyloMovementUtil, Warning, TEXT("UXMoveU_ModularMovementComponent::RequestLayeredMovementMode >> No layered movement mode registered with tag [%s]"), *LayeredMovementModeTag.ToString())
+}
+
+bool UXMoveU_ModularMovementComponent::IsInLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const
+{
+	for (const FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (LayeredMovementModeTag.MatchesTagExact(RegisteredLayeredMove.Tag))
+		{
+			return IsValid(RegisteredLayeredMove.Mode) && RegisteredLayeredMove.Mode->IsInMode();
+		}
+	}
+
+	UE_LOG(LogXyloMovementUtil, Warning, TEXT("UXMoveU_ModularMovementComponent::RequestLayeredMovementMode >> No layered movement mode registered with tag [%s]"), *LayeredMovementModeTag.ToString())
+	return false;
 }
 
 void UXMoveU_ModularMovementComponent::ReplicateLayeredMovementModeStatesToSimProxies(uint32 OldStates)
@@ -968,6 +989,17 @@ void UXMoveU_ModularMovementComponent::TryLeaveLayeredMovementModes(float DeltaS
 			{
 				RegisteredLayeredMove.Mode->LeaveMode(false);
 			}
+		}
+	}
+}
+
+void UXMoveU_ModularMovementComponent::ApplyLayeredMovementModesSpeedModifier(float& OutMaxSpeed) const
+{
+	for (const FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (IsValid(RegisteredLayeredMove.Mode) && RegisteredLayeredMove.Mode->IsInMode())
+		{
+			RegisteredLayeredMove.Mode->ModifyMaxSpeed(OutMaxSpeed);
 		}
 	}
 }
