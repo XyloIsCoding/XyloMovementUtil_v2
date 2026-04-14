@@ -22,6 +22,7 @@ class XYLOMOVEMENTUTIL_API AXMoveU_ModularCharacter : public AXMoveU_PredictionC
 
 public:
 	AXMoveU_ModularCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -61,5 +62,17 @@ protected:
 	// ~JumpExtension
 /*====================================================================================================================*/
 
+/*====================================================================================================================*/
+	// LayeredMovementModes
+	
+public:
+	UPROPERTY(ReplicatedUsing="OnRep_LayeredMovementModeStates")
+	uint32 LayeredMovementModeStates;
+
+	UFUNCTION()
+	virtual void OnRep_LayeredMovementModeStates(uint32 OldStates);
+
+	// ~LayeredMovementModes
+/*====================================================================================================================*/
 	
 };

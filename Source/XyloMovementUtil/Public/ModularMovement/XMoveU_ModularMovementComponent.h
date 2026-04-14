@@ -225,6 +225,9 @@ protected:
 /*====================================================================================================================*/
 	// LayeredMoves
 
+public:
+	virtual void ReplicateLayeredMovementModeStatesToSimProxies(uint32 OldStates);
+	
 protected:
 	virtual void RegisterLayeredMovementModes();
 	

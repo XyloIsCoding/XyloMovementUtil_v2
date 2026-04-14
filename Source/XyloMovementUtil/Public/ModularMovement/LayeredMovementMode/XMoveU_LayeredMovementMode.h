@@ -38,5 +38,34 @@ protected:
 
 public:
 	virtual void OnRegistered() {}
+
+public:
+	virtual void RequestMode(bool bWantsToEnterMode);
+	virtual bool WantsToBeInMode() const;
+	virtual void SetModeState(bool bIsInMode);
+	virtual bool IsInMode() const;
+	virtual void ReplicateStateToSimProxies();
+protected:
+	bool bModeRequested = false;
+	uint32 ModeIndex = 0;
+
+/*====================================================================================================================*/
+	// LayeredMovementModeInterface
+	
+public:
+	virtual bool ShouldEnterMode(float DeltaSeconds) { return false; }
+	virtual bool ShouldLeaveMode(float DeltaSeconds) { return false; }
+	virtual bool ShouldForceLeaveMode(float DeltaSeconds) { return false; }
+
+public:
+	virtual void EnterMode(bool bClientSimulation);
+	virtual void LeaveMode(bool bClientSimulation);
+	
+public:
+	virtual void OnEnteredMode() {}
+	virtual void OnLeftMode() {}
+
+	// ~LayeredMovementModeInterface
+/*====================================================================================================================*/
 	
 };

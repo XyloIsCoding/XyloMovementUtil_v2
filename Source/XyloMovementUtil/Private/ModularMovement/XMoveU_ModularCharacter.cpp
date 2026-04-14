@@ -4,6 +4,7 @@
 #include "ModularMovement/XMoveU_ModularCharacter.h"
 
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Caches CVars from base class and provides getters
@@ -22,6 +23,13 @@ namespace CharacterCVars
 AXMoveU_ModularCharacter::AXMoveU_ModularCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UXMoveU_ModularMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
+}
+
+void AXMoveU_ModularCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AXMoveU_ModularCharacter, LayeredMovementModeStates);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,4 +160,18 @@ bool AXMoveU_ModularCharacter::JumpIsAllowed() const
 }
 
 // ~JumpExtension
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+// LayeredMovementModes
+	
+void AXMoveU_ModularCharacter::OnRep_LayeredMovementModeStates(uint32 OldStates)
+{
+	if (UXMoveU_ModularMovementComponent* MoveComp = GetCharacterMovement<UXMoveU_ModularMovementComponent>())
+	{
+		MoveComp->ReplicateLayeredMovementModeStatesToSimProxies(OldStates);
+	}
+}
+
+// ~LayeredMovementModes
 /*====================================================================================================================*/

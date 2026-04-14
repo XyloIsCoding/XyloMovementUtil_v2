@@ -854,13 +854,24 @@ void UXMoveU_ModularMovementComponent::RegisterMovementModes()
 /*====================================================================================================================*/
 // LayeredMoves
 
+void UXMoveU_ModularMovementComponent::ReplicateLayeredMovementModeStatesToSimProxies(uint32 OldStates)
+{
+	for (FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (IsValid(RegisteredLayeredMove.Mode))
+		{
+			RegisteredLayeredMove.Mode->ReplicateStateToSimProxies();
+		}
+	}
+}
+
 void UXMoveU_ModularMovementComponent::RegisterLayeredMovementModes()
 {
 	for (FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
 	{
 		if (IsValid(RegisteredLayeredMove.Mode))
 		{
-			RegisteredLayeredMove.Mode->OnRegistered();
+			RegisteredLayeredMove.Mode->OnRegistered(); // TODO: assign ModeIndex
 			
 			UXMoveU_PredictionManager* PredictionManager = RegisteredLayeredMove.Mode->GetPredictionManager();
 			if (IsValid(PredictionManager))
