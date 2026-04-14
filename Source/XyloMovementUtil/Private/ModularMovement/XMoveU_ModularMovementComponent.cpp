@@ -661,6 +661,11 @@ bool UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitR
 /*====================================================================================================================*/
 // JumpProfiles
 
+UXMoveU_JumpProfile* UXMoveU_ModularMovementComponent::GetJumpProfile() const
+{
+	return IsValid(JumpProfile) ? JumpProfile : nullptr;
+}
+
 void UXMoveU_ModularMovementComponent::SetJumpProfileByClass(TSubclassOf<UXMoveU_JumpProfile> JumpProfileClass)
 {
 	if (!ensureMsgf(JumpProfileClass, TEXT("UXMoveU_ModularMovementComponent::SetJumpProfileByClass >> JumpProfileClass not valid")))

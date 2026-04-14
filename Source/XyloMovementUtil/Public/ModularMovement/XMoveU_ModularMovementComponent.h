@@ -156,7 +156,7 @@ protected:
 	// JumpProfiles
 
 public:
-	UXMoveU_JumpProfile* GetJumpProfile() const { return JumpProfile; }
+	UXMoveU_JumpProfile* GetJumpProfile() const;
 	virtual void SetJumpProfileByClass(TSubclassOf<UXMoveU_JumpProfile> JumpProfileClass);
 	virtual void SetJumpProfileFromPreset(UXMoveU_JumpProfile* JumpProfilePreset);
 	virtual void ClearJumpProfile();
