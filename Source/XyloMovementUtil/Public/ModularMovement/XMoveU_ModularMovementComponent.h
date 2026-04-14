@@ -228,10 +228,17 @@ private:
 	// LayeredMoves
 
 public:
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
+	void RequestLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag, bool bWantsToEnterMode);
+	
+public:
 	virtual void ReplicateLayeredMovementModeStatesToSimProxies(uint32 OldStates);
 	
 protected:
 	virtual void RegisterLayeredMovementModes();
+
+	virtual void CheckLayeredMovementModesTransition(float DeltaSeconds);
+	virtual void TryLeaveLayeredMovementModes(float DeltaSeconds);
 	
 private:
 	UPROPERTY(Category="Character Movement: Custom Movement", EditDefaultsOnly)

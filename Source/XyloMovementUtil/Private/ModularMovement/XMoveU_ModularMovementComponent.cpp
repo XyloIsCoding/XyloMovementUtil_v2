@@ -45,6 +45,7 @@ void UXMoveU_ModularMovementComponent::UpdateCharacterStateBeforeMovement(float 
 {
 	UpdateJumpBeforeMovement(DeltaSeconds);
 	UpdateCrouchBeforeMovement(DeltaSeconds);
+	CheckLayeredMovementModesTransition(DeltaSeconds);
 
 	TickSyncedObjectsBeforeMovement(DeltaSeconds);
 }
@@ -52,7 +53,8 @@ void UXMoveU_ModularMovementComponent::UpdateCharacterStateBeforeMovement(float 
 void UXMoveU_ModularMovementComponent::UpdateCharacterStateAfterMovement(float DeltaSeconds)
 {
 	UpdateCrouchAfterMovement(DeltaSeconds);
-
+	TryLeaveLayeredMovementModes(DeltaSeconds);
+	
 	TickSyncedObjectsAfterMovement(DeltaSeconds);
 }
 
@@ -855,6 +857,23 @@ void UXMoveU_ModularMovementComponent::RegisterMovementModes()
 /*====================================================================================================================*/
 // LayeredMoves
 
+void UXMoveU_ModularMovementComponent::RequestLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag, bool bWantsToEnterMode)
+{
+	for (FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (LayeredMovementModeTag.MatchesTagExact(RegisteredLayeredMove.Tag))
+		{
+			if (IsValid(RegisteredLayeredMove.Mode))
+			{
+				RegisteredLayeredMove.Mode->RequestMode(bWantsToEnterMode);
+			}
+			return;
+		}
+	}
+
+	UE_LOG(LogXyloMovementUtil, Error, TEXT("UXMoveU_ModularMovementComponent::RequestLayeredMovementMode >> No layered movement mode registered with tag [%s]"), *LayeredMovementModeTag.ToString())
+}
+
 void UXMoveU_ModularMovementComponent::ReplicateLayeredMovementModeStatesToSimProxies(uint32 OldStates)
 {
 	for (auto It = LayeredMovementModes.CreateIterator(); It; ++It)
@@ -886,6 +905,58 @@ void UXMoveU_ModularMovementComponent::RegisterLayeredMovementModes()
 			if (IsValid(PredictionManager))
 			{
 				PredictionManager->OnRegistered(this);
+			}
+		}
+		else
+		{
+			UE_LOG(LogXyloMovementUtil, Error, TEXT("UXMoveU_ModularMovementComponent::RegisterLayeredMovementModes >> No LayeredMovementMode Object associated with tag [%s]"), *RegisteredLayeredMove.Tag.ToString())
+		}
+	}
+}
+
+void UXMoveU_ModularMovementComponent::CheckLayeredMovementModesTransition(float DeltaSeconds)
+{
+	// Proxies get replicated layered modes state.
+	if (CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		return;
+	}
+		
+	for (FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (IsValid(RegisteredLayeredMove.Mode))
+		{
+			// Leave mode.
+			if (RegisteredLayeredMove.Mode->ShouldLeaveMode(DeltaSeconds))
+			{
+				RegisteredLayeredMove.Mode->LeaveMode(false);
+			}
+
+			// Enter mode.
+			if (RegisteredLayeredMove.Mode->ShouldEnterMode(DeltaSeconds))
+			{
+				RegisteredLayeredMove.Mode->EnterMode(false);
+			}
+		}
+	}
+}
+
+void UXMoveU_ModularMovementComponent::TryLeaveLayeredMovementModes(float DeltaSeconds)
+{
+	// Proxies get replicated layered modes state.
+	if (CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		return;
+	}
+	
+	for (FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (IsValid(RegisteredLayeredMove.Mode))
+		{
+			// Leave mode if no longer able to be in this mode.
+			if (RegisteredLayeredMove.Mode->ShouldForceLeaveMode(DeltaSeconds))
+			{
+				RegisteredLayeredMove.Mode->LeaveMode(false);
 			}
 		}
 	}
