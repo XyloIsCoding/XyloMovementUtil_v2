@@ -11,8 +11,9 @@ bool FXMoveU_PredictionProxy_Vector::SerializeInputsAndCorrectionStates_Internal
 
 bool FXMoveU_PredictionProxy_Vector::HasPredictionError_Internal(const FVector& ClientPredictedValue)
 {
+	if (!ProxyVariable->IsValid()) { return false; }
 	float Tolerance = FMath::Min(ErrorThreshold, 0.0001);
-	return ClientPredictedValue.Equals(ProxyVariable->Get(), Tolerance);
+	return !ClientPredictedValue.Equals(ProxyVariable->Get(), Tolerance);
 }
 
 bool FXMoveU_PredictionProxy_Vector::SerializeCorrectedStates_Internal(FVector& Value, FArchive& Ar, UPackageMap* PackageMap)

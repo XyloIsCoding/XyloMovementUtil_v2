@@ -142,8 +142,11 @@ namespace XMoveU
 		{
 			if (bIsInput)
 			{
-				// If this is an input, apply it to server.
-				ProxyVariable->Set(BlackboardHelper.Get(ClientNetworkFrame));
+				if (ProxyVariable->IsValid())
+				{
+					// If this is an input, apply it to server.
+					ProxyVariable->Set(BlackboardHelper.Get(ClientNetworkFrame));
+				}
 			}
 		}
 		
@@ -160,8 +163,11 @@ namespace XMoveU
 		{
 			if (CorrectionMode == EXMoveU_CorrectionMode::Authoritative)
 			{
-				// Collect this value if it needs to be sent as correction.
-				BlackboardHelper.Set(AuthoritativeFrame, ProxyVariable->Get());
+				if (ProxyVariable->IsValid())
+				{
+					// Collect this value if it needs to be sent as correction.
+					BlackboardHelper.Set(AuthoritativeFrame, ProxyVariable->Get());
+				}
 			}
 		}
 		
@@ -208,17 +214,23 @@ namespace XMoveU
 				OnCorrectionReceived(BlackboardHelper.Get(AuthoritativeFrame), BlackboardHelperPostSim.Get(*TargetPredictionFrame), Context, bApplyCorrection);
 				if (!bApplyCorrection) { return; }
 
-				// Apply the correction if the subclass approved.
-				ProxyVariable->Set(BlackboardHelper.Get(AuthoritativeFrame));
+				if (ProxyVariable->IsValid())
+				{
+					// Apply the correction if the subclass approved.
+					ProxyVariable->Set(BlackboardHelper.Get(AuthoritativeFrame));
+				}
 				return;
 			}
 
 			bool bWantsLocalCorrection = CorrectionMode == EXMoveU_CorrectionMode::Local;
 			if ((bWantsLocalCorrection || bForceLocalCorrection) && Context == EXMoveU_CorrectionContext::PreRollback)
 			{
-				// Sometimes we want the rollback to start with the value we had locally at the frame that got corrected.
-				// In this case apply the PostSim value.
-				ProxyVariable->Set(BlackboardHelperPostSim.Get(*TargetPredictionFrame));
+				if (ProxyVariable->IsValid())
+				{
+					// Sometimes we want the rollback to start with the value we had locally at the frame that got corrected.
+					// In this case apply the PostSim value.
+					ProxyVariable->Set(BlackboardHelperPostSim.Get(*TargetPredictionFrame));
+				}
 				return;
 			}
 		}
@@ -234,8 +246,11 @@ namespace XMoveU
 		{
 			if (!bAffectedBySimulation)
 			{
-				// If the value is not affected by the simulation, for example an external "setting", we collect it here.
-				BlackboardHelper.Set(PredictionFrame, ProxyVariable->Get());
+				if (ProxyVariable->IsValid())
+				{
+					// If the value is not affected by the simulation, for example an external "setting", we collect it here.
+					BlackboardHelper.Set(PredictionFrame, ProxyVariable->Get());
+				}
 			}
 		}
 		
@@ -243,8 +258,11 @@ namespace XMoveU
 		{
 			if (bAffectedBySimulation)
 			{
-				// If the value is affected by the simulation, for example "stamina", we collect it here.
-				BlackboardHelper.Set(PredictionFrame, ProxyVariable->Get());
+				if (ProxyVariable->IsValid())
+				{
+					// If the value is affected by the simulation, for example "stamina", we collect it here.
+					BlackboardHelper.Set(PredictionFrame, ProxyVariable->Get());
+				}
 			}
 		}
 		
@@ -255,8 +273,11 @@ namespace XMoveU
 		
 		virtual void CollectFinalState(FBlackboard& PredictionFrame, FSavedMove_Character::EPostUpdateMode PostUpdateMode) override final
 		{
-			// Collect the PostSim value.
-			BlackboardHelperPostSim.Set(PredictionFrame, ProxyVariable->Get());
+			if (ProxyVariable->IsValid())
+			{
+				// Collect the PostSim value.
+				BlackboardHelperPostSim.Set(PredictionFrame, ProxyVariable->Get());
+			}
 		}
 		
 		virtual bool BlockCombinePostSimulation(FBlackboard& PredictionFrame) override final
@@ -280,8 +301,11 @@ namespace XMoveU
 		{
 			if (bAffectedBySimulation)
 			{
-				// If the value is affected by the simulation, we revert its changes.
-				ProxyVariable->Set(BlackboardHelper.Get(OldPredictionFrame));
+				if (ProxyVariable->IsValid())
+				{
+					// If the value is affected by the simulation, we revert its changes.
+					ProxyVariable->Set(BlackboardHelper.Get(OldPredictionFrame));
+				}
 			}
 		}
 
@@ -289,8 +313,11 @@ namespace XMoveU
 		{
 			if (bRestoreAfterRollback)
 			{
-				// Cache value before performing rollback and resimulation.
-				CachedValue = ProxyVariable->Get();
+				if (ProxyVariable->IsValid())
+				{
+					// Cache value before performing rollback and resimulation.
+					CachedValue = ProxyVariable->Get();
+				}
 			}
 		}
 		
@@ -302,8 +329,11 @@ namespace XMoveU
 			// We only need to rollback if CorrectionMode is None, otherwise we would be overwriting the correction.
 			if (CorrectionMode == EXMoveU_CorrectionMode::None)
 			{
-				// TODO: some times we might need to have available a value that was generated during the simulation to resimulate the frame properly (eg grapple point).
-				ProxyVariable->Set(BlackboardHelper.Get(PredictionFrame));
+				if (ProxyVariable->IsValid())
+				{
+					// TODO: some times we might need to have available a value that was generated during the simulation to resimulate the frame properly (eg grapple point).
+					ProxyVariable->Set(BlackboardHelper.Get(PredictionFrame));
+				}
 			}
 		}
 		
@@ -317,8 +347,11 @@ namespace XMoveU
 				OnRestoreStatePostRollback(bRestoreFromCache);
 				if (!bRestoreFromCache) { return; }
 
-				// Apply the cahced value if the subclass approved.
-				ProxyVariable->Set(CachedValue);
+				if (ProxyVariable->IsValid())
+				{
+					// Apply the cahced value if the subclass approved.
+					ProxyVariable->Set(CachedValue);
+				}
 			}
 		}
 	};

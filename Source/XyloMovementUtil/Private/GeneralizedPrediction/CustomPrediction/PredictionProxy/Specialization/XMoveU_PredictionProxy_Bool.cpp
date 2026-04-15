@@ -11,6 +11,7 @@ bool FXMoveU_PredictionProxy_Bool::SerializeInputsAndCorrectionStates_Internal(b
 
 bool FXMoveU_PredictionProxy_Bool::HasPredictionError_Internal(bool ClientPredictedValue)
 {
+	if (!ProxyVariable->IsValid()) { return false; }
 	return ClientPredictedValue != ProxyVariable->Get();
 }
 
