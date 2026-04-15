@@ -1088,5 +1088,19 @@ void UXMoveU_ModularMovementComponent::ApplyLayeredMovementModesSpeedModifier(fl
 	}
 }
 
+UXMoveU_LayeredMovementMode* UXMoveU_ModularMovementComponent::GetLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const
+{
+	for (const FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (LayeredMovementModeTag.MatchesTagExact(RegisteredLayeredMove.Tag))
+		{
+			return IsValid(RegisteredLayeredMove.Mode) ? RegisteredLayeredMove.Mode : nullptr;
+		}
+	}
+
+	UE_LOG(LogXyloMovementUtil, Warning, TEXT("UXMoveU_ModularMovementComponent::GetLayeredMovementMode >> No layered movement mode registered with tag [%s]"), *LayeredMovementModeTag.ToString())
+	return nullptr;
+}
+
 // ~LayeredMoves
 /*====================================================================================================================*/

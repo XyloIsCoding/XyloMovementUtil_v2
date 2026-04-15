@@ -9,6 +9,7 @@
 #include "XMoveU_ModularMovementComponent.generated.h"
 
 
+class UXMoveU_LayeredMovementMode;
 struct FXMoveU_RegisteredLayeredMovementMode;
 class UXMoveU_JumpProfile;
 class UXMoveU_MovementMode;
@@ -284,6 +285,9 @@ protected:
 
 	virtual void ApplyLayeredMovementModesSpeedModifier(float& OutMaxSpeed) const;
 	
+public:
+	virtual UXMoveU_LayeredMovementMode* GetLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const;
+	const TArray<FXMoveU_RegisteredLayeredMovementMode>& GetLayeredMovementModes() const { return LayeredMovementModes; }
 private:
 	UPROPERTY(Category="Character Movement: Custom Movement", EditDefaultsOnly)
 	TArray<FXMoveU_RegisteredLayeredMovementMode> LayeredMovementModes;
