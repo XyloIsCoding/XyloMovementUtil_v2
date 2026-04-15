@@ -45,8 +45,14 @@ public:
 	virtual void SetModeState(bool bIsInMode);
 	virtual bool IsInMode() const;
 	virtual void ReplicateStateToSimProxies();
+	virtual bool ShouldCancelRequestAfterTransitionCheck() const { return bCancelRequestAfterTransitionCheck; }
+	
 protected:
+	UPROPERTY(Category="Settings", EditDefaultsOnly)
+	bool bCancelRequestAfterTransitionCheck;
+	
 	bool bModeRequested = false;
+	
 	/** The index this mode was registered with. Used to access the mode state on the character */
 	uint32 ModeIndex = 0;
 	bool bRegistered = false;
@@ -65,6 +71,7 @@ public:
 public:
 	virtual void EnterMode(bool bClientSimulation);
 	virtual void LeaveMode(bool bClientSimulation);
+	virtual void UpdateMode(float DeltaSeconds) {}
 	
 public:
 	virtual void OnEnteredMode() {}

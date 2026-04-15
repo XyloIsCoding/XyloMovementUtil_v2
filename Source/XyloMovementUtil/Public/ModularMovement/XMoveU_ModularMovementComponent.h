@@ -241,6 +241,7 @@ protected:
 
 	virtual void CheckLayeredMovementModesTransition(float DeltaSeconds);
 	virtual void TryLeaveLayeredMovementModes(float DeltaSeconds);
+	virtual void UpdateLayeredMovementModes(float DeltaSeconds);
 
 	virtual void ApplyLayeredMovementModesSpeedModifier(float& OutMaxSpeed) const;
 	

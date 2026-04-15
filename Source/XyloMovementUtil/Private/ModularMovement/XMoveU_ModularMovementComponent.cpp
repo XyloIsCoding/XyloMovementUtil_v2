@@ -47,6 +47,7 @@ void UXMoveU_ModularMovementComponent::UpdateCharacterStateBeforeMovement(float 
 	UpdateJumpBeforeMovement(DeltaSeconds);
 	UpdateCrouchBeforeMovement(DeltaSeconds);
 	CheckLayeredMovementModesTransition(DeltaSeconds);
+	UpdateLayeredMovementModes(DeltaSeconds);
 
 	TickSyncedObjectsBeforeMovement(DeltaSeconds);
 }
@@ -981,6 +982,12 @@ void UXMoveU_ModularMovementComponent::CheckLayeredMovementModesTransition(float
 			{
 				RegisteredLayeredMove.Mode->EnterMode(false);
 			}
+
+			// Reset input request if necessary
+			if (RegisteredLayeredMove.Mode->ShouldCancelRequestAfterTransitionCheck())
+			{
+				RegisteredLayeredMove.Mode->RequestMode(false);
+			}
 		}
 	}
 }
@@ -1002,6 +1009,17 @@ void UXMoveU_ModularMovementComponent::TryLeaveLayeredMovementModes(float DeltaS
 			{
 				RegisteredLayeredMove.Mode->LeaveMode(false);
 			}
+		}
+	}
+}
+
+void UXMoveU_ModularMovementComponent::UpdateLayeredMovementModes(float DeltaSeconds)
+{
+	for (const FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (IsValid(RegisteredLayeredMove.Mode))
+		{
+			RegisteredLayeredMove.Mode->UpdateMode(DeltaSeconds);
 		}
 	}
 }

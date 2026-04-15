@@ -9,6 +9,7 @@
 UXMoveU_LayeredMovementMode::UXMoveU_LayeredMovementMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	bCancelRequestAfterTransitionCheck = false;
 }
 
 UXMoveU_ModularMovementComponent* UXMoveU_LayeredMovementMode::GetOwningMoveComp() const
