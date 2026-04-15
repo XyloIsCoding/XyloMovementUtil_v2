@@ -44,6 +44,9 @@ bool UXMoveU_SprintLayeredMoveMode::CanSprintInCurrentState() const
 		return false;
 	}
 	
-	if ((MoveComp->GetCurrentAcceleration().GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()) < MinSprintingAngleCosine) return false;
+	if ((MoveComp->GetCurrentAcceleration().GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()) < MinSprintingAngleCosine)
+	{
+		return false;
+	}
 	return (MoveComp->IsFalling() || MoveComp->IsMovingOnGround()) && !MoveComp->IsCrouching();
 }

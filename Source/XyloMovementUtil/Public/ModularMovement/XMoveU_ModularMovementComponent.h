@@ -15,6 +15,28 @@ class UXMoveU_MovementMode;
 struct FXMoveU_RegisteredMovementMode;
 
 /**
+ * Information about the ground under the character. It only gets updated as needed.
+ */
+USTRUCT(BlueprintType)
+struct XYLOMOVEMENTUTIL_API FXMoveU_CharacterGroundInfo
+{
+	GENERATED_BODY()
+
+	FXMoveU_CharacterGroundInfo()
+		: LastUpdateFrame(0)
+		, GroundDistance(0.0f)
+	{}
+
+	uint64 LastUpdateFrame;
+
+	UPROPERTY(BlueprintReadOnly)
+	FHitResult GroundHitResult;
+
+	UPROPERTY(BlueprintReadOnly)
+	float GroundDistance;
+};
+
+/**
  * Adds modular system for CustomMovementModes, LayeredMoves, and JumpProfiles
  */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -152,6 +174,23 @@ protected:
 	// ~ImprovedInterface
 /*====================================================================================================================*/
 
+/*====================================================================================================================*/
+	// GroundInfo
+
+public:
+	// Returns the current ground info.  Calling this will update the ground info if it's out of date.
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	const FXMoveU_CharacterGroundInfo& GetGroundInfo();
+protected:
+	/** Cached ground info for the character.  Do not access this directly!
+	 * It's only updated when accessed via GetGroundInfo(). */
+	FXMoveU_CharacterGroundInfo CachedGroundInfo;
+
+	float GroundTraceDistance = 100000.0f;
+
+	// ~GroundInfo
+/*====================================================================================================================*/
+	
 /*====================================================================================================================*/
 	// JumpProfiles
 

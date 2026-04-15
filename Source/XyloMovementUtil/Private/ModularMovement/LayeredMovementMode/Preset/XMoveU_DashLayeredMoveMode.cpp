@@ -28,7 +28,10 @@ void UXMoveU_DashLayeredMoveMode::OnRegistered(uint32 InModeIndex)
 
 bool UXMoveU_DashLayeredMoveMode::ShouldEnterMode(float DeltaSeconds) const
 {
-	if (FMath::Floor<int32>(DashCharge) < 1) return false;
+	if (FMath::Floor<int32>(DashCharge) < 1)
+	{
+		return false;
+	}
 	return !IsInMode() && WantsToBeInMode() && CanDashInCurrentState();
 }
 
