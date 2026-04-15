@@ -482,6 +482,19 @@ void UXMoveU_ModularMovementComponent::GetPredictionManagers(TArray<UXMoveU_Pred
 			}
 		}
 	}
+
+	// From LayeredCustomMovementModes
+	for (const FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (IsValid(RegisteredLayeredMove.Mode))
+		{
+			UXMoveU_PredictionManager* PredictionManager = RegisteredLayeredMove.Mode->GetPredictionManager();
+			if (IsValid(PredictionManager))
+			{
+				OutPredictionManagers.Add(PredictionManager);
+			}
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
