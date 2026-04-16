@@ -11,7 +11,7 @@ UXMoveU_ImpulseJump::UXMoveU_ImpulseJump(const FObjectInitializer& ObjectInitial
 	: Super(ObjectInitializer)
 {
 	VerticalVelocity = 1400.f;
-	HorizontalVelocity = 300.f;
+	HorizontalVelocity = 600.f;
 	
 	JumpMaxCount = 2;
 	JumpMaxHoldTime = 0.f;

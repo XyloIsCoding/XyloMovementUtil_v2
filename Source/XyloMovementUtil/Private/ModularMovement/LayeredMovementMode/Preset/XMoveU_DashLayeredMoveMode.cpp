@@ -13,7 +13,8 @@ UXMoveU_DashLayeredMoveMode::UXMoveU_DashLayeredMoveMode(const FObjectInitialize
 	bCancelRequestAfterTransitionCheck = true;
 	
 	DashVerticalImpulseSpeed = 300.f;
-	DashHorizontalImpulseSpeed = 600.f;
+	DashHorizontalImpulseSpeed = 800.f;
+	PostDashHorizontalMaxSpeed = 1000.f;
 	DashAngleCosineDeadZone = 0.5f;
 	DashDuration = 0.5f;
 	DashMaxCharges = 2;
@@ -48,8 +49,9 @@ bool UXMoveU_DashLayeredMoveMode::CanDashInCurrentState(bool bIgnoreDeadZone) co
 		return false;
 	}
 
-	const bool bOutOfDeadZone = bIgnoreDeadZone || (MoveComp->GetCurrentAcceleration().GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()) < DashAngleCosineDeadZone;
-	return MoveComp->IsFalling() || (MoveComp->IsMovingOnGround() && !MoveComp->IsCrouching() && bOutOfDeadZone);
+	FVector InputDirection = MoveComp->GetCurrentAcceleration().GetSafeNormal();
+	const bool bOutOfDeadZone = !InputDirection.IsNearlyZero() && (MoveComp->GetCurrentAcceleration().GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()) < DashAngleCosineDeadZone;
+	return MoveComp->IsFalling() || (MoveComp->IsMovingOnGround() && !MoveComp->IsCrouching() && (bIgnoreDeadZone || bOutOfDeadZone));
 }
 
 void UXMoveU_DashLayeredMoveMode::OnEnteredMode()
@@ -60,8 +62,19 @@ void UXMoveU_DashLayeredMoveMode::OnEnteredMode()
 	if (GetOwningCharacter()->GetLocalRole() != ROLE_SimulatedProxy)
 	{
 		UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
-		UXMoveU_JumpStaticLibrary::LimitMinVerticalVelocity(MoveComp, 0.f);
-		UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(MoveComp, MoveComp->GetCurrentAcceleration().GetSafeNormal(), DashVerticalImpulseSpeed, DashHorizontalImpulseSpeed, false);
+		FVector InputDirection = MoveComp->GetCurrentAcceleration().GetSafeNormal();
+		if (InputDirection.IsNearlyZero())
+		{
+			InputDirection = MoveComp->GetForwardVector();
+		}
+		
+		float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
+		VerticalVelocity = FMath::Max(VerticalVelocity, 0.f);
+		VerticalVelocity += DashVerticalImpulseSpeed;
+
+		FVector HorizontalImpulse = InputDirection * FMath::Min(PostDashHorizontalMaxSpeed, (DashHorizontalImpulseSpeed + (MoveComp->Velocity | InputDirection)));
+		MoveComp->Velocity = HorizontalImpulse + (VerticalVelocity * -MoveComp->GetGravityDirection());
+		
 		MoveComp->SetMovementMode(MOVE_Falling);
 	}
 }
