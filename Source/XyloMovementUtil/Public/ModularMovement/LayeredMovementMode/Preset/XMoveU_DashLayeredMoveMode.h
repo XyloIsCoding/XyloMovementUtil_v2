@@ -34,7 +34,10 @@ protected:
 	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
 	float DashHorizontalImpulseSpeed;
 
-	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(InlineEditConditionToggle))
+	bool bClampHorizontalVelocity;
+	
+	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(EditCondition="bClampHorizontalVelocity", ClampMin="0", UIMin="0", ForceUnits="cm/s"))
 	float PostDashHorizontalMaxSpeed;
 
 	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))

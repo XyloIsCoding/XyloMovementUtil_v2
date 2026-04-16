@@ -72,8 +72,13 @@ void UXMoveU_DashLayeredMoveMode::OnEnteredMode()
 		VerticalVelocity = FMath::Max(VerticalVelocity, 0.f);
 		VerticalVelocity += DashVerticalImpulseSpeed;
 
-		FVector HorizontalImpulse = InputDirection * FMath::Min(PostDashHorizontalMaxSpeed, (DashHorizontalImpulseSpeed + (MoveComp->Velocity | InputDirection)));
-		MoveComp->Velocity = HorizontalImpulse + (VerticalVelocity * -MoveComp->GetGravityDirection());
+		float HorizontalVelocity = DashHorizontalImpulseSpeed + (MoveComp->Velocity | InputDirection);
+		if (bClampHorizontalVelocity)
+		{
+			HorizontalVelocity = FMath::Min(HorizontalVelocity, PostDashHorizontalMaxSpeed);
+		}
+		
+		MoveComp->Velocity = HorizontalVelocity * InputDirection + (VerticalVelocity * -MoveComp->GetGravityDirection());
 		
 		MoveComp->SetMovementMode(MOVE_Falling);
 	}
