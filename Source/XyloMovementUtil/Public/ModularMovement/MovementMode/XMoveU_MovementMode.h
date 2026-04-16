@@ -39,6 +39,7 @@ protected:
 
 public:
 	virtual void OnRegistered() {}
+	virtual bool IsInMode() const;
 
 /*====================================================================================================================*/
 	// MovementModeType
@@ -69,8 +70,11 @@ public:
 	virtual bool CanCrouchInCurrentMode() const { return true; }
 
 public:
+	virtual bool ShouldEnterMode() const { return false; }
+	virtual bool ShouldEnterModePostLanded(const FHitResult& Hit) { return false; }
 	virtual void OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) {}
 	virtual void OnLeftMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) {}
+	virtual void UpdateMode(float DeltaTime) {}
 	virtual void PhysUpdate(float DeltaTime, int32 Iterations) {}
 
 	// ~MovementModeInterface

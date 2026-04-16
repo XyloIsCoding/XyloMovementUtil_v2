@@ -21,3 +21,10 @@ AXMoveU_ModularCharacter* UXMoveU_MovementMode::GetOwningCharacter() const
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 	return MoveComp ? Cast<AXMoveU_ModularCharacter>(MoveComp->GetCharacterOwner()) : nullptr;
 }
+
+bool UXMoveU_MovementMode::IsInMode() const
+{
+	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+	UXMoveU_MovementMode* CurrentMode = MoveComp->GetCurrentCustomMovementMode();
+	return CurrentMode == this;
+}

@@ -9,6 +9,7 @@
 #include "XMoveU_ModularMovementComponent.generated.h"
 
 
+class UXMoveU_SlideMoveMode;
 class UXMoveU_LayeredMovementMode;
 struct FXMoveU_RegisteredLayeredMovementMode;
 class UXMoveU_JumpProfile;
@@ -44,6 +45,7 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class XYLOMOVEMENTUTIL_API UXMoveU_ModularMovementComponent : public UXMoveU_PredictionMovementComponent
 {
 	GENERATED_BODY()
+	friend UXMoveU_SlideMoveMode;
 
 public:
 	UXMoveU_ModularMovementComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -163,7 +165,7 @@ protected:
 
 	virtual void PostLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations) {}
 	
-	virtual bool EvaluatePostLandedTransitions(const FHitResult& Hit);
+	virtual void EvaluatePostLandedTransitions(const FHitResult& Hit);
 
 public:
 	virtual bool CanJumpWhileCrouched() const { return bCanJumpWhileCrouched; }
@@ -253,9 +255,15 @@ public:
 
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|MovementModes", BlueprintCallable)
 	FGameplayTag GetCustomMovementModeTag(uint8 InCustomMode) const;
+
+	virtual bool IsInCustomMovementMode(const FGameplayTag& MovementModeTag) const;
 	
 protected:
 	virtual void RegisterMovementModes();
+
+	virtual void CheckMovementModesTransition(float DeltaSeconds);
+	virtual bool CheckMovementModesPostLandedTransitions(const FHitResult& Hit);
+	virtual void UpdateMovementModes(float DeltaSeconds);
 	
 private:
 	UPROPERTY(Category="Character Movement: Custom Movement", EditDefaultsOnly)

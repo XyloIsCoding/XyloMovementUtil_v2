@@ -47,6 +47,8 @@ void UXMoveU_ModularMovementComponent::UpdateCharacterStateBeforeMovement(float 
 {
 	UpdateJumpBeforeMovement(DeltaSeconds);
 	UpdateCrouchBeforeMovement(DeltaSeconds);
+	UpdateMovementModes(DeltaSeconds);
+	CheckMovementModesTransition(DeltaSeconds);
 	CheckLayeredMovementModesTransition(DeltaSeconds);
 	UpdateLayeredMovementModes(DeltaSeconds);
 
@@ -652,8 +654,14 @@ bool UXMoveU_ModularMovementComponent::EvaluatePostJumpedTransitions()
 	return true;
 }
 
-bool UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitResult& Hit)
+void UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitResult& Hit)
 {
+	bool bTransitioned = CheckMovementModesPostLandedTransitions(Hit);
+	if (bTransitioned)
+	{
+		return;
+	}
+	
 	// @XMoveU - @CopiedFromSuper::SetPostLandedPhysics: without applying impact forces 
 	if (CanEverSwim() && IsInWater())
 	{
@@ -673,8 +681,6 @@ bool UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitR
 		}
 	}
 	// ~@XMoveU - @CopiedFromSuper::SetPostLandedPhysics
-	
-	return true;
 }
 
 // ~ImprovedInterface
@@ -863,7 +869,11 @@ UXMoveU_MovementMode* UXMoveU_ModularMovementComponent::GetCurrentCustomMovement
 
 UXMoveU_MovementMode* UXMoveU_ModularMovementComponent::GetCustomMovementMode(EMovementMode InMovementMode, uint8 InCustomMode) const
 {
-	if (InMovementMode != MOVE_Custom) return nullptr; // Not really necessary cause InCustomMode would be 0
+	if (InMovementMode != MOVE_Custom)
+	{
+		// Not really necessary cause InCustomMode would be 0
+		return nullptr;
+	}
 
 	if (CustomMovementModes.IsValidIndex(InCustomMode - 1))
 	{
@@ -914,6 +924,22 @@ FGameplayTag UXMoveU_ModularMovementComponent::GetCustomMovementModeTag(uint8 In
 	return FGameplayTag();
 }
 
+bool UXMoveU_ModularMovementComponent::IsInCustomMovementMode(const FGameplayTag& MovementModeTag) const
+{
+	if (MovementMode != MOVE_Custom)
+	{
+		return false;
+	}
+
+	if (!CustomMovementModes.IsValidIndex(CustomMovementMode - 1))
+	{
+		return false;
+	}
+	
+	FGameplayTag CustomModeTag = CustomMovementModes[CustomMovementMode - 1].Tag;
+	return CustomModeTag.MatchesTagExact(MovementModeTag);
+}
+
 void UXMoveU_ModularMovementComponent::RegisterMovementModes()
 {
 	for (FXMoveU_RegisteredMovementMode& RegisteredMoveMode : CustomMovementModes)
@@ -935,6 +961,55 @@ void UXMoveU_ModularMovementComponent::RegisterMovementModes()
 	}
 }
 	
+void UXMoveU_ModularMovementComponent::CheckMovementModesTransition(float DeltaSeconds)
+{
+	// Proxies get replicated layered modes state.
+	if (CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		return;
+	}
+		
+	for (FXMoveU_RegisteredMovementMode& RegisteredMoveMode : CustomMovementModes)
+	{
+		if (IsValid(RegisteredMoveMode.Mode))
+		{
+			// Enter mode.
+			if (RegisteredMoveMode.Mode->ShouldEnterMode())
+			{
+				SetMovementModeByTag(RegisteredMoveMode.Tag);
+			}
+		}
+	}
+}
+
+bool UXMoveU_ModularMovementComponent::CheckMovementModesPostLandedTransitions(const FHitResult& Hit)
+{
+	for (FXMoveU_RegisteredMovementMode& RegisteredMoveMode : CustomMovementModes)
+	{
+		if (IsValid(RegisteredMoveMode.Mode))
+		{
+			// Enter mode.
+			if (RegisteredMoveMode.Mode->ShouldEnterModePostLanded(Hit))
+			{
+				SetMovementModeByTag(RegisteredMoveMode.Tag);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void UXMoveU_ModularMovementComponent::UpdateMovementModes(float DeltaSeconds)
+{
+	for (FXMoveU_RegisteredMovementMode& RegisteredMoveMode : CustomMovementModes)
+	{
+		if (IsValid(RegisteredMoveMode.Mode))
+		{
+			RegisteredMoveMode.Mode->UpdateMode(DeltaSeconds);
+		}
+	}
+}
+
 // ~MovementModes
 /*====================================================================================================================*/
 	
