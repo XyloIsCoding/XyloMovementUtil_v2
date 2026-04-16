@@ -6,7 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 
-void UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(UCharacterMovementComponent* MoveComp, const FVector& ScaledDirection, float VerticalVelocity, float HorizontalVelocity, bool bOverrideVerticalVelocity, bool bClampHorizontalVelocity, float MaxHorizontalVelocity)
+void UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(UCharacterMovementComponent* MoveComp, const FVector& ScaledDirection, float VerticalVelocity, float HorizontalVelocity, bool bOverrideVerticalVelocity, bool bOverrideHorizontalVelocity, bool bClampHorizontalVelocity, float MaxHorizontalVelocity)
 {
 	FVector InitialVelocity = MoveComp->Velocity;
 	FVector InputDirection = ScaledDirection;
@@ -33,8 +33,16 @@ void UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(UCharacterMovementComponent* Mo
 	FVector NewHorizontalVelocity { InitialVelocity.X, InitialVelocity.Y, 0.f };
 	if (HorizontalVelocity != 0.f && (!bClampHorizontalVelocity || (InitialVelocity.SizeSquared2D() < MaxHorizontalVelocity * MaxHorizontalVelocity)))
 	{
+		if (bOverrideHorizontalVelocity)
+		{
+			NewHorizontalVelocity = InputDirection * HorizontalVelocity;
+		}
+		else
+		{
+			NewHorizontalVelocity += InputDirection * HorizontalVelocity;
+		}
+
 		// If we increased Horizontal Velocity, make sure we clamp the result.
-		NewHorizontalVelocity = NewHorizontalVelocity + InputDirection * HorizontalVelocity;
 		if (bClampHorizontalVelocity && NewHorizontalVelocity.SizeSquared2D() > MaxHorizontalVelocity * MaxHorizontalVelocity)
 		{
 			NewHorizontalVelocity = NewHorizontalVelocity.GetSafeNormal2D() * MaxHorizontalVelocity;

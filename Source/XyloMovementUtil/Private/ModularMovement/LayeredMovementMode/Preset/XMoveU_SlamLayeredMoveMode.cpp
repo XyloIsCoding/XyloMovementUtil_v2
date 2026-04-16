@@ -49,6 +49,6 @@ void UXMoveU_SlamLayeredMoveMode::UpdateMode(float DeltaSeconds)
 	{
 		UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 		UXMoveU_JumpStaticLibrary::ApplyJumpAcceleration(MoveComp, FVector::ZeroVector, MoveComp->GetGravityZ() * SlamGravityMultiplier, 0.f, 0.f, 0.f, DeltaSeconds);
-		UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(MoveComp, MoveComp->GetForwardVector(), 0.f, SlamHorizontalVelocity, false, true, SlamHorizontalVelocity);
+		UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(MoveComp, MoveComp->GetForwardVector(), 0.f, SlamHorizontalVelocity, false, false, true, SlamHorizontalVelocity);
 	}
 }

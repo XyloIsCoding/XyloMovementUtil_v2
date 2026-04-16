@@ -17,7 +17,7 @@ class XYLOMOVEMENTUTIL_API UXMoveU_JumpStaticLibrary : public UBlueprintFunction
 
 public:
 	UFUNCTION(Category = "JumpStaticLibrary", BlueprintCallable)
-	static void ApplyJumpImpulse(UCharacterMovementComponent* MoveComp, const FVector& ScaledDirection, float VerticalVelocity, float HorizontalVelocity, bool bOverrideVerticalVelocity, bool bClampHorizontalVelocity = false, float MaxHorizontalVelocity = 0.f);
+	static void ApplyJumpImpulse(UCharacterMovementComponent* MoveComp, const FVector& ScaledDirection, float VerticalVelocity, float HorizontalVelocity, bool bOverrideVerticalVelocity, bool bOverrideHorizontalVelocity = false, bool bClampHorizontalVelocity = false, float MaxHorizontalVelocity = 0.f);
 
 	UFUNCTION(Category = "JumpStaticLibrary", BlueprintCallable)
 	static void ApplyJumpAcceleration(UCharacterMovementComponent* MoveComp, const FVector& ScaledDirection, float VerticalAcceleration, float HorizontalAcceleration, float MaxVerticalVelocity, float MaxHorizontalVelocity, float DeltaTime);
