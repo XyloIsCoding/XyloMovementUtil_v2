@@ -860,7 +860,7 @@ void UXMoveU_ModularMovementComponent::TickSyncedObjectsAfterMovement(float Delt
 /*====================================================================================================================*/
 
 /*====================================================================================================================*/
-// MovementModes
+// CustomMovementModes
 
 UXMoveU_MovementMode* UXMoveU_ModularMovementComponent::GetCurrentCustomMovementMode() const
 {
@@ -1010,7 +1010,7 @@ void UXMoveU_ModularMovementComponent::UpdateMovementModes(float DeltaSeconds)
 	}
 }
 
-// ~MovementModes
+// ~CustomMovementModes
 /*====================================================================================================================*/
 	
 /*====================================================================================================================*/

@@ -11,14 +11,14 @@ class UXMoveU_LayeredMovementMode;
 /**
  * 
  */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct XYLOMOVEMENTUTIL_API FXMoveU_RegisteredLayeredMovementMode
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FGameplayTag Tag;
 
-	UPROPERTY(EditAnywhere, Instanced)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced)
 	TObjectPtr<UXMoveU_LayeredMovementMode> Mode;
 };

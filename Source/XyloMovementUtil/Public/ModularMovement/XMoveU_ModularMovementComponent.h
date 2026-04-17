@@ -238,24 +238,25 @@ protected:
 /*====================================================================================================================*/
 
 /*====================================================================================================================*/
-	// MovementModes
+	// CustomMovementModes
 
 public:
-	UFUNCTION(Category="Pawn|Components|CharacterMovement|MovementModes", BlueprintCallable)
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
 	UXMoveU_MovementMode* GetCurrentCustomMovementMode() const;
 
-	UFUNCTION(Category="Pawn|Components|CharacterMovement|MovementModes", BlueprintCallable)
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
 	UXMoveU_MovementMode* GetCustomMovementMode(EMovementMode InMovementMode, uint8 InCustomMode) const;
 	
-	UFUNCTION(Category="Pawn|Components|CharacterMovement|MovementModes", BlueprintCallable)
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
 	UXMoveU_MovementMode* GetCustomMovementModeByTag(const FGameplayTag& MovementModeTag) const;
 
-	UFUNCTION(Category="Pawn|Components|CharacterMovement|MovementModes", BlueprintCallable)
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
 	void SetMovementModeByTag(const FGameplayTag& MovementModeTag);
 
-	UFUNCTION(Category="Pawn|Components|CharacterMovement|MovementModes", BlueprintCallable)
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
 	FGameplayTag GetCustomMovementModeTag(uint8 InCustomMode) const;
 
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
 	virtual bool IsInCustomMovementMode(const FGameplayTag& MovementModeTag) const;
 	
 protected:
@@ -269,7 +270,7 @@ private:
 	UPROPERTY(Category="Character Movement: Custom Movement", EditDefaultsOnly)
 	TArray<FXMoveU_RegisteredMovementMode> CustomMovementModes;
 	
-	// ~MovementModes
+	// ~CustomMovementModes
 /*====================================================================================================================*/
 
 /*====================================================================================================================*/
@@ -279,6 +280,7 @@ public:
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
 	virtual void RequestLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag, bool bWantsToEnterMode);
 
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
 	virtual bool IsInLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const;
 	
 public:
@@ -294,8 +296,12 @@ protected:
 	virtual void ApplyLayeredMovementModesSpeedModifier(float& OutMaxSpeed) const;
 	
 public:
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
 	virtual UXMoveU_LayeredMovementMode* GetLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const;
+
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
 	const TArray<FXMoveU_RegisteredLayeredMovementMode>& GetLayeredMovementModes() const { return LayeredMovementModes; }
+	
 private:
 	UPROPERTY(Category="Character Movement: Custom Movement", EditDefaultsOnly)
 	TArray<FXMoveU_RegisteredLayeredMovementMode> LayeredMovementModes;
