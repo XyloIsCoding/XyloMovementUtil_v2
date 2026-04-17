@@ -11,8 +11,8 @@ UXMoveU_SlamLayeredMoveMode::UXMoveU_SlamLayeredMoveMode(const FObjectInitialize
 {
 	bCancelRequestAfterTransitionCheck = true;
 	
-	SlamGravityMultiplier = 4.f;
-	SlamHorizontalVelocity = 500.f;
+	SlamGravityMultiplier = 3.f;
+	SlamHorizontalVelocity = 650.f;
 	SlamMinHeight = 200.f;
 }
 
