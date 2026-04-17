@@ -12,7 +12,7 @@ UXMoveU_DashLayeredMoveMode::UXMoveU_DashLayeredMoveMode(const FObjectInitialize
 {
 	bCancelRequestAfterTransitionCheck = true;
 	
-	DashVerticalImpulseSpeed = 300.f;
+	DashVerticalImpulseSpeed = 0.f;
 	DashHorizontalImpulseSpeed = 800.f;
 	PostDashHorizontalMaxSpeed = 1000.f;
 	DashAngleCosineDeadZone = 0.5f;
