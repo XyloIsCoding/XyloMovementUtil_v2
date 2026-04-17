@@ -41,6 +41,7 @@ namespace CharacterMovementCVars
 {
 	static IConsoleVariable* CVar_bLedgeMovementApplyDirectMove = IConsoleManager::Get().FindConsoleVariable(TEXT("p.LedgeMovement.ApplyDirectMove"));
 	static IConsoleVariable* CVar_UseTargetVelocityOnImpact = IConsoleManager::Get().FindConsoleVariable(TEXT("p.UseTargetVelocityOnImpact"));
+	static IConsoleVariable* CVar_ForceJumpPeakSubstep = IConsoleManager::Get().FindConsoleVariable(TEXT("p.ForceJumpPeakSubstep"));
 	
 	bool Get_bLedgeMovementApplyDirectMove()
 	{
@@ -51,6 +52,18 @@ namespace CharacterMovementCVars
 	{
 		return CharacterMovementCVars::CVar_UseTargetVelocityOnImpact->GetInt();
 	}
+
+	int32 Get_ForceJumpPeakSubstep()
+	{
+		return CharacterMovementCVars::CVar_ForceJumpPeakSubstep->GetInt();
+	}
+}
+
+// @XMoveU - @AfterUpdatingEngine: check that this did not change
+namespace CharacterMovementConstants
+{
+	// MAGIC NUMBERS
+	const float VERTICAL_SLOPE_NORMAL_Z = 0.001f; // Slope is vertical if Abs(Normal.Z) <= this threshold. Accounts for precision problems that sometimes angle normals slightly off horizontal for vertical surface.
 }
 
 
@@ -458,7 +471,7 @@ void UXMoveU_ModularMovementComponent::PhysWalking(float deltaTime, int32 Iterat
 		Acceleration = FVector::VectorPlaneProject(Acceleration, -GetGravityDirection());
 
 		// Apply acceleration
-		const bool bSkipForLedgeMove = bTriedLedgeMove && CharacterMovementCVars::Get_bLedgeMovementApplyDirectMove;
+		const bool bSkipForLedgeMove = bTriedLedgeMove && CharacterMovementCVars::Get_bLedgeMovementApplyDirectMove();
 		if( !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity() && !bSkipForLedgeMove )
 		{
 			CalcVelocity(timeTick, GetBrakingFriction(), false, GetMaxBrakingDeceleration()); // @XMoveU - @Change: using GetBrakingFriction
@@ -912,7 +925,7 @@ void UXMoveU_ModularMovementComponent::PhysFalling(float deltaTime, int32 Iterat
 
 		// See if we need to sub-step to exactly reach the apex. This is important for avoiding "cutting off the top" of the trajectory as framerate varies.
 		const FVector::FReal GravityRelativeOldVelocityWithRootMotionZ = GetGravitySpaceZ(OldVelocityWithRootMotion);
-		if (CharacterMovementCVars::ForceJumpPeakSubstep && GravityRelativeOldVelocityWithRootMotionZ > 0.f && GetGravitySpaceZ(Velocity) <= 0.f && NumJumpApexAttempts < MaxJumpApexAttemptsPerSimulation)
+		if (CharacterMovementCVars::Get_ForceJumpPeakSubstep() && GravityRelativeOldVelocityWithRootMotionZ > 0.f && GetGravitySpaceZ(Velocity) <= 0.f && NumJumpApexAttempts < MaxJumpApexAttemptsPerSimulation)
 		{
 			const FVector DerivedAccel = (Velocity - OldVelocityWithRootMotion) / timeTick;
 			const FVector::FReal GravityRelativeDerivedAccelZ = GetGravitySpaceZ(DerivedAccel);
@@ -1068,7 +1081,7 @@ void UXMoveU_ModularMovementComponent::PhysFalling(float deltaTime, int32 Iterat
 
 				// Compute velocity after deflection (only gravity component for RootMotion)
 				const UPrimitiveComponent* HitComponent = Hit.GetComponent();
-				if (CharacterMovementCVars::Get_UseTargetVelocityOnImpact && !Velocity.IsNearlyZero() && MovementBaseUtility::IsSimulatedBase(HitComponent))
+				if (CharacterMovementCVars::Get_UseTargetVelocityOnImpact() && !Velocity.IsNearlyZero() && MovementBaseUtility::IsSimulatedBase(HitComponent))
 				{
 					const FVector ContactVelocity = MovementBaseUtility::GetMovementBaseVelocity(HitComponent, NAME_None) + MovementBaseUtility::GetMovementBaseTangentialVelocity(HitComponent, NAME_None, Hit.ImpactPoint);
 					const FVector NewVelocity = Velocity - Hit.ImpactNormal * FVector::DotProduct(Velocity - ContactVelocity, Hit.ImpactNormal);

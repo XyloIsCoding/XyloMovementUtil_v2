@@ -20,6 +20,7 @@ namespace CharacterMovementCVars
 {
 	bool Get_bLedgeMovementApplyDirectMove();
 	int32 Get_UseTargetVelocityOnImpact();
+	int32 Get_ForceJumpPeakSubstep();
 }
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FXMoveU_LandedSignature, const FHitResult& Hit)
