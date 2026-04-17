@@ -16,6 +16,9 @@ class XYLOMOVEMENTUTIL_API UXMoveU_SlamLayeredMoveMode : public UXMoveU_LayeredM
 
 public:
 	UXMoveU_SlamLayeredMoveMode(const FObjectInitializer& ObjectInitializer);
+
+public:
+	virtual void OnRegistered(uint32 InModeIndex) override;
 	
 public:
 	virtual bool ShouldEnterMode(float DeltaSeconds) const override;
@@ -25,6 +28,8 @@ protected:
 	
 	virtual void OnEnteredMode() override;
 	virtual void UpdateMode(float DeltaSeconds) override;
+
+	virtual void OnImpact(const FHitResult& Impact);
 
 protected:
 	UPROPERTY(Category="Slam", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))

@@ -4,6 +4,7 @@
 #include "ModularMovement/LayeredMovementMode/Preset/XMoveU_SlamLayeredMoveMode.h"
 
 #include "ModularMovement/XMoveU_JumpStaticLibrary.h"
+#include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
 
 UXMoveU_SlamLayeredMoveMode::UXMoveU_SlamLayeredMoveMode(const FObjectInitializer& ObjectInitializer)
@@ -14,6 +15,17 @@ UXMoveU_SlamLayeredMoveMode::UXMoveU_SlamLayeredMoveMode(const FObjectInitialize
 	SlamGravityMultiplier = 3.f;
 	SlamHorizontalVelocity = 650.f;
 	SlamMinHeight = 200.f;
+}
+
+void UXMoveU_SlamLayeredMoveMode::OnRegistered(uint32 InModeIndex)
+{
+	Super::OnRegistered(InModeIndex);
+
+	AXMoveU_ModularCharacter* Character = GetOwningCharacter();
+	Character->MoveBlockedByDelegate.AddUObject(this, &UXMoveU_SlamLayeredMoveMode::OnImpact);
+
+	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+	MoveComp->OnPostLandedDelegate.AddUObject(this, &UXMoveU_SlamLayeredMoveMode::OnImpact);
 }
 
 bool UXMoveU_SlamLayeredMoveMode::ShouldEnterMode(float DeltaSeconds) const
@@ -48,7 +60,25 @@ void UXMoveU_SlamLayeredMoveMode::UpdateMode(float DeltaSeconds)
 	if (IsInMode())
 	{
 		UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
-		UXMoveU_JumpStaticLibrary::ApplyJumpAcceleration(MoveComp, FVector::ZeroVector, MoveComp->GetGravityZ() * SlamGravityMultiplier, 0.f, 0.f, 0.f, DeltaSeconds);
-		UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(MoveComp, MoveComp->GetForwardVector(), 0.f, SlamHorizontalVelocity, false, false, true, SlamHorizontalVelocity);
+		
+		float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
+		VerticalVelocity += MoveComp->GetGravityZ() * SlamGravityMultiplier * DeltaSeconds;
+
+		FVector Direction = MoveComp->GetForwardVector();
+		MoveComp->Velocity = SlamHorizontalVelocity * Direction + (VerticalVelocity * -MoveComp->GetGravityDirection());
+	}
+}
+
+void UXMoveU_SlamLayeredMoveMode::OnImpact(const FHitResult& Impact)
+{
+	if (IsInMode())
+	{
+		LeaveMode(false);
+
+		UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+		if (!MoveComp->IsFalling())
+		{
+			MoveComp->Velocity = FVector::ZeroVector;
+		}
 	}
 }
