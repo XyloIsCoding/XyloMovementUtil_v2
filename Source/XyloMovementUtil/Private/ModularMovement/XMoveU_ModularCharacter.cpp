@@ -58,6 +58,12 @@ bool AXMoveU_ModularCharacter::CanJumpInternal_Implementation() const
 	return (!IsCrouched() || bCanJumpWhileCrouched) && JumpIsAllowed();
 }
 
+void AXMoveU_ModularCharacter::MoveBlockedBy(const FHitResult& Impact)
+{
+	Super::MoveBlockedBy(Impact);
+	MoveBlockedByDelegate.Broadcast(Impact);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
          

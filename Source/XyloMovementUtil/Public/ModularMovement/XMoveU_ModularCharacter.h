@@ -12,6 +12,10 @@ namespace CharacterCVars
 	int32 Get_UseLegacyDoJump();
 }
 
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FMoveBlockedBySignature, const FHitResult& /* Impact*/)
+
+
 /**
  *
  */
@@ -34,12 +38,24 @@ public:
 	virtual void CheckJumpInput(float DeltaTime) override;
 protected:
 	virtual bool CanJumpInternal_Implementation() const override;
+
+public:
+	virtual void MoveBlockedBy(const FHitResult& Impact) override;
     	 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
          
 	/*
 	 * AXMoveU_ModularCharacter
 	 */
+
+/*====================================================================================================================*/
+	// ImprovedInterface
+
+public:
+	FMoveBlockedBySignature MoveBlockedByDelegate;
+	
+	// ~ImprovedInterface
+/*====================================================================================================================*/
 	
 /*====================================================================================================================*/
 	// JumpExtension
