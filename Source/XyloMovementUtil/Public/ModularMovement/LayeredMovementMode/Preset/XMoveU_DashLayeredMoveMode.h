@@ -35,9 +35,6 @@ protected:
 	float DashHorizontalImpulseSpeed;
 
 	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
-	float DashHorizontalFrictionFalling;
-
-	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
 	float DashAngleCosineDeadZone;
 
 	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
