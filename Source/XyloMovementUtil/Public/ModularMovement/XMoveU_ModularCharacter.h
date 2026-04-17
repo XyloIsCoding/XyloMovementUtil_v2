@@ -13,7 +13,7 @@ namespace CharacterCVars
 }
 
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FMoveBlockedBySignature, const FHitResult& /* Impact*/)
+DECLARE_MULTICAST_DELEGATE_OneParam(FXMoveU_MoveBlockedBySignature, const FHitResult& /* Impact*/)
 
 
 /**
@@ -52,7 +52,7 @@ public:
 	// ImprovedInterface
 
 public:
-	FMoveBlockedBySignature MoveBlockedByDelegate;
+	FXMoveU_MoveBlockedBySignature MoveBlockedByDelegate;
 	
 	// ~ImprovedInterface
 /*====================================================================================================================*/

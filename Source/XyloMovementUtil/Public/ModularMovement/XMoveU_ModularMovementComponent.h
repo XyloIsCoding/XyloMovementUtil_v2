@@ -16,6 +16,8 @@ class UXMoveU_JumpProfile;
 class UXMoveU_MovementMode;
 struct FXMoveU_RegisteredMovementMode;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FXMoveU_LandedSignature, const FHitResult& Hit)
+
 /**
  * Information about the ground under the character. It only gets updated as needed.
  */
@@ -159,11 +161,16 @@ protected:
 	virtual bool JumpSustainImpulse(bool bReplayingMoves, float DeltaTime);
 
 	virtual bool EvaluatePostJumpedTransitions();
+
+public:
+	FXMoveU_LandedSignature OnLandedDelegate;
+	
+	FXMoveU_LandedSignature OnPostLandedDelegate;
 	
 protected:
-	virtual void OnLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations) {}
+	virtual void OnLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations);
 
-	virtual void PostLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations) {}
+	virtual void PostLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations);
 	
 	virtual void EvaluatePostLandedTransitions(const FHitResult& Hit);
 

@@ -654,6 +654,16 @@ bool UXMoveU_ModularMovementComponent::EvaluatePostJumpedTransitions()
 	return true;
 }
 
+void UXMoveU_ModularMovementComponent::OnLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations)
+{
+	OnLandedDelegate.Broadcast(Hit);
+}
+
+void UXMoveU_ModularMovementComponent::PostLanded(const FHitResult& Hit, float RemainingTime, int32 Iterations)
+{
+	OnPostLandedDelegate.Broadcast(Hit);
+}
+
 void UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitResult& Hit)
 {
 	bool bTransitioned = CheckMovementModesPostLandedTransitions(Hit);
