@@ -16,6 +16,12 @@ class UXMoveU_JumpProfile;
 class UXMoveU_MovementMode;
 struct FXMoveU_RegisteredMovementMode;
 
+namespace CharacterMovementCVars
+{
+	bool Get_bLedgeMovementApplyDirectMove();
+	int32 Get_UseTargetVelocityOnImpact();
+}
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FXMoveU_LandedSignature, const FHitResult& Hit)
 
 /**
@@ -93,6 +99,11 @@ protected:
 
 public:
 	virtual bool CanCrouchInCurrentState() const override;
+
+protected:
+	virtual void PhysWalking(float deltaTime, int32 Iterations) override;
+	virtual void PhysNavWalking(float deltaTime, int32 Iterations) override;
+	virtual void PhysFalling(float deltaTime, int32 Iterations) override;
 	
 	// ~CustomMovementModesIntegration
 /*====================================================================================================================*/
@@ -144,6 +155,10 @@ public:
 	virtual float GetMaxSpeedFalling() const;
 	virtual float GetMaxSpeedSwimming() const;
 	virtual float GetMaxSpeedFlying() const;
+
+	virtual float GetBrakingFriction() const;
+	virtual float GetGroundFriction() const;
+	virtual float GetFallingLateralFriction() const;
 
 public:
 	/** Override this function to intercept and stop the jump pipeline (for example for a mantle mechanic).

@@ -63,6 +63,7 @@ protected:
 public:
 	virtual float GetModeMaxSpeed() const { return 0.f; }
 	virtual float GetModeMaxBrakingDeceleration() const { return 0.f; }
+	virtual float GetModeBrakingFriction() const { return 0.f; }
 	virtual float GetModeMinAnalogSpeed() const { return 0.f; }
 
 public:
