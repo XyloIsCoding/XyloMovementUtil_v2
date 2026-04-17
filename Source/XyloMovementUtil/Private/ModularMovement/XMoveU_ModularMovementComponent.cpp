@@ -26,6 +26,7 @@ UXMoveU_ModularMovementComponent::UXMoveU_ModularMovementComponent(const FObject
 	: Super(ObjectInitializer)
 {
 	bCanJumpWhileCrouched = false;
+	JumpHorizontalVelocity = 300.f;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -627,13 +628,10 @@ bool UXMoveU_ModularMovementComponent::ApplyJumpImpulse(bool bReplayingMoves, fl
 
 bool UXMoveU_ModularMovementComponent::JumpInitialImpulse(bool bReplayingMoves, float DeltaTime)
 {
-	// @XMoveU - @SameAsSuper::DoJump: only handling the first jump case
-	const bool bFirstJump = (CharacterOwner->JumpCurrentCountPreJump == 0);
-	if (bFirstJump)
-	{
-		const FVector::FReal NewVerticalVelocity = FMath::Max<FVector::FReal>(HasCustomGravity() ? GetGravitySpaceZ(Velocity) : Velocity.Z, JumpZVelocity);
-		UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(this, FVector::ZeroVector, NewVerticalVelocity, 0.f, true);
-	}
+	// @XMoveU - @SameAsSuper::DoJump: removed check for JumpCurrentCountPreJump == 0, cause that would
+	// remove the ability to double jump if bDontFallBelowJumpZVelocityDuringJump is false
+	const FVector::FReal NewVerticalVelocity = FMath::Max<FVector::FReal>(HasCustomGravity() ? GetGravitySpaceZ(Velocity) : Velocity.Z, JumpZVelocity);
+	UXMoveU_JumpStaticLibrary::ApplyJumpImpulse(this, GetCurrentAcceleration() / GetMaxAcceleration(), NewVerticalVelocity, JumpHorizontalVelocity, true);
 	return true;
 }
 

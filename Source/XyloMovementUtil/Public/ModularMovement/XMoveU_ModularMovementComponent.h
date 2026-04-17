@@ -176,6 +176,10 @@ protected:
 
 public:
 	virtual bool CanJumpWhileCrouched() const { return bCanJumpWhileCrouched; }
+
+public:
+	UPROPERTY(Category="Character Movement: Jumping / Falling", EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Jump Horizontal Velocity", ClampMin="0", UIMin="0", ForceUnits="cm/s", DisplayAfter="JumpZVelocity"))
+	float JumpHorizontalVelocity;
 	
 protected:
 	UPROPERTY(Category="Character Movement: Walking", EditAnywhere, BlueprintReadWrite)
