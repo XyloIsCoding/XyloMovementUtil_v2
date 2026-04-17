@@ -459,6 +459,11 @@ void UXMoveU_ModularMovementComponent::SetPostLandedPhysics(const FHitResult& Hi
 	// ~@XMoveU - @SameAsSuper
 }
 
+void UXMoveU_ModularMovementComponent::ApplyVelocityBraking(float DeltaTime, float Friction, float BrakingDeceleration)
+{
+	Super::ApplyVelocityBraking(DeltaTime, Friction, BrakingDeceleration);
+}
+
 // ~HooksForImprovedInterface
 /*====================================================================================================================*/
 

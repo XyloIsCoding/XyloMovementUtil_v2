@@ -108,6 +108,11 @@ protected:
 	virtual void ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations) override;
 	virtual void SetPostLandedPhysics(const FHitResult& Hit) override;
 
+	// Making functions public
+	
+public:
+	virtual void ApplyVelocityBraking(float DeltaTime, float Friction, float BrakingDeceleration) override;
+
 	// ~HooksForImprovedInterface
 /*====================================================================================================================*/
 	
