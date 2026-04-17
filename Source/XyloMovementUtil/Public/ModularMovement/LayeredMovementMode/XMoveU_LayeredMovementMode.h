@@ -62,8 +62,8 @@ protected:
 
 public:
 	virtual void ModifyMaxSpeed(float& OutMaxSpeed) const {}
-	virtual void ModifyBrakingFriction(float OutBrakingFriction) const {}
-	virtual void ModifyBrakingDeceleration(float OutBrakingDeceleration) const {}
+	virtual void ModifyBrakingFriction(float& OutBrakingFriction) const {}
+	virtual void ModifyBrakingDeceleration(float& OutBrakingDeceleration) const {}
 	
 public:
 	virtual bool ShouldEnterMode(float DeltaSeconds) const { return false; }
