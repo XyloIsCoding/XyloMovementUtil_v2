@@ -155,7 +155,7 @@ bool UXMoveU_ModularMovementComponent::IsMovingOnGround() const
 
 float UXMoveU_ModularMovementComponent::GetMaxSpeed() const
 {
-	float OutMaxSpeed = 0.f;
+	float OutMaxSpeed;
 	
 	// @XMoveU - @CopiedFromSuper: but setting OutMaxSpeed instead of returning
 	switch(MovementMode)
@@ -207,30 +207,36 @@ float UXMoveU_ModularMovementComponent::GetMinAnalogSpeed() const
 
 float UXMoveU_ModularMovementComponent::GetMaxBrakingDeceleration() const
 {
-	// @XMoveU - @CopiedFromSuper
-	switch (MovementMode)
+	float OutMaxBrakingDeceleration;
+	
+	// @XMoveU - @CopiedFromSuper: but setting OutMaxBrakingDeceleration instead of returning
+	switch(MovementMode)
 	{
 	case MOVE_Walking:
 	case MOVE_NavWalking:
-		return BrakingDecelerationWalking;
+		OutMaxBrakingDeceleration = GetMaxBrakingDecelerationWaking(); break;
 	case MOVE_Falling:
-		return BrakingDecelerationFalling;
+		OutMaxBrakingDeceleration = GetMaxBrakingDecelerationFalling(); break;
 	case MOVE_Swimming:
-		return BrakingDecelerationSwimming;
+		OutMaxBrakingDeceleration = GetMaxBrakingDecelerationSwimming(); break;
 	case MOVE_Flying:
-		return BrakingDecelerationFlying;
+		OutMaxBrakingDeceleration = GetMaxBrakingDecelerationFlying(); break;
 	case MOVE_Custom:
 		{
 			// @XMoveU - @Change
 			UXMoveU_MovementMode* CurrentMovementMode = GetCurrentCustomMovementMode();
-			return CurrentMovementMode ? CurrentMovementMode->GetModeMaxBrakingDeceleration() : 0.f;
+			OutMaxBrakingDeceleration = CurrentMovementMode ? CurrentMovementMode->GetModeMaxBrakingDeceleration() : 0.f;
+			break;
 			// ~@XMoveU - @Change
 		}
 	case MOVE_None:
 	default:
-		return 0.f;
+		OutMaxBrakingDeceleration = 0.f; break;
 	}
 	// ~@XMoveU - @CopiedFromSuper
+
+	ApplyLayeredMovementModesBrakingDecelerationModifier(OutMaxBrakingDeceleration);
+	return OutMaxBrakingDeceleration;
 }
 
 FString UXMoveU_ModularMovementComponent::GetMovementName() const
@@ -1418,30 +1424,56 @@ float UXMoveU_ModularMovementComponent::GetMaxSpeedFlying() const
 	return MaxFlySpeed;
 }
 
+float UXMoveU_ModularMovementComponent::GetMaxBrakingDecelerationWaking() const
+{
+	return BrakingDecelerationWalking;
+}
+
+float UXMoveU_ModularMovementComponent::GetMaxBrakingDecelerationFalling() const
+{
+	return BrakingDecelerationFalling;
+}
+
+float UXMoveU_ModularMovementComponent::GetMaxBrakingDecelerationSwimming() const
+{
+	return BrakingDecelerationSwimming;
+}
+
+float UXMoveU_ModularMovementComponent::GetMaxBrakingDecelerationFlying() const
+{
+	return BrakingDecelerationFlying;
+}
+
 float UXMoveU_ModularMovementComponent::GetBrakingFriction() const
 {
-	switch (MovementMode)
+	// Same concept as GetMaxBrakingDeceleration
+	
+	float OutMaxBrakingFriction;
+	
+	switch(MovementMode)
 	{
 	case MOVE_Walking:
 	case MOVE_NavWalking:
-		return GetGroundFriction();
+		OutMaxBrakingFriction = GetGroundFriction(); break;
 	case MOVE_Falling:
-		return GetFallingLateralFriction();
+		OutMaxBrakingFriction = GetFallingLateralFriction(); break;
 	case MOVE_Swimming:
-		return GetPhysicsVolume()->FluidFriction;
+		OutMaxBrakingFriction = GetPhysicsVolume()->FluidFriction; break;
 	case MOVE_Flying:
-		return GetPhysicsVolume()->FluidFriction;
+		OutMaxBrakingFriction = GetPhysicsVolume()->FluidFriction; break;
 	case MOVE_Custom:
 		{
-			// @XMoveU - @Change
 			UXMoveU_MovementMode* CurrentMovementMode = GetCurrentCustomMovementMode();
-			return CurrentMovementMode ? CurrentMovementMode->GetModeBrakingFriction() : 0.f;
-			// ~@XMoveU - @Change
+			OutMaxBrakingFriction = CurrentMovementMode ? CurrentMovementMode->GetModeBrakingFriction() : 0.f;
+			break;
 		}
 	case MOVE_None:
 	default:
-		return 0.f;
+		OutMaxBrakingFriction = 0.f; break;
 	}
+	
+	ApplyLayeredMovementModesBrakingFrictionModifier(OutMaxBrakingFriction);
+	return OutMaxBrakingFriction;
 }
 
 float UXMoveU_ModularMovementComponent::GetGroundFriction() const
@@ -2040,6 +2072,28 @@ void UXMoveU_ModularMovementComponent::ApplyLayeredMovementModesSpeedModifier(fl
 		if (IsValid(RegisteredLayeredMove.Mode) && RegisteredLayeredMove.Mode->IsInMode())
 		{
 			RegisteredLayeredMove.Mode->ModifyMaxSpeed(OutMaxSpeed);
+		}
+	}
+}
+
+void UXMoveU_ModularMovementComponent::ApplyLayeredMovementModesBrakingFrictionModifier(float& OutBrakingFriction) const
+{
+	for (const FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (IsValid(RegisteredLayeredMove.Mode) && RegisteredLayeredMove.Mode->IsInMode())
+		{
+			RegisteredLayeredMove.Mode->ModifyBrakingFriction(OutBrakingFriction);
+		}
+	}
+}
+
+void UXMoveU_ModularMovementComponent::ApplyLayeredMovementModesBrakingDecelerationModifier(float& OutBrakingDeceleration) const
+{
+	for (const FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (IsValid(RegisteredLayeredMove.Mode) && RegisteredLayeredMove.Mode->IsInMode())
+		{
+			RegisteredLayeredMove.Mode->ModifyBrakingDeceleration(OutBrakingDeceleration);
 		}
 	}
 }

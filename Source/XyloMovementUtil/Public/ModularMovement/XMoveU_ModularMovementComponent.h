@@ -156,6 +156,11 @@ public:
 	virtual float GetMaxSpeedSwimming() const;
 	virtual float GetMaxSpeedFlying() const;
 
+	virtual float GetMaxBrakingDecelerationWaking() const;
+	virtual float GetMaxBrakingDecelerationFalling() const;
+	virtual float GetMaxBrakingDecelerationSwimming() const;
+	virtual float GetMaxBrakingDecelerationFlying() const;
+
 	virtual float GetBrakingFriction() const;
 	virtual float GetGroundFriction() const;
 	virtual float GetFallingLateralFriction() const;
@@ -325,6 +330,8 @@ protected:
 	virtual void UpdateLayeredMovementModes(float DeltaSeconds);
 
 	virtual void ApplyLayeredMovementModesSpeedModifier(float& OutMaxSpeed) const;
+	virtual void ApplyLayeredMovementModesBrakingFrictionModifier(float& OutBrakingFriction) const;
+	virtual void ApplyLayeredMovementModesBrakingDecelerationModifier(float& OutBrakingDeceleration) const;
 	
 public:
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
