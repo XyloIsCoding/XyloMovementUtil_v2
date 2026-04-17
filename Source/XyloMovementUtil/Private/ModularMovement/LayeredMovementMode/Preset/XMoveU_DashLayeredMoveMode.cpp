@@ -13,8 +13,8 @@ UXMoveU_DashLayeredMoveMode::UXMoveU_DashLayeredMoveMode(const FObjectInitialize
 	bCancelRequestAfterTransitionCheck = true;
 	
 	DashVerticalImpulseSpeed = 0.f;
-	DashHorizontalImpulseSpeed = 800.f;
-	PostDashHorizontalMaxSpeed = 1000.f;
+	DashHorizontalImpulseSpeed = 1300.f;
+	DashHorizontalFrictionFalling = 1.8f;
 	DashAngleCosineDeadZone = 0.5f;
 	DashDuration = 0.5f;
 	DashMaxCharges = 2;
@@ -73,14 +73,15 @@ void UXMoveU_DashLayeredMoveMode::OnEnteredMode()
 		VerticalVelocity += DashVerticalImpulseSpeed;
 
 		float HorizontalVelocity = DashHorizontalImpulseSpeed + (MoveComp->Velocity | InputDirection);
-		if (bClampHorizontalVelocity)
-		{
-			HorizontalVelocity = FMath::Min(HorizontalVelocity, PostDashHorizontalMaxSpeed);
-		}
 		
 		MoveComp->Velocity = HorizontalVelocity * InputDirection + (VerticalVelocity * -MoveComp->GetGravityDirection());
+
+		CachedDashDirection = InputDirection;
 		
-		MoveComp->SetMovementMode(MOVE_Falling);
+		if (DashVerticalImpulseSpeed > 0.f)
+		{
+			MoveComp->SetMovementMode(MOVE_Falling);
+		}
 	}
 }
 
@@ -95,5 +96,14 @@ void UXMoveU_DashLayeredMoveMode::UpdateMode(float DeltaSeconds)
 	{
 		DashCharge += DeltaSeconds / DashRechargeTime;
 		DashCharge = FMath::Min<float>(DashCharge, DashMaxCharges);
+	}
+
+	if (GetOwningCharacter()->GetLocalRole() != ROLE_SimulatedProxy && IsInMode())
+	{
+		UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+		if (MoveComp->IsFalling())
+		{
+			MoveComp->ApplyVelocityBraking(DeltaSeconds, DashHorizontalFrictionFalling, 0.f);
+		}
 	}
 }
