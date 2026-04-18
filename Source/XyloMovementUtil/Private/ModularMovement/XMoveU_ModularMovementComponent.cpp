@@ -1499,6 +1499,12 @@ float UXMoveU_ModularMovementComponent::GetFallingLateralFriction() const
 	return FallingLateralFriction;
 }
 
+bool UXMoveU_ModularMovementComponent::IsWalkingStrict() const
+{
+	if (!UpdatedComponent) return false;
+	return MovementMode == MOVE_Walking || MovementMode == MOVE_NavWalking;
+}
+
 bool UXMoveU_ModularMovementComponent::TryJumpOverride()
 {
 	return false;

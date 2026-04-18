@@ -76,7 +76,7 @@ void UXMoveU_SlamLayeredMoveMode::OnImpact(const FHitResult& Impact)
 		LeaveMode(false);
 
 		UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
-		if (!MoveComp->IsFalling())
+		if (MoveComp->IsWalkingStrict())
 		{
 			MoveComp->Velocity = FVector::ZeroVector;
 		}

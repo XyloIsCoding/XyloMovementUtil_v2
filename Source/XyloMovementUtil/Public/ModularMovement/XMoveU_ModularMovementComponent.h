@@ -167,6 +167,9 @@ public:
 	virtual float GetFallingLateralFriction() const;
 
 public:
+	virtual bool IsWalkingStrict() const;
+	
+public:
 	/** Override this function to intercept and stop the jump pipeline (for example for a mantle mechanic).
 	 * @remarks: Only called if using SyncedJumpInputCheck (default behaviour). */
 	virtual bool TryJumpOverride();
