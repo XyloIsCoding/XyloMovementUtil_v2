@@ -23,6 +23,7 @@ public:
 	virtual bool ShouldForceLeaveMode(float DeltaSeconds) const override;
 protected:
 	virtual bool CanDashInCurrentState(bool bIgnoreDeadZone = false) const;
+	virtual bool IsInputInDeadZone() const;
 	
 	virtual void OnEnteredMode() override;
 	virtual void UpdateMode(float DeltaSeconds) override;
@@ -34,7 +35,10 @@ protected:
 	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
 	float DashHorizontalImpulseSpeed;
 
-	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
+	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(InlineEditConditionToggle))
+	bool bUseDeadZoneAngle;
+	
+	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(EditCondition="bUseDeadZoneAngle", ClampMin="0", UIMin="0"))
 	float DashAngleCosineDeadZone;
 
 	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))

@@ -14,6 +14,7 @@ UXMoveU_DashLayeredMoveMode::UXMoveU_DashLayeredMoveMode(const FObjectInitialize
 	
 	DashVerticalImpulseSpeed = 100.f;
 	DashHorizontalImpulseSpeed = 1300.f;
+	bUseDeadZoneAngle = true;
 	DashAngleCosineDeadZone = 0.5f;
 	DashDuration = 0.5f;
 	DashMaxCharges = 2;
@@ -47,10 +48,29 @@ bool UXMoveU_DashLayeredMoveMode::CanDashInCurrentState(bool bIgnoreDeadZone) co
 	{
 		return false;
 	}
+	
+	return MoveComp->IsFalling() || (MoveComp->IsMovingOnGround() && (bIgnoreDeadZone || !IsInputInDeadZone()));
+}
 
+bool UXMoveU_DashLayeredMoveMode::IsInputInDeadZone() const
+{
+	// If not using DeadZone angle we can never be in DeadZone.
+	if (!bUseDeadZoneAngle)
+	{
+		return false;
+	}
+	
+	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 	FVector InputDirection = MoveComp->GetCurrentAcceleration().GetSafeNormal();
-	const bool bOutOfDeadZone = !InputDirection.IsNearlyZero() && (MoveComp->GetCurrentAcceleration().GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()) < DashAngleCosineDeadZone;
-	return MoveComp->IsFalling() || (MoveComp->IsMovingOnGround() && !MoveComp->IsCrouching() && (bIgnoreDeadZone || bOutOfDeadZone));
+
+	// No acceleration means forward. So we are in DeadZone for sure.
+	if (InputDirection.IsNearlyZero())
+	{
+		return true;
+	}
+
+	// We are in DeadZone if the cosine between input and capsule direction is greater than threshold.
+	return (InputDirection | MoveComp->UpdatedComponent->GetForwardVector()) > DashAngleCosineDeadZone;
 }
 
 void UXMoveU_DashLayeredMoveMode::OnEnteredMode()
