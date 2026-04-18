@@ -300,7 +300,7 @@ protected:
 	virtual void RegisterMovementModes();
 
 	virtual void CheckMovementModesTransition(float DeltaSeconds);
-	virtual bool CheckMovementModesPostLandedTransitions(const FHitResult& Hit);
+	virtual void CheckMovementModesPostLandedTransitions(const FHitResult& Hit);
 	virtual void UpdateMovementModes(float DeltaSeconds);
 	
 private:

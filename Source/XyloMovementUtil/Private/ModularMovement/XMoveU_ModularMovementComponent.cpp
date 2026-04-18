@@ -1582,9 +1582,10 @@ void UXMoveU_ModularMovementComponent::PostLanded(const FHitResult& Hit, float R
 
 void UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitResult& Hit)
 {
-	bool bTransitioned = CheckMovementModesPostLandedTransitions(Hit);
-	if (bTransitioned)
+	CheckMovementModesPostLandedTransitions(Hit);
+	if (!IsFalling())
 	{
+		// If we transitioned out of falling, there is no need to go on with other checks.
 		return;
 	}
 	
@@ -1908,7 +1909,7 @@ void UXMoveU_ModularMovementComponent::CheckMovementModesTransition(float DeltaS
 	}
 }
 
-bool UXMoveU_ModularMovementComponent::CheckMovementModesPostLandedTransitions(const FHitResult& Hit)
+void UXMoveU_ModularMovementComponent::CheckMovementModesPostLandedTransitions(const FHitResult& Hit)
 {
 	for (FXMoveU_RegisteredMovementMode& RegisteredMoveMode : CustomMovementModes)
 	{
@@ -1918,11 +1919,9 @@ bool UXMoveU_ModularMovementComponent::CheckMovementModesPostLandedTransitions(c
 			if (RegisteredMoveMode.Mode->ShouldEnterModePostLanded(Hit))
 			{
 				SetMovementModeByTag(RegisteredMoveMode.Tag);
-				return true;
 			}
 		}
 	}
-	return false;
 }
 
 void UXMoveU_ModularMovementComponent::UpdateMovementModes(float DeltaSeconds)
