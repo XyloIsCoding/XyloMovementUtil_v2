@@ -43,7 +43,7 @@ bool UXMoveU_SlideMoveMode::ShouldEnterMode() const
 {
 	// Start sliding if crouching and enough speed.
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
-	if (MoveComp->IsCrouching() && MoveComp->IsMovingOnGround() && !IsInMode())
+	if (MoveComp->IsMovingOnGround() && CanSlideInCurrentState())
 	{
 		if (MoveComp->Velocity.SizeSquared() > FMath::Square(SlideEnterSpeed))
 		{
@@ -53,13 +53,13 @@ bool UXMoveU_SlideMoveMode::ShouldEnterMode() const
 	return false;
 }
 
-bool UXMoveU_SlideMoveMode::ShouldEnterModePostLanded(const FHitResult& Hit)
+bool UXMoveU_SlideMoveMode::ShouldEnterModePostLanded(const FHitResult& Hit) const
 {
 	// Enter sliding if landing while crouched with enough speed.
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 	if (MoveComp->IsFalling())
 	{
-		if (MoveComp->IsCrouching())
+		if (CanSlideInCurrentState())
 		{
 			if (FVector::VectorPlaneProject(MoveComp->Velocity, Hit.ImpactNormal).SizeSquared() > FMath::Square(SlideEnterSpeed))
 			{
@@ -68,6 +68,12 @@ bool UXMoveU_SlideMoveMode::ShouldEnterModePostLanded(const FHitResult& Hit)
 		}
 	}
 	return false;
+}
+
+bool UXMoveU_SlideMoveMode::CanSlideInCurrentState() const
+{
+	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+	return !IsInMode() && MoveComp->IsCrouching();
 }
 
 void UXMoveU_SlideMoveMode::OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode)

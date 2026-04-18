@@ -19,8 +19,14 @@ public:
 	
 public:
 	virtual void OnRegistered() override;
+
+public:
 	virtual bool ShouldEnterMode() const override;
-	virtual bool ShouldEnterModePostLanded(const FHitResult& Hit) override;
+	virtual bool ShouldEnterModePostLanded(const FHitResult& Hit) const override;
+protected:
+	virtual bool CanSlideInCurrentState() const;
+
+public:
 	virtual void OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
 	virtual void OnLeftMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) override;
 	virtual void UpdateMode(float DeltaTime) override;
