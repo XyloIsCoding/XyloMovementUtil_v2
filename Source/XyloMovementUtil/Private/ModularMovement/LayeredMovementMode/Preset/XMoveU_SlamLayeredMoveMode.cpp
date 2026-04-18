@@ -78,7 +78,8 @@ void UXMoveU_SlamLayeredMoveMode::OnImpact(const FHitResult& Impact)
 		UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 		if (MoveComp->IsWalkingStrict())
 		{
-			MoveComp->Velocity = FVector::ZeroVector;
+			FVector Direction = MoveComp->GetForwardVector();
+			MoveComp->Velocity = MoveComp->GetMaxSpeed() * Direction;
 		}
 	}
 }
