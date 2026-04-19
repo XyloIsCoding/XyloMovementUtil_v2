@@ -28,7 +28,7 @@ void FXMoveU_LayeredMoveModeInputsPredProxy::Initialize(FName Name, UXMoveU_Modu
 bool FXMoveU_LayeredMoveModeInputsPredProxy::SerializeInputsAndCorrectionStates_Internal(uint32& Value, FArchive& Ar, UPackageMap* PackageMap)
 {
 	Ar.SerializeBits(&Value, LayeredMoveModesCount);
-	UE_LOG(LogTemp, Warning, TEXT("LayeredMoveModeInputs: %i (%s)"), Value, *(Ar.IsSaving() ? FString(TEXT("Client")) : FString(TEXT("Server"))))
+	// UE_LOG(LogTemp, Warning, TEXT("LayeredMoveModeInputs: %i (%s)"), Value, *(Ar.IsSaving() ? FString(TEXT("Client")) : FString(TEXT("Server"))))
 	return true;
 }
 
