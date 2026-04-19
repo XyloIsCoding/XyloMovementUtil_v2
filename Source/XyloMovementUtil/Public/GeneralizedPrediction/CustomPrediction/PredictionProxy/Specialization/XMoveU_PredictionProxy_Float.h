@@ -33,7 +33,7 @@ struct FXMoveU_IsImportantPredicate_Float
  *	
  *	FXMoveU_PredictionProxy_Float Test2;
  *	Test2.SetName("Hello2");
- *	Test2.SetProxyVariable<XMoveU::TProxyVar_Lambda<float, XMoveU::ProxyVar::Traits::ByValue>>({[]()->float{ return 0.f; }, [](float a){}});
+ *	Test2.SetProxyVariable<XMoveU::TProxyVar_Lambda<float, XMoveU::ProxyVar::Traits::ByValue>>({Context, []()->float{ return 0.f; }, [](float a){}});
  *  @endcode
  */
 USTRUCT(BlueprintType, DisplayName="Prediction Proxy (Float)")

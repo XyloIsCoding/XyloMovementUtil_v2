@@ -13,6 +13,7 @@ namespace XMoveU
 {
 	/**
 	 * Template class to help building a PredictionProxy for a type or a specific variable.
+	 * Must be initialized by calling SetName and SetProxyVariable.
 	 */
 	template <typename T, template <typename> typename Traits>
 	struct TSimplePredictionProxy : public FXMoveU_SimplePredictionProxy
