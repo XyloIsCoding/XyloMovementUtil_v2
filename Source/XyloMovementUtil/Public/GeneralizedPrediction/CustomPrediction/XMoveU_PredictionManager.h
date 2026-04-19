@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "PredictionProxy/XMoveU_PredictionProxy.h"
 #include "GeneralizedPrediction/MovementComponentPrediction/XMoveU_SavedMove_Character.h"
+#include "ModularMovement/XMoveU_ModularMovementComponent.h"
 #include "UObject/Object.h"
 #include "XMoveU_PredictionManager.generated.h"
 
@@ -29,7 +30,7 @@ public:
 public:
 	/** Called when movement component registered this PredictionManager.
 	 * This is a good spot to create and register PredictionProxies */
-	virtual void OnRegistered(UCharacterMovementComponent* MovementComponent) {}
+	virtual void OnRegistered(UXMoveU_ModularMovementComponent* MovementComponent) {}
 
 /*====================================================================================================================*/
 	// PredictionProxies
