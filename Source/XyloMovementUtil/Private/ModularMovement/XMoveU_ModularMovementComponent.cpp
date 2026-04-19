@@ -1978,6 +1978,35 @@ bool UXMoveU_ModularMovementComponent::IsInLayeredMovementMode(const FGameplayTa
 	return false;
 }
 
+uint32 UXMoveU_ModularMovementComponent::GetLayeredMovementModesRequests() const
+{
+	uint32 Output = 0;
+	for (auto It = LayeredMovementModes.CreateConstIterator(); It; ++It)
+	{
+		const FXMoveU_RegisteredLayeredMovementMode& LayeredMoveMode = *It;
+		if (IsValid(LayeredMoveMode.Mode) && LayeredMoveMode.Mode->WantsToBeInMode())
+		{
+			uint32 ModeIndex = It.GetIndex();
+			Output |= (1 << ModeIndex);
+		}
+	}
+	return 0;
+}
+
+void UXMoveU_ModularMovementComponent::SetLayeredMovementModesRequests(uint32 CompressedRequests)
+{
+	for (auto It = LayeredMovementModes.CreateConstIterator(); It; ++It)
+	{
+		const FXMoveU_RegisteredLayeredMovementMode& LayeredMoveMode = *It;
+		if (IsValid(LayeredMoveMode.Mode))
+		{
+			uint32 ModeIndex = It.GetIndex();
+			bool bWantsToBeInMode = ((CompressedRequests & (1 << ModeIndex)) != 0);
+			LayeredMoveMode.Mode->RequestMode(bWantsToBeInMode);
+		}
+	}
+}
+
 void UXMoveU_ModularMovementComponent::ReplicateLayeredMovementModeStatesToSimProxies(uint32 OldStates)
 {
 	for (auto It = LayeredMovementModes.CreateIterator(); It; ++It)

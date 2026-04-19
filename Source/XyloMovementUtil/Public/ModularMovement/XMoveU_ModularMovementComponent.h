@@ -322,6 +322,10 @@ public:
 
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
 	virtual bool IsInLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const;
+
+	// Compresses request states into a 32 bits bitflag
+	virtual uint32 GetLayeredMovementModesRequests() const;
+	virtual void SetLayeredMovementModesRequests(uint32 CompressedRequests);
 	
 public:
 	virtual void ReplicateLayeredMovementModeStatesToSimProxies(uint32 OldStates);
