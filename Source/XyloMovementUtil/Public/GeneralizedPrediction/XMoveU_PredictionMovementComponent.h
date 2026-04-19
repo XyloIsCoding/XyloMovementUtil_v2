@@ -116,6 +116,11 @@ protected:
 /*====================================================================================================================*/
 	// CustomAccessors
 
+public:
+	/** Sets bForceClientUpdate to true in FNetworkPredictionData_Server_Character */
+	UFUNCTION(Category="Pawn|Components|CharacterMovement|Networking", BlueprintCallable)
+	void TriggerCorrection();
+	
 protected:
 	void SetLastServerMovementBase(UPrimitiveComponent* InMovementBase);
 	

@@ -711,6 +711,12 @@ void UXMoveU_PredictionMovementComponent::GetPredictionManagers(TArray<UXMoveU_P
 /*====================================================================================================================*/
 // CustomAccessors
 
+void UXMoveU_PredictionMovementComponent::TriggerCorrection()
+{
+	FNetworkPredictionData_Server_Character* ServerData = GetPredictionData_Server_Character();
+	ServerData->bForceClientUpdate = true;
+}
+
 void UXMoveU_PredictionMovementComponent::SetLastServerMovementBase(UPrimitiveComponent* InMovementBase)
 {
 	(*this).*GLastServerMovementBase = InMovementBase;
