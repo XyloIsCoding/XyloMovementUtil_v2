@@ -107,7 +107,7 @@ protected:
 	UPROPERTY()
 	TArray<TObjectPtr<UXMoveU_PredictionManager>> PredictionManagers;
 
-	UPROPERTY(Category="Character Movement (Networking)", EditDefaultsOnly, Instanced)
+	UPROPERTY(Category="Character Movement (Networking)", EditDefaultsOnly, Instanced, BlueprintReadOnly)
 	TObjectPtr<UXMoveU_PredictionManager> DefaultPredictionManager;
 
 	// ~CustomPrediction

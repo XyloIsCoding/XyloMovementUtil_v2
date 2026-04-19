@@ -27,7 +27,7 @@ protected:
 public:
 	UXMoveU_PredictionManager* GetPredictionManager() const { return PredictionManager; }
 protected:
-	UPROPERTY(Category="Networking", EditDefaultsOnly, Instanced)
+	UPROPERTY(Category="Networking", EditDefaultsOnly, Instanced, BlueprintReadOnly)
 	TObjectPtr<UXMoveU_PredictionManager> PredictionManager;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
