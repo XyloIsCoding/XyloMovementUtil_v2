@@ -1990,7 +1990,7 @@ uint32 UXMoveU_ModularMovementComponent::GetLayeredMovementModesRequests() const
 			Output |= (1 << ModeIndex);
 		}
 	}
-	return 0;
+	return Output;
 }
 
 void UXMoveU_ModularMovementComponent::SetLayeredMovementModesRequests(uint32 CompressedRequests)
