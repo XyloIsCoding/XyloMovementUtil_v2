@@ -15,5 +15,5 @@ class XYLOMOVEMENTUTIL_API UXMoveU_ModularMovementPredManager : public UXMoveU_P
 	GENERATED_BODY()
 
 public:
-	virtual void OnRegistered(UXMoveU_ModularMovementComponent* MovementComponent) override;
+	virtual void OnRegistered(UCharacterMovementComponent* MovementComponent) override;
 };

@@ -30,7 +30,7 @@ public:
 public:
 	/** Called when movement component registered this PredictionManager.
 	 * This is a good spot to create and register PredictionProxies */
-	virtual void OnRegistered(UXMoveU_ModularMovementComponent* MovementComponent) {}
+	virtual void OnRegistered(UCharacterMovementComponent* MovementComponent) {}
 
 /*====================================================================================================================*/
 	// PredictionProxies
