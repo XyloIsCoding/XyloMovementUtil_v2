@@ -28,7 +28,7 @@ protected:
 	virtual void OnEnteredMode() override;
 	virtual void UpdateMode(float DeltaSeconds) override;
 
-protected:
+public:
 	UPROPERTY(Category="Dash", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
 	float DashVerticalImpulseSpeed;
 	
