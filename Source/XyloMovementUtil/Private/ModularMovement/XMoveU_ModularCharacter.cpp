@@ -29,7 +29,7 @@ void AXMoveU_ModularCharacter::GetLifetimeReplicatedProps(TArray<class FLifetime
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AXMoveU_ModularCharacter, LayeredMovementModeStates);
+	DOREPLIFETIME_CONDITION(AXMoveU_ModularCharacter, LayeredMovementModeStates, COND_SimulatedOnly);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
