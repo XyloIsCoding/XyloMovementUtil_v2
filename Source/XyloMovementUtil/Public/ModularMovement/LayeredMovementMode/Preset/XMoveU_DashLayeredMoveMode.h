@@ -53,6 +53,4 @@ public:
 	float TimeSinceDash = 0.f;
 
 	float DashCharge = 0.f;
-
-	FVector CachedDashDirection;
 };

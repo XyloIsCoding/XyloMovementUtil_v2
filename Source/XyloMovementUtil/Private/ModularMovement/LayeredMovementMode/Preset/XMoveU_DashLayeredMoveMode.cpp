@@ -94,8 +94,6 @@ void UXMoveU_DashLayeredMoveMode::OnEnteredMode()
 		float HorizontalVelocity = DashHorizontalImpulseSpeed + (MoveComp->Velocity | InputDirection);
 		
 		MoveComp->Velocity = HorizontalVelocity * InputDirection + (VerticalVelocity * -MoveComp->GetGravityDirection());
-
-		CachedDashDirection = InputDirection;
 		
 		if (DashVerticalImpulseSpeed > 0.f)
 		{
