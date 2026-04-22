@@ -84,6 +84,7 @@ void UXMoveU_ModularMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	AutoRegisterAttachedSyncedObjects();
 	RegisterMovementModes();
 	RegisterLayeredMovementModes();
 	OnJumpProfileSet(nullptr);
@@ -1785,6 +1786,25 @@ void UXMoveU_ModularMovementComponent::TickSyncedObjectsAfterMovement(float Delt
 		if (IXMoveU_MovementSyncedObjectInterface* MoveSyncedObjInterface = Cast<IXMoveU_MovementSyncedObjectInterface>(MoveSyncObject.Get()))
 		{
 			MoveSyncedObjInterface->TickAfterMovement(Params, DeltaSeconds);
+		}
+	}
+}
+
+void UXMoveU_ModularMovementComponent::AutoRegisterAttachedSyncedObjects()
+{
+	// Register character if it implements the interface.
+	if (IXMoveU_MovementSyncedObjectInterface* SyncedChar = Cast<IXMoveU_MovementSyncedObjectInterface>(GetCharacterOwner()))
+	{
+		RegisterMovementSyncedObject(GetCharacterOwner(), SyncedChar->GetPredictionManager());
+	}
+
+	// Register all character's component implementing the interface.
+	const TSet<UActorComponent*>& CharComponents = GetCharacterOwner()->GetComponents();
+	for (UActorComponent* Component : CharComponents)
+	{
+		if (IXMoveU_MovementSyncedObjectInterface* SyncedComponent = Cast<IXMoveU_MovementSyncedObjectInterface>(Component))
+		{
+			RegisterMovementSyncedObject(Component, SyncedComponent->GetPredictionManager());
 		}
 	}
 }

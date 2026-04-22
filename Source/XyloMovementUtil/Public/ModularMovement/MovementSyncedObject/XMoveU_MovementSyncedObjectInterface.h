@@ -25,4 +25,5 @@ public:
 	virtual void OnRegistered(UXMoveU_ModularMovementComponent* OwningMovementComponent) {}
 	virtual void TickBeforeMovement(const FXMoveU_MovementSyncParams& Params, float DeltaSeconds) {}
 	virtual void TickAfterMovement(const FXMoveU_MovementSyncParams& Params, float DeltaSeconds) {}
+	virtual UXMoveU_PredictionManager* GetPredictionManager() const { return nullptr; }
 };

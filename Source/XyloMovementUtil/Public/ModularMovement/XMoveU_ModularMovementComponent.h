@@ -265,6 +265,8 @@ public:
 	virtual void TickSyncedObjectsAfterMovement(float DeltaSeconds);
 	
 protected:
+	virtual void AutoRegisterAttachedSyncedObjects();
+	
 	UPROPERTY()
 	TArray<TWeakObjectPtr<UObject>> MovementSyncedObjects;
 
