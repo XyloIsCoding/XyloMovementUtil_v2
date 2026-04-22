@@ -10,7 +10,7 @@
 void FXMoveU_LayeredMoveModeInputsPredProxy::Initialize(FName Name, UXMoveU_ModularMovementComponent* MovementComponent)
 {
 	SetName(Name);
-	SetProxyVariable<XMoveU::TProxyVar_Lambda<uint32, XMoveU::ProxyVar::Traits::ByValue>>({
+	SetProxyVariable(XMoveU::TProxyVar_Lambda<uint32>(
 		MovementComponent,
 		[MovementComponent]()->uint32
 		{
@@ -20,7 +20,7 @@ void FXMoveU_LayeredMoveModeInputsPredProxy::Initialize(FName Name, UXMoveU_Modu
 		{
 			MovementComponent->SetLayeredMovementModesRequests(Inputs);
 		}
-	});
+	));
 
 	LayeredMoveModesCount = MovementComponent->GetLayeredMovementModes().Num();
 }

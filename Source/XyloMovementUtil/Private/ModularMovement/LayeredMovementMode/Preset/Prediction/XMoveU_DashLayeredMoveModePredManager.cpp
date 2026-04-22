@@ -19,14 +19,14 @@ void UXMoveU_DashLayeredMoveModePredManager::OnRegistered(UCharacterMovementComp
 
 	TSharedPtr<FXMoveU_PredictionProxy_Float> TimeSinceDash = MakeShared<FXMoveU_PredictionProxy_Float>();
 	TimeSinceDash->SetName("XMoveU_DashLayeredMoveMode_TimeSinceDash");
-	TimeSinceDash->SetProxyVariable<XMoveU::TProxyVar_Object<UXMoveU_DashLayeredMoveMode, float>>({DashLayeredMoveMode, &UXMoveU_DashLayeredMoveMode::TimeSinceDash});
+	TimeSinceDash->SetProxyVariable(XMoveU::TProxyVar_Object(DashLayeredMoveMode, &UXMoveU_DashLayeredMoveMode::TimeSinceDash));
 	TimeSinceDash->bAffectedBySimulation = true;
 	TimeSinceDash->CorrectionMode = EXMoveU_CorrectionMode::Local;
 	RegisterPredictionProxy(TimeSinceDash);
 
 	TSharedPtr<FXMoveU_PredictionProxy_Float> DashCharge = MakeShared<FXMoveU_PredictionProxy_Float>();
 	DashCharge->SetName("XMoveU_DashLayeredMoveMode_DashCharge");
-	DashCharge->SetProxyVariable<XMoveU::TProxyVar_Object<UXMoveU_DashLayeredMoveMode, float>>({DashLayeredMoveMode, &UXMoveU_DashLayeredMoveMode::DashCharge});
+	DashCharge->SetProxyVariable(XMoveU::TProxyVar_Object(DashLayeredMoveMode, &UXMoveU_DashLayeredMoveMode::DashCharge));
 	DashCharge->bAffectedBySimulation = true;
 	DashCharge->CorrectionMode = EXMoveU_CorrectionMode::Local;
 	RegisterPredictionProxy(DashCharge);

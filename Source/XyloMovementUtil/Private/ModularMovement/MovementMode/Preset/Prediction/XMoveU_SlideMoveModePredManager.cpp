@@ -18,7 +18,7 @@ void UXMoveU_SlideMoveModePredManager::OnRegistered(UCharacterMovementComponent*
 
 	TSharedPtr<FXMoveU_PredictionProxy_Float> TimeSinceLastSlide = MakeShared<FXMoveU_PredictionProxy_Float>();
 	TimeSinceLastSlide->SetName("XMoveU_SlideMoveMode_TimeSinceLastSlide");
-	TimeSinceLastSlide->SetProxyVariable<XMoveU::TProxyVar_Object<UXMoveU_SlideMoveMode, float>>({SlideMoveMode, &UXMoveU_SlideMoveMode::TimeSinceLastSlide});
+	TimeSinceLastSlide->SetProxyVariable(XMoveU::TProxyVar_Object(SlideMoveMode, &UXMoveU_SlideMoveMode::TimeSinceLastSlide));
 	TimeSinceLastSlide->bAffectedBySimulation = true;
 	TimeSinceLastSlide->CorrectionMode = EXMoveU_CorrectionMode::Local;
 	RegisterPredictionProxy(TimeSinceLastSlide);

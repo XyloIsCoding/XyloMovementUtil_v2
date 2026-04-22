@@ -12,10 +12,7 @@ void FXMoveU_LayeredMoveModeStatesPredProxy::Initialize(FName Name, UXMoveU_Modu
 	AXMoveU_ModularCharacter* Character = Cast<AXMoveU_ModularCharacter>(MovementComponent->GetCharacterOwner());
 	
 	SetName(Name);
-	SetProxyVariable<XMoveU::TProxyVar_Object<AXMoveU_ModularCharacter, uint32, XMoveU::ProxyVar::Traits::ByValue>>({
-		Character,
-		&AXMoveU_ModularCharacter::LayeredMovementModeStates
-	});
+	SetProxyVariable(XMoveU::TProxyVar_Object(Character, &AXMoveU_ModularCharacter::LayeredMovementModeStates));
 
 	LayeredMoveModesCount = MovementComponent->GetLayeredMovementModes().Num();
 }
