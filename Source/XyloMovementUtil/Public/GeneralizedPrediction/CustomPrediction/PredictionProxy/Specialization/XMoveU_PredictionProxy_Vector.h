@@ -31,7 +31,7 @@ struct FXMoveU_IsImportantPredicate_Vector
 USTRUCT(BlueprintType, DisplayName="Prediction Proxy (Vector)")
 struct XYLOMOVEMENTUTIL_API FXMoveU_PredictionProxy_Vector :
 #if CPP
-	public XMoveU::TSimplePredictionProxy<FVector, XMoveU::ProxyVar::Traits::ByRef>
+	public XMoveU::TSimplePredictionProxy<FVector, XMoveU::ProxyVar::Traits::ByValue>
 #else
 	public FXMoveU_SimplePredictionProxy
 #endif
