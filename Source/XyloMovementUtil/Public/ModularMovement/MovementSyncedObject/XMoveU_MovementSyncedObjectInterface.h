@@ -7,6 +7,8 @@
 #include "UObject/Interface.h"
 #include "XMoveU_MovementSyncedObjectInterface.generated.h"
 
+class UXMoveU_PredictionManager;
+
 // This class does not need to be modified.
 UINTERFACE()
 class UXMoveU_MovementSyncedObjectInterface : public UInterface
