@@ -31,7 +31,7 @@ struct FXMoveU_IsImportantPredicate_Rotator
 USTRUCT(BlueprintType, DisplayName="Prediction Proxy (Rotator)")
 struct XYLOMOVEMENTUTIL_API FXMoveU_PredictionProxy_Rotator :
 #if CPP
-	public XMoveU::TSimplePredictionProxy<FRotator, XMoveU::ProxyVar::Traits::ByRef>
+	public XMoveU::TSimplePredictionProxy<FRotator, XMoveU::ProxyVar::Traits::ByValue>
 #else
 	public FXMoveU_SimplePredictionProxy
 #endif
