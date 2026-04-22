@@ -57,9 +57,9 @@ public:
 protected:
 	virtual FXMoveU_BitFlag MakeDefaulted() override { return FXMoveU_BitFlag(); }
 	virtual bool SerializeInputsAndCorrectionStates_Internal(FXMoveU_BitFlag& Value, FArchive& Ar, UPackageMap* PackageMap) override;
-	virtual bool HasPredictionError_Internal(FXMoveU_BitFlag ClientPredictedValue) override;
+	virtual bool HasPredictionError_Internal(const FXMoveU_BitFlag& ClientPredictedValue) override;
 	virtual bool SerializeCorrectedStates_Internal(FXMoveU_BitFlag& Value, FArchive& Ar, UPackageMap* PackageMap) override;
-	virtual bool CanCombineWithNewFrame_Internal(FXMoveU_BitFlag OldFrameValue, FXMoveU_BitFlag NewFrameValue) override;
-	virtual bool HasNonSimulatedChange(FXMoveU_BitFlag LastPostSimValue, FXMoveU_BitFlag NewPreSimValue) override;
-	virtual bool IsImportantFrame_Internal(FXMoveU_BitFlag PreSimValue, FXMoveU_BitFlag PostSimValue, FXMoveU_BitFlag LastAckedPreSimValue, FXMoveU_BitFlag LastAckedPostSimValue) override;
+	virtual bool CanCombineWithNewFrame_Internal(const FXMoveU_BitFlag& OldFrameValue, const FXMoveU_BitFlag& NewFrameValue) override;
+	virtual bool HasNonSimulatedChange(const FXMoveU_BitFlag& LastPostSimValue, const FXMoveU_BitFlag& NewPreSimValue) override;
+	virtual bool IsImportantFrame_Internal(const FXMoveU_BitFlag& PreSimValue, const FXMoveU_BitFlag& PostSimValue, const FXMoveU_BitFlag& LastAckedPreSimValue, const FXMoveU_BitFlag& LastAckedPostSimValue) override;
 };

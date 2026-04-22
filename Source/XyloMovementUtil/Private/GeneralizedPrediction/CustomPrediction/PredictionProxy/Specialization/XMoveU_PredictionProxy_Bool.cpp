@@ -9,7 +9,7 @@ bool FXMoveU_PredictionProxy_Bool::SerializeInputsAndCorrectionStates_Internal(b
 	return true;
 }
 
-bool FXMoveU_PredictionProxy_Bool::HasPredictionError_Internal(bool ClientPredictedValue)
+bool FXMoveU_PredictionProxy_Bool::HasPredictionError_Internal(const bool& ClientPredictedValue)
 {
 	if (!ProxyVariable->IsValid()) { return false; }
 	return ClientPredictedValue != ProxyVariable->Get();
@@ -21,18 +21,18 @@ bool FXMoveU_PredictionProxy_Bool::SerializeCorrectedStates_Internal(bool& Value
 	return true;
 }
 
-bool FXMoveU_PredictionProxy_Bool::CanCombineWithNewFrame_Internal(bool OldFrameValue, bool NewFrameValue)
+bool FXMoveU_PredictionProxy_Bool::CanCombineWithNewFrame_Internal(const bool& OldFrameValue, const bool& NewFrameValue)
 {
 	if (!CanCombinePredicate.Predicate.IsSet()) return true;
 	return CanCombinePredicate.Predicate(OldFrameValue, NewFrameValue); 
 }
 
-bool FXMoveU_PredictionProxy_Bool::HasNonSimulatedChange(bool LastPostSimValue, bool NewPreSimValue)
+bool FXMoveU_PredictionProxy_Bool::HasNonSimulatedChange(const bool& LastPostSimValue, const bool& NewPreSimValue)
 {
 	return LastPostSimValue != NewPreSimValue;
 }
 
-bool FXMoveU_PredictionProxy_Bool::IsImportantFrame_Internal(bool PreSimValue, bool PostSimValue, bool LastAckedPreSimValue, bool LastAckedPostSimValue)
+bool FXMoveU_PredictionProxy_Bool::IsImportantFrame_Internal(const bool& PreSimValue, const bool& PostSimValue, const bool& LastAckedPreSimValue, const bool& LastAckedPostSimValue)
 {
 	if (!IsImportantPredicate.Predicate.IsSet()) return false;
 	return IsImportantPredicate.Predicate(PreSimValue, PostSimValue, LastAckedPreSimValue, LastAckedPostSimValue);

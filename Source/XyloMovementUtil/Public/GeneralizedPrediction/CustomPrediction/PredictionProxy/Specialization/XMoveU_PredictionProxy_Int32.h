@@ -47,9 +47,9 @@ struct XYLOMOVEMENTUTIL_API FXMoveU_PredictionProxy_Int32 :
 protected:
 	virtual int32 MakeDefaulted() override { return 0; }
 	virtual bool SerializeInputsAndCorrectionStates_Internal(int32& Value, FArchive& Ar, UPackageMap* PackageMap) override;
-	virtual bool HasPredictionError_Internal(int32 ClientPredictedValue) override;
+	virtual bool HasPredictionError_Internal(const int32& ClientPredictedValue) override;
 	virtual bool SerializeCorrectedStates_Internal(int32& Value, FArchive& Ar, UPackageMap* PackageMap) override;
-	virtual bool CanCombineWithNewFrame_Internal(int32 OldFrameValue, int32 NewFrameValue) override;
-	virtual bool HasNonSimulatedChange(int32 LastPostSimValue, int32 NewPreSimValue) override;
-	virtual bool IsImportantFrame_Internal(int32 PreSimValue, int32 PostSimValue, int32 LastAckedPreSimValue, int32 LastAckedPostSimValue) override;
+	virtual bool CanCombineWithNewFrame_Internal(const int32& OldFrameValue, const int32& NewFrameValue) override;
+	virtual bool HasNonSimulatedChange(const int32& LastPostSimValue, const int32& NewPreSimValue) override;
+	virtual bool IsImportantFrame_Internal(const int32& PreSimValue, const int32& PostSimValue, const int32& LastAckedPreSimValue, const int32& LastAckedPostSimValue) override;
 };

@@ -19,7 +19,6 @@ namespace XMoveU
 	struct TSimplePredictionProxy : public FXMoveU_SimplePredictionProxy
 	{
 		using FTraits = Traits<T>;
-		using ParamType = typename FTraits::ParamType;
 		using FProxyVarType = TProxyVarInterface<T, Traits>;
 		
 		TSimplePredictionProxy() {}
@@ -69,33 +68,33 @@ namespace XMoveU
 		virtual bool SerializeInputsAndCorrectionStates_Internal(T& Value, FArchive& Ar, UPackageMap* PackageMap) = 0;
 
 		/** Checks the client value for discrepancies with the server value. */
-		virtual bool HasPredictionError_Internal(ParamType ClientPredictedValue) = 0;
+		virtual bool HasPredictionError_Internal(const T& ClientPredictedValue) = 0;
 		/** Serializes the value to send to client as the correct authoritative value. */
 		virtual bool SerializeCorrectedStates_Internal(T& Value, FArchive& Ar, UPackageMap* PackageMap) = 0;
 
 		/** Respond to an authoritative correction being received. Can prevent the proxy from automatically applying the correction value */
-		virtual void OnCorrectionReceived(ParamType AuthoritativeValue, ParamType PredictedValue, EXMoveU_CorrectionContext Context, bool& bOutApplyCorrection) {}
+		virtual void OnCorrectionReceived(const T& AuthoritativeValue, const T& PredictedValue, EXMoveU_CorrectionContext Context, bool& bOutApplyCorrection) {}
 		
 		/** Called when the proxy is asked to roll back the value to a specific frame.
 		 * The proxy only rollbacks the value if CorrectionMode == EXMoveU_CorrectionMode::None, so this can be used
 		 * to implement extra logic. */
-		virtual void OnFrameRollback(ParamType RollbackValue) {}
+		virtual void OnFrameRollback(const T& RollbackValue) {}
 		/** Called after a rollback before applying back the pre-rollback value.  */
 		virtual void OnRestoreStatePostRollback(bool& bOutRestoreFromCache) {}
 		
 		/** Checks if the value at the beginning of the simulation frame already prevents combining by itself.
 		 * An Engine example is having RootMotion or PendingLaunchVelocity. */
-		virtual bool IsFrameNonCombinablePreSim(ParamType Value) { return false; }
+		virtual bool IsFrameNonCombinablePreSim(const T& Value) { return false; }
 		/** Checks if the changes in the value during the simulation made this frame not combinable, or if we want
 		 * this frame to be immediately sent to server instead of waiting next frame to check if it can be combined. */
-		virtual bool IsFrameNonCombinablePostSim(ParamType PreSimValue, ParamType PostSimValue) { return false; }
+		virtual bool IsFrameNonCombinablePostSim(const T& PreSimValue, const T& PostSimValue) { return false; }
 		/** Checks if the value at the start of the old frame and the next one allow combining the frames. */
-		virtual bool CanCombineWithNewFrame_Internal(ParamType OldFrameValue, ParamType NewFrameValue) { return true; }
+		virtual bool CanCombineWithNewFrame_Internal(const T& OldFrameValue, const T& NewFrameValue) { return true; }
 		/** Checks if the value changed outside the simulation, which then makes this frame not able to be combined. */
-		virtual bool HasNonSimulatedChange(ParamType LastPostSimValue, ParamType NewPreSimValue) { return false; }
+		virtual bool HasNonSimulatedChange(const T& LastPostSimValue, const T& NewPreSimValue) { return false; }
 
 		/** Checks if this frame has any important changes relative to the last frame that got acknowledge by the server. */
-		virtual bool IsImportantFrame_Internal(ParamType PreSimValue, ParamType PostSimValue, ParamType LastAckedPreSimValue, ParamType LastAckedPostSimValue) { return false; }
+		virtual bool IsImportantFrame_Internal(const T& PreSimValue, const T& PostSimValue, const T& LastAckedPreSimValue, const T& LastAckedPostSimValue) { return false; }
 		
 		// ~Interface
 	/*----------------------------------------------------------------------------------------------------------------*/

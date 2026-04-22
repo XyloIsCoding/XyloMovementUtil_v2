@@ -9,7 +9,7 @@ bool FXMoveU_PredictionProxy_Float::SerializeInputsAndCorrectionStates_Internal(
 	return true;
 }
 
-bool FXMoveU_PredictionProxy_Float::HasPredictionError_Internal(float ClientPredictedValue)
+bool FXMoveU_PredictionProxy_Float::HasPredictionError_Internal(const float& ClientPredictedValue)
 {
 	if (!ProxyVariable->IsValid()) { return false; }
 	float Tolerance = FMath::Min(ErrorThreshold, 1E-08);
@@ -22,18 +22,18 @@ bool FXMoveU_PredictionProxy_Float::SerializeCorrectedStates_Internal(float& Val
 	return true;
 }
 
-bool FXMoveU_PredictionProxy_Float::CanCombineWithNewFrame_Internal(float OldFrameValue, float NewFrameValue)
+bool FXMoveU_PredictionProxy_Float::CanCombineWithNewFrame_Internal(const float& OldFrameValue, const float& NewFrameValue)
 {
 	if (!CanCombinePredicate.Predicate.IsSet()) return true;
 	return CanCombinePredicate.Predicate(OldFrameValue, NewFrameValue);
 }
 
-bool FXMoveU_PredictionProxy_Float::HasNonSimulatedChange(float LastPostSimValue, float NewPreSimValue)
+bool FXMoveU_PredictionProxy_Float::HasNonSimulatedChange(const float& LastPostSimValue, const float& NewPreSimValue)
 {
 	return !FMath::IsNearlyEqual(LastPostSimValue, NewPreSimValue);
 }
 
-bool FXMoveU_PredictionProxy_Float::IsImportantFrame_Internal(float PreSimValue, float PostSimValue, float LastAckedPreSimValue, float LastAckedPostSimValue)
+bool FXMoveU_PredictionProxy_Float::IsImportantFrame_Internal(const float& PreSimValue, const float& PostSimValue, const float& LastAckedPreSimValue, const float& LastAckedPostSimValue)
 {
 	if (!IsImportantPredicate.Predicate.IsSet()) return false;
 	return IsImportantPredicate.Predicate(PreSimValue, PostSimValue, LastAckedPreSimValue, LastAckedPostSimValue);

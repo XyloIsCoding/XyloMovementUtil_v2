@@ -43,9 +43,9 @@ protected:
 protected:
 	virtual uint32 MakeDefaulted() override { return 0; }
 	virtual bool SerializeInputsAndCorrectionStates_Internal(uint32& Value, FArchive& Ar, UPackageMap* PackageMap) override;
-	virtual bool HasPredictionError_Internal(uint32 ClientPredictedValue) override;
+	virtual bool HasPredictionError_Internal(const uint32& ClientPredictedValue) override;
 	virtual bool SerializeCorrectedStates_Internal(uint32& Value, FArchive& Ar, UPackageMap* PackageMap) override;
-	virtual bool CanCombineWithNewFrame_Internal(uint32 OldFrameValue, uint32 NewFrameValue) override;
-	virtual bool HasNonSimulatedChange(uint32 LastPostSimValue, uint32 NewPreSimValue) override;
-	virtual bool IsImportantFrame_Internal(uint32 PreSimValue, uint32 PostSimValue, uint32 LastAckedPreSimValue, uint32 LastAckedPostSimValue) override;
+	virtual bool CanCombineWithNewFrame_Internal(const uint32& OldFrameValue, const uint32& NewFrameValue) override;
+	virtual bool HasNonSimulatedChange(const uint32& LastPostSimValue, const uint32& NewPreSimValue) override;
+	virtual bool IsImportantFrame_Internal(const uint32& PreSimValue, const uint32& PostSimValue, const uint32& LastAckedPreSimValue, const uint32& LastAckedPostSimValue) override;
 };

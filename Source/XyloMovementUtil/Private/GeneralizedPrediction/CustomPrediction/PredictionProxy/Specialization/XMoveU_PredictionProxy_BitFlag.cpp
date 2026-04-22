@@ -39,7 +39,7 @@ bool FXMoveU_PredictionProxy_BitFlag::SerializeInputsAndCorrectionStates_Interna
 	return true;
 }
 
-bool FXMoveU_PredictionProxy_BitFlag::HasPredictionError_Internal(FXMoveU_BitFlag ClientPredictedValue)
+bool FXMoveU_PredictionProxy_BitFlag::HasPredictionError_Internal(const FXMoveU_BitFlag& ClientPredictedValue)
 {
 	if (!ProxyVariable->IsValid()) { return false; }
 	return ClientPredictedValue.Flags != ProxyVariable->Get().Flags; 
@@ -57,17 +57,17 @@ bool FXMoveU_PredictionProxy_BitFlag::SerializeCorrectedStates_Internal(FXMoveU_
 	return true;
 }
 
-bool FXMoveU_PredictionProxy_BitFlag::CanCombineWithNewFrame_Internal(FXMoveU_BitFlag OldFrameValue, FXMoveU_BitFlag NewFrameValue)
+bool FXMoveU_PredictionProxy_BitFlag::CanCombineWithNewFrame_Internal(const FXMoveU_BitFlag& OldFrameValue, const FXMoveU_BitFlag& NewFrameValue)
 {
 	return OldFrameValue.Flags == NewFrameValue.Flags;
 }
 
-bool FXMoveU_PredictionProxy_BitFlag::HasNonSimulatedChange(FXMoveU_BitFlag LastPostSimValue, FXMoveU_BitFlag NewPreSimValue)
+bool FXMoveU_PredictionProxy_BitFlag::HasNonSimulatedChange(const FXMoveU_BitFlag& LastPostSimValue, const FXMoveU_BitFlag& NewPreSimValue)
 {
 	return LastPostSimValue.Flags != NewPreSimValue.Flags;
 }
 
-bool FXMoveU_PredictionProxy_BitFlag::IsImportantFrame_Internal(FXMoveU_BitFlag PreSimValue, FXMoveU_BitFlag PostSimValue, FXMoveU_BitFlag LastAckedPreSimValue, FXMoveU_BitFlag LastAckedPostSimValue)
+bool FXMoveU_PredictionProxy_BitFlag::IsImportantFrame_Internal(const FXMoveU_BitFlag& PreSimValue, const FXMoveU_BitFlag& PostSimValue, const FXMoveU_BitFlag& LastAckedPreSimValue, const FXMoveU_BitFlag& LastAckedPostSimValue)
 {
 	return PreSimValue.Flags != LastAckedPreSimValue.Flags;
 }

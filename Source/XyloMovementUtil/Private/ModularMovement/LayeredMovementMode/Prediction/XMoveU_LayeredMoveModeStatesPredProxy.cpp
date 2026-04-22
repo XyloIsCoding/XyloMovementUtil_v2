@@ -25,7 +25,7 @@ bool FXMoveU_LayeredMoveModeStatesPredProxy::SerializeInputsAndCorrectionStates_
 	return true;
 }
 
-bool FXMoveU_LayeredMoveModeStatesPredProxy::HasPredictionError_Internal(uint32 ClientPredictedValue)
+bool FXMoveU_LayeredMoveModeStatesPredProxy::HasPredictionError_Internal(const uint32& ClientPredictedValue)
 {
 	UE_LOG(LogXyloMovementUtil, Warning, TEXT("FXMoveU_LayeredMoveModeStatesPredProxy should not be used for error checking"))
 	return false;
@@ -37,17 +37,17 @@ bool FXMoveU_LayeredMoveModeStatesPredProxy::SerializeCorrectedStates_Internal(u
 	return true;
 }
 
-bool FXMoveU_LayeredMoveModeStatesPredProxy::CanCombineWithNewFrame_Internal(uint32 OldFrameValue, uint32 NewFrameValue)
+bool FXMoveU_LayeredMoveModeStatesPredProxy::CanCombineWithNewFrame_Internal(const uint32& OldFrameValue, const uint32& NewFrameValue)
 {
 	return OldFrameValue == NewFrameValue;
 }
 
-bool FXMoveU_LayeredMoveModeStatesPredProxy::HasNonSimulatedChange(uint32 LastPostSimValue, uint32 NewPreSimValue)
+bool FXMoveU_LayeredMoveModeStatesPredProxy::HasNonSimulatedChange(const uint32& LastPostSimValue, const uint32& NewPreSimValue)
 {
 	return LastPostSimValue != NewPreSimValue;
 }
 
-bool FXMoveU_LayeredMoveModeStatesPredProxy::IsImportantFrame_Internal(uint32 PreSimValue, uint32 PostSimValue, uint32 LastAckedPreSimValue, uint32 LastAckedPostSimValue)
+bool FXMoveU_LayeredMoveModeStatesPredProxy::IsImportantFrame_Internal(const uint32& PreSimValue, const uint32& PostSimValue, const uint32& LastAckedPreSimValue, const uint32& LastAckedPostSimValue)
 {
 	return false;
 }

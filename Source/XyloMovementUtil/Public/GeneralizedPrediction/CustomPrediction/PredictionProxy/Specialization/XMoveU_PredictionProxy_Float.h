@@ -58,10 +58,10 @@ struct XYLOMOVEMENTUTIL_API FXMoveU_PredictionProxy_Float :
 protected:
 	virtual float MakeDefaulted() override { return 0.f; }
 	virtual bool SerializeInputsAndCorrectionStates_Internal(float& Value, FArchive& Ar, UPackageMap* PackageMap) override;
-	virtual bool HasPredictionError_Internal(float ClientPredictedValue) override;
+	virtual bool HasPredictionError_Internal(const float& ClientPredictedValue) override;
 	virtual bool SerializeCorrectedStates_Internal(float& Value, FArchive& Ar, UPackageMap* PackageMap) override;
-	virtual bool CanCombineWithNewFrame_Internal(float OldFrameValue, float NewFrameValue) override;
-	virtual bool HasNonSimulatedChange(float LastPostSimValue, float NewPreSimValue) override;
-	virtual bool IsImportantFrame_Internal(float PreSimValue, float PostSimValue, float LastAckedPreSimValue, float LastAckedPostSimValue) override;
+	virtual bool CanCombineWithNewFrame_Internal(const float& OldFrameValue, const float& NewFrameValue) override;
+	virtual bool HasNonSimulatedChange(const float& LastPostSimValue, const float& NewPreSimValue) override;
+	virtual bool IsImportantFrame_Internal(const float& PreSimValue, const float& PostSimValue, const float& LastAckedPreSimValue, const float& LastAckedPostSimValue) override;
 };
 

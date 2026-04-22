@@ -9,7 +9,7 @@ bool FXMoveU_PredictionProxy_Int32::SerializeInputsAndCorrectionStates_Internal(
 	return true;
 }
 
-bool FXMoveU_PredictionProxy_Int32::HasPredictionError_Internal(int32 ClientPredictedValue)
+bool FXMoveU_PredictionProxy_Int32::HasPredictionError_Internal(const int32& ClientPredictedValue)
 {
 	if (!ProxyVariable->IsValid()) { return false; }
 	return ClientPredictedValue != ProxyVariable->Get();
@@ -21,18 +21,18 @@ bool FXMoveU_PredictionProxy_Int32::SerializeCorrectedStates_Internal(int32& Val
 	return true;
 }
 
-bool FXMoveU_PredictionProxy_Int32::CanCombineWithNewFrame_Internal(int32 OldFrameValue, int32 NewFrameValue)
+bool FXMoveU_PredictionProxy_Int32::CanCombineWithNewFrame_Internal(const int32& OldFrameValue, const int32& NewFrameValue)
 {
 	if (!CanCombinePredicate.Predicate.IsSet()) return true;
 	return CanCombinePredicate.Predicate(OldFrameValue, NewFrameValue); 
 }
 
-bool FXMoveU_PredictionProxy_Int32::HasNonSimulatedChange(int32 LastPostSimValue, int32 NewPreSimValue)
+bool FXMoveU_PredictionProxy_Int32::HasNonSimulatedChange(const int32& LastPostSimValue, const int32& NewPreSimValue)
 {
 	return LastPostSimValue != NewPreSimValue;
 }
 
-bool FXMoveU_PredictionProxy_Int32::IsImportantFrame_Internal(int32 PreSimValue, int32 PostSimValue, int32 LastAckedPreSimValue, int32 LastAckedPostSimValue)
+bool FXMoveU_PredictionProxy_Int32::IsImportantFrame_Internal(const int32& PreSimValue, const int32& PostSimValue, const int32& LastAckedPreSimValue, const int32& LastAckedPostSimValue)
 {
 	if (!IsImportantPredicate.Predicate.IsSet()) return false;
 	return IsImportantPredicate.Predicate(PreSimValue, PostSimValue, LastAckedPreSimValue, LastAckedPostSimValue);
