@@ -51,6 +51,15 @@ bool FXMoveU_CharacterMoveResponseDataContainer::Serialize(UCharacterMovementCom
 			bOutSuccess &= PredictionProxy.SerializeCorrectedStates(Blackboard, Ar, PackageMap);
 		});
 	}
+	else
+	{
+		// Call FXMoveU_PredictionProxy::SerializeAcknowledgedStates
+		UXMoveU_PredictionMovementComponent::ExecuteOnPredictionProxies(&CharacterMovement,
+		[&](FXMoveU_PredictionProxy& PredictionProxy, bool& bOutStopExecution)
+		{
+			bOutSuccess &= PredictionProxy.SerializeAcknowledgedStates(Blackboard, Ar, PackageMap);
+		});
+	}
 
 	return bOutSuccess;
 }

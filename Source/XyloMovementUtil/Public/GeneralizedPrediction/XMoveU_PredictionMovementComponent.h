@@ -48,6 +48,7 @@ public:
 public:
 	virtual void ServerMove_PerformMovement(const FCharacterNetworkMoveData& MoveData) override;
 protected:
+	virtual void ClientAckGoodMove_Implementation(float TimeStamp) override;
 	virtual void OnClientCorrectionReceived(class FNetworkPredictionData_Client_Character& ClientData, float TimeStamp, FVector NewLocation, FVector NewVelocity, UPrimitiveComponent* NewBase, FName NewBaseBoneName, bool bHasBase, bool bBaseRelativePosition, uint8 ServerMovementMode, FVector ServerGravityDirection) override;
 	virtual bool ClientUpdatePositionAfterServerUpdate() override;
 protected:

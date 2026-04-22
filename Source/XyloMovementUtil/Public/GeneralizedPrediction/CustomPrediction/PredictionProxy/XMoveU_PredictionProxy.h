@@ -50,6 +50,12 @@ public:
 	 * Context param is used to differentiate the two calls. */
 	virtual void ApplyCorrectedState(const XMoveU::FBlackboard& AuthoritativeFrame, const XMoveU::FBlackboard* TargetPredictionFrame, EXMoveU_CorrectionContext Context) {}
 
+	/** Called instead of SerializeCorrectedStates if the move was valid. Should be used with caution, since data
+	 * serialized is sent to client with every move acknowledgment. */
+	virtual bool SerializeAcknowledgedStates(XMoveU::FBlackboard& AuthoritativeFrame, FArchive& Ar, UPackageMap* PackageMap) { return true; }
+	/** Called by UCharacterMovementComponent::ClientAckGoodMove_Implementation. */
+	virtual void CheckAcknowledgedState(const XMoveU::FBlackboard& AuthoritativeFrame, const XMoveU::FBlackboard* TargetPredictionFrame) {}
+	
 	/** Called by FXMoveU_SavedMove_Character::Clear */
 	virtual void Reset(XMoveU::FBlackboard& PredictionFrame) {}
 	/** Called by FXMoveU_SavedMove_Character::SetMoveFor */

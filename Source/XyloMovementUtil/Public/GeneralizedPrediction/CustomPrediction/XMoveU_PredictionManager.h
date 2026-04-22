@@ -51,6 +51,7 @@ public:
 	// UCharacterMovementComponent Interface
 	virtual void ServerGetClientInputs(UCharacterMovementComponent* MoveComp, const FXMoveU_CharacterNetworkMoveData& MoveData) {}
 	virtual bool ServerCheckClientError(UCharacterMovementComponent* MoveComp, float ClientTimeStamp, float DeltaTime, const FVector& Accel, const FVector& ClientWorldLocation, const FVector& RelativeClientLocation, UPrimitiveComponent* ClientMovementBase, FName ClientBaseBoneName, uint8 ClientMovementMode, bool bIgnorePositionErrors) { return false; }
+	virtual void OnClientAcknowledgmentReceived(UCharacterMovementComponent* MoveComp, const FXMoveU_CharacterMoveResponseDataContainer& MoveResponse, FXMoveU_NetworkPredictionData_Client_Character& ClientData, float TimeStamp) {}
 	virtual void OnClientCorrectionReceived(UCharacterMovementComponent* MoveComp, FXMoveU_NetworkPredictionData_Client_Character& ClientData, float TimeStamp, FVector NewLocation, FVector NewVelocity, UPrimitiveComponent* NewBase, FName NewBaseBoneName, bool bHasBase, bool bBaseRelativePosition, uint8 ServerMovementMode, FVector ServerGravityDirection) {}
 	virtual void CorrectClientPreRollback(UCharacterMovementComponent* MoveComp, const FXMoveU_CharacterMoveResponseDataContainer& MoveResponse, FXMoveU_NetworkPredictionData_Client_Character& ClientData) {}
 	virtual void CacheStateBeforeReplay(UCharacterMovementComponent* MoveComp) {}

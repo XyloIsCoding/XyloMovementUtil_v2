@@ -107,13 +107,35 @@ void UXMoveU_PredictionMovementComponent::ServerMove_PerformMovement(const FChar
 	Super::ServerMove_PerformMovement(MoveData);
 }
 
+void UXMoveU_PredictionMovementComponent::ClientAckGoodMove_Implementation(float TimeStamp)
+{
+	Super::ClientAckGoodMove_Implementation(TimeStamp);
+	
+	FXMoveU_NetworkPredictionData_Client_Character& XMoveU_ClientData = static_cast<FXMoveU_NetworkPredictionData_Client_Character&>(*GetPredictionData_Client_Character());
+	const FXMoveU_CharacterMoveResponseDataContainer& XMoveU_MoveResponse = static_cast<const FXMoveU_CharacterMoveResponseDataContainer&>(GetMoveResponseDataContainer());
+	const TSharedPtr<FXMoveU_SavedMove_Character> XMoveU_LastAckedMove = StaticCastSharedPtr<FXMoveU_SavedMove_Character>(XMoveU_ClientData.LastAckedMove);
+
+	// Call UXMoveU_PredictionManager::OnClientAcknowledgmentReceived
+	ExecuteOnPredictionManagers(this, [&](UXMoveU_PredictionManager* PredictionManager, bool& bOutStopExecution)
+	{
+		PredictionManager->OnClientAcknowledgmentReceived(this, XMoveU_MoveResponse, XMoveU_ClientData, TimeStamp);
+	});
+	
+	// Call FXMoveU_PredictionProxy::CheckAcknowledgedState
+	ExecuteOnPredictionProxies(this, [&](FXMoveU_PredictionProxy& PredictionProxy, bool& bOutStopExecution)
+	{
+		// TODO: check if it is possible for ClientData.LastAckedMove to be nullptr. Cause that will lead to crashes inside prediction proxies
+		PredictionProxy.CheckAcknowledgedState(XMoveU_MoveResponse.Blackboard, XMoveU_LastAckedMove.IsValid() ? &XMoveU_LastAckedMove->Blackboard : nullptr);
+	});
+}
+
 void UXMoveU_PredictionMovementComponent::OnClientCorrectionReceived(class FNetworkPredictionData_Client_Character& ClientData, float TimeStamp, FVector NewLocation, FVector NewVelocity, UPrimitiveComponent* NewBase, FName NewBaseBoneName, bool bHasBase, bool bBaseRelativePosition, uint8 ServerMovementMode, FVector ServerGravityDirection)
 {
 	Super::OnClientCorrectionReceived(ClientData, TimeStamp, NewLocation, NewVelocity, NewBase, NewBaseBoneName, bHasBase, bBaseRelativePosition, ServerMovementMode, ServerGravityDirection);
 
+	FXMoveU_NetworkPredictionData_Client_Character& XMoveU_ClientData = static_cast<FXMoveU_NetworkPredictionData_Client_Character&>(ClientData);
 	const FXMoveU_CharacterMoveResponseDataContainer& XMoveU_MoveResponse = static_cast<const FXMoveU_CharacterMoveResponseDataContainer&>(GetMoveResponseDataContainer());
 	const TSharedPtr<FXMoveU_SavedMove_Character> XMoveU_LastAckedMove = StaticCastSharedPtr<FXMoveU_SavedMove_Character>(ClientData.LastAckedMove);
-	FXMoveU_NetworkPredictionData_Client_Character& XMoveU_ClientData = static_cast<FXMoveU_NetworkPredictionData_Client_Character&>(ClientData);
 	
 	// Call UXMoveU_PredictionManager::OnClientCorrectionReceived
 	ExecuteOnPredictionManagers(this, [&](UXMoveU_PredictionManager* PredictionManager, bool& bOutStopExecution)
