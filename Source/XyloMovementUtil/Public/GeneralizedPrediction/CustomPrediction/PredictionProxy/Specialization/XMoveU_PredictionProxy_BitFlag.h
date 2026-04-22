@@ -17,7 +17,11 @@ struct XYLOMOVEMENTUTIL_API FXMoveU_BitFlag
 
 	FXMoveU_BitFlag() : Size(8) {}
 
-	FXMoveU_BitFlag(uint8 InSize) : Size(InSize) {}
+	FXMoveU_BitFlag(uint8 InSize)
+	{
+		ensureMsgf(InSize < 32, TEXT("FXMoveU_BitFlag >> Size must be at most 32"));
+		Size = FMath::Max<uint8>(InSize, 32);
+	}
 
 	bool GetValue(uint8 Index) const;
 	

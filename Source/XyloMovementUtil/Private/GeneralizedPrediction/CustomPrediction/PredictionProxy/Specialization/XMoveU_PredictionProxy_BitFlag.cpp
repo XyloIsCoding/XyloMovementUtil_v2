@@ -5,11 +5,21 @@
 
 bool FXMoveU_BitFlag::GetValue(uint8 Index) const
 {
+	if (!ensureMsgf(Index < Size, TEXT("FXMoveU_BitFlag::GetValue >> Index %i exceds BitFlag size %i"), Index, Size))
+	{
+		return false;
+	}
+	
 	return ((Flags & (1 << Index)) != 0);
 }
 
 void FXMoveU_BitFlag::SetValue(uint8 Index, bool Value)
 {
+	if (!ensureMsgf(Index < Size, TEXT("FXMoveU_BitFlag::SetValue >> Index %i exceds BitFlag size %i"), Index, Size))
+	{
+		return;
+	}
+	
 	if (Value)
 	{
 		// 0100010 Flags
