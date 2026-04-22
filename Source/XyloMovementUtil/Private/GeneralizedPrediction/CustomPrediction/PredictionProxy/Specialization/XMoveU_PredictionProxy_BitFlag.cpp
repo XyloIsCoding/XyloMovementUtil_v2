@@ -29,7 +29,13 @@ void FXMoveU_BitFlag::SetValue(uint8 Index, bool Value)
 
 bool FXMoveU_PredictionProxy_BitFlag::SerializeInputsAndCorrectionStates_Internal(FXMoveU_BitFlag& Value, FArchive& Ar, UPackageMap* PackageMap)
 {
-	Ar.SerializeBits(&Value.Flags, Value.Size);
+	bool bIsZero = Value.Flags == 0;
+	Ar.SerializeBits(&bIsZero, 1);
+
+	if (!bIsZero)
+	{
+		Ar.SerializeBits(&Value.Flags, Value.Size);
+	}
 	return true;
 }
 
@@ -41,7 +47,13 @@ bool FXMoveU_PredictionProxy_BitFlag::HasPredictionError_Internal(FXMoveU_BitFla
 
 bool FXMoveU_PredictionProxy_BitFlag::SerializeCorrectedStates_Internal(FXMoveU_BitFlag& Value, FArchive& Ar, UPackageMap* PackageMap)
 {
-	Ar.SerializeBits(&Value.Flags, Value.Size);
+	bool bIsZero = Value.Flags == 0;
+	Ar.SerializeBits(&bIsZero, 1);
+
+	if (!bIsZero)
+	{
+		Ar.SerializeBits(&Value.Flags, Value.Size);
+	}
 	return true;
 }
 
