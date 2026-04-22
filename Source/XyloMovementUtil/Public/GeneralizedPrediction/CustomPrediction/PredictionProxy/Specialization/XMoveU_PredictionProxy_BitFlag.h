@@ -1,0 +1,65 @@
+// Copyright (c) 2026, XyloIsCoding. All rights reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GeneralizedPrediction/CustomPrediction/PredictionProxy/XMoveU_SimplePredictionProxyTemplate.h"
+#include "UObject/Object.h"
+#include "XMoveU_PredictionProxy_BitFlag.generated.h"
+
+/**
+ * 
+ */
+USTRUCT()
+struct FXMoveU_BitFlag
+{
+	GENERATED_BODY()
+
+	FXMoveU_BitFlag() : Size(8) {}
+
+	FXMoveU_BitFlag(uint8 InSize) : Size(InSize) {}
+
+	bool GetValue(uint8 Index) const;
+	
+	void SetValue(uint8 Index, bool Value);
+	
+	UPROPERTY()
+	uint32 Flags = 0;
+
+	UPROPERTY()
+	uint8 Size;
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType, DisplayName="Prediction Proxy (Bit Flag)")
+struct XYLOMOVEMENTUTIL_API FXMoveU_PredictionProxy_BitFlag :
+#if CPP
+	public XMoveU::TSimplePredictionProxy<FXMoveU_BitFlag, XMoveU::ProxyVar::Traits::ByValue>
+#else
+	public FXMoveU_SimplePredictionProxy
+#endif
+{
+	GENERATED_BODY()
+
+public:
+	FXMoveU_PredictionProxy_BitFlag()
+	{
+		bIsInput = true;
+		bCheckForError = false;
+		CorrectionMode = EXMoveU_CorrectionMode::None;
+		bAffectedBySimulation = true;
+		bRestoreAfterRollback = true;
+		bIsPositionRelated = false;
+	}
+
+protected:
+	virtual FXMoveU_BitFlag MakeDefaulted() override { return FXMoveU_BitFlag(); }
+	virtual bool SerializeInputsAndCorrectionStates_Internal(FXMoveU_BitFlag& Value, FArchive& Ar, UPackageMap* PackageMap) override;
+	virtual bool HasPredictionError_Internal(FXMoveU_BitFlag ClientPredictedValue) override;
+	virtual bool SerializeCorrectedStates_Internal(FXMoveU_BitFlag& Value, FArchive& Ar, UPackageMap* PackageMap) override;
+	virtual bool CanCombineWithNewFrame_Internal(FXMoveU_BitFlag OldFrameValue, FXMoveU_BitFlag NewFrameValue) override;
+	virtual bool HasNonSimulatedChange(FXMoveU_BitFlag LastPostSimValue, FXMoveU_BitFlag NewPreSimValue) override;
+	virtual bool IsImportantFrame_Internal(FXMoveU_BitFlag PreSimValue, FXMoveU_BitFlag PostSimValue, FXMoveU_BitFlag LastAckedPreSimValue, FXMoveU_BitFlag LastAckedPostSimValue) override;
+};
