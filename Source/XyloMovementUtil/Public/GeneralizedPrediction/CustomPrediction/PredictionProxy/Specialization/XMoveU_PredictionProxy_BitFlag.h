@@ -10,8 +10,8 @@
 /**
  * 
  */
-USTRUCT()
-struct FXMoveU_BitFlag
+USTRUCT(BlueprintType)
+struct XYLOMOVEMENTUTIL_API FXMoveU_BitFlag
 {
 	GENERATED_BODY()
 
