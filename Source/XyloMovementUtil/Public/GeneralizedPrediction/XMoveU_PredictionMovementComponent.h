@@ -84,6 +84,10 @@ protected:
 	virtual void ServerGetClientInputs(const FCharacterNetworkMoveData& MoveData);
 	virtual void CacheStateBeforeReplay();
 	virtual void RestoreStateAfterReplay();
+
+	/** Like OnClientCorrectionReceived but called by ClientAckGoodMove_Implementation
+	 * (instead of ClientAdjustPosition_Implementation) */
+	virtual void OnClientAcknowledgmentReceived(float TimeStamp);
 	
 	/** We use this function instead of ServerCheckClientError because that one is position focused, and is ignored
 	 * under certain conditions, like transitioning on and off moving platforms. */
