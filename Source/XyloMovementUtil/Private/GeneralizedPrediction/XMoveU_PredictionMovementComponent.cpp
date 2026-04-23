@@ -110,6 +110,8 @@ void UXMoveU_PredictionMovementComponent::ServerMove_PerformMovement(const FChar
 void UXMoveU_PredictionMovementComponent::ClientAckGoodMove_Implementation(float TimeStamp)
 {
 	Super::ClientAckGoodMove_Implementation(TimeStamp);
+
+	// TODO: we cannot continue here if timestamp is already expired
 	
 	FXMoveU_NetworkPredictionData_Client_Character& XMoveU_ClientData = static_cast<FXMoveU_NetworkPredictionData_Client_Character&>(*GetPredictionData_Client_Character());
 	const FXMoveU_CharacterMoveResponseDataContainer& XMoveU_MoveResponse = static_cast<const FXMoveU_CharacterMoveResponseDataContainer&>(GetMoveResponseDataContainer());
@@ -153,6 +155,7 @@ void UXMoveU_PredictionMovementComponent::OnClientCorrectionReceived(class FNetw
 
 bool UXMoveU_PredictionMovementComponent::ClientUpdatePositionAfterServerUpdate()
 {
+	// TODO: cannot use GetMoveResponseDataContainer as the last correction data, since we might have received an ack after the last correction and now that response data does not contain any correction.
 	const FXMoveU_CharacterMoveResponseDataContainer& XMoveU_MoveResponse = static_cast<const FXMoveU_CharacterMoveResponseDataContainer&>(GetMoveResponseDataContainer());
 	const TSharedPtr<FXMoveU_SavedMove_Character> XMoveU_LastAckedMove = StaticCastSharedPtr<FXMoveU_SavedMove_Character>(GetPredictionData_Client_Character()->LastAckedMove);
 	FXMoveU_NetworkPredictionData_Client_Character& XMoveU_ClientData = static_cast<FXMoveU_NetworkPredictionData_Client_Character&>(*GetPredictionData_Client_Character());
