@@ -155,8 +155,11 @@ void UXMoveU_PredictionMovementComponent::OnClientCorrectionReceived(class FNetw
 
 bool UXMoveU_PredictionMovementComponent::ClientUpdatePositionAfterServerUpdate()
 {
-	// TODO: cannot use GetMoveResponseDataContainer as the last correction data, since we might have received an ack after the last correction and now that response data does not contain any correction.
+	// We can use GetMoveResponseDataContainer to get the server data form the last received correction since the data
+	// contained in the mode response is only updated by a correction, while is not really touched by acknowledgments.
 	const FXMoveU_CharacterMoveResponseDataContainer& XMoveU_MoveResponse = static_cast<const FXMoveU_CharacterMoveResponseDataContainer&>(GetMoveResponseDataContainer());
+	// We can use LastAckedMove as the move that got the correction, even if an acknowledgment was received this same
+	// frame after the correction since this is still the move right before the first replayed one.
 	const TSharedPtr<FXMoveU_SavedMove_Character> XMoveU_LastAckedMove = StaticCastSharedPtr<FXMoveU_SavedMove_Character>(GetPredictionData_Client_Character()->LastAckedMove);
 	FXMoveU_NetworkPredictionData_Client_Character& XMoveU_ClientData = static_cast<FXMoveU_NetworkPredictionData_Client_Character&>(*GetPredictionData_Client_Character());
 	
