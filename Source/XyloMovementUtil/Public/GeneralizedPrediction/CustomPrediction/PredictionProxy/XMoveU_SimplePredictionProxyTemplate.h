@@ -47,7 +47,6 @@ namespace XMoveU
 		TSharedPtr<FProxyVarType> ProxyVariable;
 		/** Only valid on client during rollback ONLY IF bRestoreAfterRollback */
 		T CachedValue;
-	private:
 		/** Helper to access the value on blackboard objects. */
 		TBlackboardHelper<T> BlackboardHelper;
 		/** Helper to access the PostSim value on blackboard objects (ONLY USED for PredictionFrame!!!). */
@@ -58,7 +57,7 @@ namespace XMoveU
 
 		
 	/*----------------------------------------------------------------------------------------------------------------*/
-		// Interface
+		// SimpleProxy Interface
 	
 	protected:
 		/** Provide the default value for this type. */
@@ -96,7 +95,7 @@ namespace XMoveU
 		/** Checks if this frame has any important changes relative to the last frame that got acknowledge by the server. */
 		virtual bool IsImportantFrame_Internal(const T& PreSimValue, const T& PostSimValue, const T& LastAckedPreSimValue, const T& LastAckedPostSimValue) { return false; }
 		
-		// ~Interface
+		// ~SimpleProxy Interface
 	/*----------------------------------------------------------------------------------------------------------------*/
 
 		
@@ -104,7 +103,7 @@ namespace XMoveU
 		// PredictionFrame uses both BlackboardHelper and BlackboardHelperPostSim.
 		// NetworkFrame and AuthoritativeFrame always use BlackboardHelper to store whatever is passed in it.
 		
-		virtual void CollectInputsAndCorrectionStates(const FBlackboard& CurrentPredictionFrame, FBlackboard& NetworkFrame) override final
+		virtual void CollectInputsAndCorrectionStates(const FBlackboard& CurrentPredictionFrame, FBlackboard& NetworkFrame) override
 		{
 			if (bIsInput)
 			{
@@ -124,7 +123,7 @@ namespace XMoveU
 			}
 		}
 		
-		virtual bool SerializeInputsAndCorrectionStates(FBlackboard& NetworkFrame, FArchive& Ar, UPackageMap* PackageMap) override final
+		virtual bool SerializeInputsAndCorrectionStates(FBlackboard& NetworkFrame, FArchive& Ar, UPackageMap* PackageMap) override
 		{
 			// Only serialize if we actually collected data in CollectInputsAndCorrectionStates.
 			if (!bIsInput && !bCheckForError) { return true; }
@@ -138,7 +137,7 @@ namespace XMoveU
 			return SerializeInputsAndCorrectionStates_Internal(BlackboardHelper.Get(NetworkFrame), Ar, PackageMap);
 		}
 		
-		virtual void ApplyClientInputs(const FBlackboard& ClientNetworkFrame) override final
+		virtual void ApplyClientInputs(const FBlackboard& ClientNetworkFrame) override
 		{
 			if (bIsInput)
 			{
@@ -150,7 +149,7 @@ namespace XMoveU
 			}
 		}
 		
-		virtual bool HasPredictionError(const FBlackboard& ClientNetworkFrame) override final
+		virtual bool HasPredictionError(const FBlackboard& ClientNetworkFrame) override
 		{
 			if (!bCheckForError) { return false; }
 
@@ -159,7 +158,7 @@ namespace XMoveU
 			return bHasPredictionErrorThisFrame;
 		}
 		
-		virtual void CollectCorrectedStates(FBlackboard& AuthoritativeFrame) override final
+		virtual void CollectCorrectedStates(FBlackboard& AuthoritativeFrame) override
 		{
 			if (CorrectionMode == EXMoveU_CorrectionMode::Authoritative)
 			{
@@ -171,7 +170,7 @@ namespace XMoveU
 			}
 		}
 		
-		virtual bool SerializeCorrectedStates(FBlackboard& AuthoritativeFrame, FArchive& Ar, UPackageMap* PackageMap) override final
+		virtual bool SerializeCorrectedStates(FBlackboard& AuthoritativeFrame, FArchive& Ar, UPackageMap* PackageMap) override
 		{
 			// Only serialize if we actually collected data in CollectCorrectedStates.
 			if (CorrectionMode != EXMoveU_CorrectionMode::Authoritative) { return true; }
@@ -199,7 +198,7 @@ namespace XMoveU
 			return SerializeCorrectedStates_Internal(BlackboardHelper.Get(AuthoritativeFrame), Ar, PackageMap);
 		}
 		
-		virtual void ApplyCorrectedState(const FBlackboard& AuthoritativeFrame, const FBlackboard* TargetPredictionFrame, EXMoveU_CorrectionContext Context) override final
+		virtual void ApplyCorrectedState(const FBlackboard& AuthoritativeFrame, const FBlackboard* TargetPredictionFrame, EXMoveU_CorrectionContext Context) override
 		{
 			bool bWantsAuthCorrection = CorrectionMode == EXMoveU_CorrectionMode::Authoritative;
 			bool bHasValidErrorState = bCheckForError && bUseLocalCorrectionIfNoError;
@@ -235,14 +234,14 @@ namespace XMoveU
 			}
 		}
 
-		virtual void Reset(FBlackboard& PredictionFrame) override final
+		virtual void Reset(FBlackboard& PredictionFrame) override
 		{
 			// Set the default values for this frame so it can be reused
 			BlackboardHelper.Set(PredictionFrame, MakeDefaulted());
 			BlackboardHelperPostSim.Set(PredictionFrame, MakeDefaulted());
 		}
 		
-		virtual void CollectCurrentState(FBlackboard& PredictionFrame) override final
+		virtual void CollectCurrentState(FBlackboard& PredictionFrame) override
 		{
 			if (!bAffectedBySimulation)
 			{
@@ -254,7 +253,7 @@ namespace XMoveU
 			}
 		}
 		
-		virtual void CollectDynamicState(FBlackboard& PredictionFrame) override final
+		virtual void CollectDynamicState(FBlackboard& PredictionFrame) override
 		{
 			if (bAffectedBySimulation)
 			{
@@ -266,12 +265,12 @@ namespace XMoveU
 			}
 		}
 		
-		virtual bool BlockCombinePreSimulation(FBlackboard& PredictionFrame) override final
+		virtual bool BlockCombinePreSimulation(FBlackboard& PredictionFrame) override
 		{
 			return IsFrameNonCombinablePreSim(BlackboardHelper.Get(PredictionFrame));
 		}
 		
-		virtual void CollectFinalState(FBlackboard& PredictionFrame, FSavedMove_Character::EPostUpdateMode PostUpdateMode) override final
+		virtual void CollectFinalState(FBlackboard& PredictionFrame, FSavedMove_Character::EPostUpdateMode PostUpdateMode) override
 		{
 			if (ProxyVariable->IsValid())
 			{
@@ -280,24 +279,24 @@ namespace XMoveU
 			}
 		}
 		
-		virtual bool BlockCombinePostSimulation(FBlackboard& PredictionFrame) override final
+		virtual bool BlockCombinePostSimulation(FBlackboard& PredictionFrame) override
 		{
 			return IsFrameNonCombinablePostSim(BlackboardHelper.Get(PredictionFrame), BlackboardHelperPostSim.Get(PredictionFrame));
 		}
 
-		virtual bool IsImportantFrame(const FBlackboard& PredictionFrame, const FBlackboard& LastAckedPredictionFrame) override final
+		virtual bool IsImportantFrame(const FBlackboard& PredictionFrame, const FBlackboard& LastAckedPredictionFrame) override
 		{
 			return IsImportantFrame_Internal(BlackboardHelper.Get(PredictionFrame), BlackboardHelperPostSim.Get(PredictionFrame), BlackboardHelper.Get(LastAckedPredictionFrame), BlackboardHelperPostSim.Get(LastAckedPredictionFrame));
 		}
 		
-		virtual bool CanCombineWithNewFrame(const FBlackboard& PredictionFrame, const FBlackboard& NewPredictionFrame) override final
+		virtual bool CanCombineWithNewFrame(const FBlackboard& PredictionFrame, const FBlackboard& NewPredictionFrame) override
 		{
 			bool bCanCombineStartWithStart = CanCombineWithNewFrame_Internal(BlackboardHelper.Get(PredictionFrame), BlackboardHelper.Get(NewPredictionFrame));
 			bool bHasNonSimulatedChanges = HasNonSimulatedChange(BlackboardHelperPostSim.Get(PredictionFrame), BlackboardHelper.Get(NewPredictionFrame));
 			return bCanCombineStartWithStart && !bHasNonSimulatedChanges;
 		}
 		
-		virtual void RevertFrameChanges(const FBlackboard& OldPredictionFrame) override final
+		virtual void RevertFrameChanges(const FBlackboard& OldPredictionFrame) override
 		{
 			if (bAffectedBySimulation)
 			{
@@ -309,7 +308,7 @@ namespace XMoveU
 			}
 		}
 
-		virtual void CacheStatePreRollback() override final
+		virtual void CacheStatePreRollback() override
 		{
 			if (bRestoreAfterRollback)
 			{
@@ -321,7 +320,7 @@ namespace XMoveU
 			}
 		}
 		
-		virtual void RollbackToFrame(const FBlackboard& PredictionFrame) override final
+		virtual void RollbackToFrame(const FBlackboard& PredictionFrame) override
 		{
 			// Give the opportunity to subclass to perform some operations before we roll back the value.
 			OnFrameRollback(BlackboardHelper.Get(PredictionFrame));
@@ -337,7 +336,7 @@ namespace XMoveU
 			}
 		}
 		
-		virtual void RestoreStatePostRollback() override final
+		virtual void RestoreStatePostRollback() override
 		{
 			if (bRestoreAfterRollback)
 			{
