@@ -93,6 +93,9 @@ protected:
 	 * under certain conditions, like transitioning on and off moving platforms. */
 	virtual bool ServerCheckGenericClientError(float ClientTimeStamp, float DeltaTime, const FVector& Accel, const FVector& ClientWorldLocation, const FVector& RelativeClientLocation, UPrimitiveComponent* ClientMovementBase, FName ClientBaseBoneName, uint8 ClientMovementMode, bool bIgnorePositionErrors);
 
+public:
+	virtual void ForEachSavedMove(TFunctionRef<void(FSavedMove_Character* CurrentMove)> InFunction);
+	
 /*====================================================================================================================*/
 	// CustomPrediction
 

@@ -687,6 +687,20 @@ bool UXMoveU_PredictionMovementComponent::ServerCheckGenericClientError(float Cl
 	return bIsError;
 }
 
+void UXMoveU_PredictionMovementComponent::ForEachSavedMove(TFunctionRef<void(FSavedMove_Character* CurrentMove)> InFunction)
+{
+	FNetworkPredictionData_Client_Character* ClientData = GetPredictionData_Client_Character();
+	check(ClientData);
+	
+	for (int32 i=0; i<ClientData->SavedMoves.Num(); i++)
+	{
+		FSavedMove_Character* const CurrentMove = ClientData->SavedMoves[i].Get();
+		checkSlow(CurrentMove != nullptr);
+
+		InFunction(CurrentMove);
+	}
+}
+
 /*====================================================================================================================*/
 // CustomPrediction
 
