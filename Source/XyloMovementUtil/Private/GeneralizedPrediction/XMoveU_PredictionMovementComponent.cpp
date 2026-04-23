@@ -109,7 +109,38 @@ void UXMoveU_PredictionMovementComponent::ServerMove_PerformMovement(const FChar
 
 void UXMoveU_PredictionMovementComponent::ClientAckGoodMove_Implementation(float TimeStamp)
 {
-	Super::ClientAckGoodMove_Implementation(TimeStamp);
+	// @XMoveU - @CopiedFromSuper
+	if (!HasValidData() || !IsActive())
+	{
+		return;
+	}
+
+	FNetworkPredictionData_Client_Character* ClientData = GetPredictionData_Client_Character();
+	check(ClientData);
+	
+#if ROOT_MOTION_DEBUG
+	if (RootMotionSourceDebug::CVarDebugRootMotionSources.GetValueOnGameThread() == 1)
+	{
+		FString AdjustedDebugString = FString::Printf(TEXT("ClientAckGoodMove_Implementation TimeStamp(%f)"),
+			TimeStamp);
+		RootMotionSourceDebug::PrintOnScreen(*CharacterOwner, AdjustedDebugString);
+	}
+#endif
+
+	// Ack move if it has not expired.
+	int32 MoveIndex = ClientData->GetSavedMoveIndex(TimeStamp);
+	if( MoveIndex == INDEX_NONE )
+	{
+		if( ClientData->LastAckedMove.IsValid() )
+		{
+			UE_LOG(LogNetPlayerMovement, Log, TEXT("ClientAckGoodMove_Implementation could not find Move for TimeStamp: %f, LastAckedTimeStamp: %f, CurrentTimeStamp: %f"), TimeStamp, ClientData->LastAckedMove->TimeStamp, ClientData->CurrentTimeStamp);
+		}
+		return;
+	}
+	
+	ClientData->AckMove(MoveIndex, *this);
+	// ~@XMoveU - @CopiedFromSuper
+	
 	OnClientAcknowledgmentReceived(TimeStamp);
 }
 
