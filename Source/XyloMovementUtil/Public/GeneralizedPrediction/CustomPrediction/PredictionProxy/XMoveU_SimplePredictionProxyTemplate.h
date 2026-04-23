@@ -25,7 +25,7 @@ namespace XMoveU
 		virtual ~TSimplePredictionProxy() {}
 
 	public:
-		void SetName(FName ProxyVarName)
+		virtual void SetName(FName ProxyVarName)
 		{
 			BlackboardHelper.VarName = ProxyVarName;
 			BlackboardHelperPostSim.VarName = FName("END_" + ProxyVarName.ToString());
