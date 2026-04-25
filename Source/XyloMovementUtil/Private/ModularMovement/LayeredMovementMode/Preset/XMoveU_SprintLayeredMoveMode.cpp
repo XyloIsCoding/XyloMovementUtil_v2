@@ -21,17 +21,17 @@ void UXMoveU_SprintLayeredMoveMode::ModifyMaxSpeed(float& OutMaxSpeed) const
 	}
 }
 
-bool UXMoveU_SprintLayeredMoveMode::ShouldEnterMode(float DeltaSeconds) const
+bool UXMoveU_SprintLayeredMoveMode::ShouldEnterMode(float DeltaSeconds)
 {
 	return !IsInMode() && WantsToBeInMode() && CanSprintInCurrentState();
 }
 
-bool UXMoveU_SprintLayeredMoveMode::ShouldLeaveMode(float DeltaSeconds) const
+bool UXMoveU_SprintLayeredMoveMode::ShouldLeaveMode(float DeltaSeconds)
 {
 	return IsInMode() && (!WantsToBeInMode() || !CanSprintInCurrentState());
 }
 
-bool UXMoveU_SprintLayeredMoveMode::ShouldForceLeaveMode(float DeltaSeconds) const
+bool UXMoveU_SprintLayeredMoveMode::ShouldForceLeaveMode(float DeltaSeconds)
 {
 	return IsInMode() && !CanSprintInCurrentState();
 }

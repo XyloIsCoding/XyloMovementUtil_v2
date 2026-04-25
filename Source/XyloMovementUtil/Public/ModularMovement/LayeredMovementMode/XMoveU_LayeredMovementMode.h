@@ -66,9 +66,11 @@ public:
 	virtual void ModifyBrakingDeceleration(float& OutBrakingDeceleration) const {}
 	
 public:
-	virtual bool ShouldEnterMode(float DeltaSeconds) const { return false; }
-	virtual bool ShouldLeaveMode(float DeltaSeconds) const { return false; }
-	virtual bool ShouldForceLeaveMode(float DeltaSeconds) const { return false; }
+	virtual bool ShouldEnterMode(float DeltaSeconds) { return false; }
+	virtual bool ShouldLeaveMode(float DeltaSeconds) { return false; }
+	virtual bool ShouldForceLeaveMode(float DeltaSeconds) { return false; }
+	/** Return true if we should enter this layered movement mode instead of performing a jump. */
+	virtual bool ShouldReplaceJump(float DeltaSeconds) { return false; }
 
 public:
 	virtual void EnterMode(bool bClientSimulation);

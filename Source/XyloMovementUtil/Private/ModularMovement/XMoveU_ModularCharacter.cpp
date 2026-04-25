@@ -84,7 +84,7 @@ void AXMoveU_ModularCharacter::CheckJumpInputSynced(float DeltaTime)
 	if (MoveComp && bPressedJump && JumpKeyHoldTime == 0.f)
 	{
 		// Called one time per input press
-		if (MoveComp->TryJumpOverride())
+		if (MoveComp->TryJumpOverride(DeltaTime))
 		{
 			StopJumping();
 			return;

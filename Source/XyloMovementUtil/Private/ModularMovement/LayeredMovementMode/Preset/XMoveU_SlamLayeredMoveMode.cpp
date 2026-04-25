@@ -28,12 +28,12 @@ void UXMoveU_SlamLayeredMoveMode::OnRegistered(uint32 InModeIndex)
 	MoveComp->OnPostLandedDelegate.AddUObject(this, &UXMoveU_SlamLayeredMoveMode::OnImpact);
 }
 
-bool UXMoveU_SlamLayeredMoveMode::ShouldEnterMode(float DeltaSeconds) const
+bool UXMoveU_SlamLayeredMoveMode::ShouldEnterMode(float DeltaSeconds)
 {
 	return !IsInMode() && WantsToBeInMode() && CanSlamInCurrentState();
 }
 
-bool UXMoveU_SlamLayeredMoveMode::ShouldForceLeaveMode(float DeltaSeconds) const
+bool UXMoveU_SlamLayeredMoveMode::ShouldForceLeaveMode(float DeltaSeconds)
 {
 	return IsInMode() && !CanSlamInCurrentState(true);
 }

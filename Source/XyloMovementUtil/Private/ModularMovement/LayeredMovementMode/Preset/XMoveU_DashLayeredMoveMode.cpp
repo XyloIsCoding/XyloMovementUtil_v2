@@ -27,7 +27,7 @@ void UXMoveU_DashLayeredMoveMode::OnRegistered(uint32 InModeIndex)
 	DashCharge = DashMaxCharges;
 }
 
-bool UXMoveU_DashLayeredMoveMode::ShouldEnterMode(float DeltaSeconds) const
+bool UXMoveU_DashLayeredMoveMode::ShouldEnterMode(float DeltaSeconds)
 {
 	if (FMath::Floor<int32>(DashCharge) < 1)
 	{
@@ -36,7 +36,7 @@ bool UXMoveU_DashLayeredMoveMode::ShouldEnterMode(float DeltaSeconds) const
 	return !IsInMode() && WantsToBeInMode() && CanDashInCurrentState();
 }
 
-bool UXMoveU_DashLayeredMoveMode::ShouldForceLeaveMode(float DeltaSeconds) const
+bool UXMoveU_DashLayeredMoveMode::ShouldForceLeaveMode(float DeltaSeconds)
 {
 	return IsInMode() && (TimeSinceDash > DashDuration || !CanDashInCurrentState(true));
 }

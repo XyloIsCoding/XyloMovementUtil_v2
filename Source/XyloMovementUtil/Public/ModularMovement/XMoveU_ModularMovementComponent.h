@@ -172,7 +172,7 @@ public:
 public:
 	/** Override this function to intercept and stop the jump pipeline (for example for a mantle mechanic).
 	 * @remarks: Only called if using SyncedJumpInputCheck (default behaviour). */
-	virtual bool TryJumpOverride();
+	virtual bool TryJumpOverride(float DeltaTime);
 
 	/** If true, JumpCurrentCount is increased before trying to perform the first jump. Useful to prevent jumping while
 	 * falling already. */
@@ -217,6 +217,26 @@ protected:
 	// ~ImprovedInterface
 /*====================================================================================================================*/
 
+/*====================================================================================================================*/
+	// Helpers
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	virtual float GetScaledCapsuleRadius() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	virtual float GetScaledCapsuleHalfHeight() const;
+	
+protected:
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	virtual FVector GetControllerForwardVector() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	virtual FVector GetControllerRightVector() const;
+	
+	// ~Helpers
+/*====================================================================================================================*/
+	
 /*====================================================================================================================*/
 	// GroundInfo
 
@@ -337,6 +357,7 @@ protected:
 
 	virtual void CheckLayeredMovementModesTransition(float DeltaSeconds);
 	virtual void TryLeaveLayeredMovementModes(float DeltaSeconds);
+	virtual bool TryReplaceJumpWithLayeredMovementModes(float DeltaSeconds);
 	virtual void UpdateLayeredMovementModes(float DeltaSeconds);
 
 	virtual void ApplyLayeredMovementModesSpeedModifier(float& OutMaxSpeed) const;

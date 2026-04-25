@@ -21,9 +21,9 @@ public:
 	virtual void ModifyMaxSpeed(float& OutMaxSpeed) const override;
 	
 public:
-	virtual bool ShouldEnterMode(float DeltaSeconds) const override;
-	virtual bool ShouldLeaveMode(float DeltaSeconds) const override;
-	virtual bool ShouldForceLeaveMode(float DeltaSeconds) const override;
+	virtual bool ShouldEnterMode(float DeltaSeconds) override;
+	virtual bool ShouldLeaveMode(float DeltaSeconds) override;
+	virtual bool ShouldForceLeaveMode(float DeltaSeconds) override;
 protected:
 	virtual bool CanSprintInCurrentState() const;
 

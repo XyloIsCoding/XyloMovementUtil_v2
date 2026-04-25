@@ -44,17 +44,17 @@ void UXMoveU_CrouchLayeredMoveMode::ReplicateStateToSimProxies()
 	// Empty implementation because character class already deals with it.
 }
 
-bool UXMoveU_CrouchLayeredMoveMode::ShouldEnterMode(float DeltaSeconds) const
+bool UXMoveU_CrouchLayeredMoveMode::ShouldEnterMode(float DeltaSeconds)
 {
 	return !IsInMode() && WantsToBeInMode() && CanCrouchInCurrentState();
 }
 
-bool UXMoveU_CrouchLayeredMoveMode::ShouldLeaveMode(float DeltaSeconds) const
+bool UXMoveU_CrouchLayeredMoveMode::ShouldLeaveMode(float DeltaSeconds)
 {
 	return IsInMode() && (!WantsToBeInMode() || !CanCrouchInCurrentState());
 }
 
-bool UXMoveU_CrouchLayeredMoveMode::ShouldForceLeaveMode(float DeltaSeconds) const
+bool UXMoveU_CrouchLayeredMoveMode::ShouldForceLeaveMode(float DeltaSeconds)
 {
 	return IsInMode() && !CanCrouchInCurrentState();
 }

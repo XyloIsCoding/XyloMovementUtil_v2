@@ -21,8 +21,8 @@ public:
 	virtual void OnRegistered(uint32 InModeIndex) override;
 	
 public:
-	virtual bool ShouldEnterMode(float DeltaSeconds) const override;
-	virtual bool ShouldForceLeaveMode(float DeltaSeconds) const override;
+	virtual bool ShouldEnterMode(float DeltaSeconds) override;
+	virtual bool ShouldForceLeaveMode(float DeltaSeconds) override;
 protected:
 	virtual bool CanSlamInCurrentState(bool bIgnoreMinHeight = false) const;
 	

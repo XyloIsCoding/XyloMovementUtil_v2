@@ -1507,8 +1507,12 @@ bool UXMoveU_ModularMovementComponent::IsWalkingStrict() const
 	return MovementMode == MOVE_Walking || MovementMode == MOVE_NavWalking;
 }
 
-bool UXMoveU_ModularMovementComponent::TryJumpOverride()
+bool UXMoveU_ModularMovementComponent::TryJumpOverride(float DeltaTime)
 {
+	if (TryReplaceJumpWithLayeredMovementModes(DeltaTime))
+	{
+		return true;
+	}
 	return false;
 }
 
@@ -1619,6 +1623,32 @@ void UXMoveU_ModularMovementComponent::EvaluatePostLandedTransitions(const FHitR
 }
 
 // ~ImprovedInterface
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+// Helpers
+
+float UXMoveU_ModularMovementComponent::GetScaledCapsuleRadius() const
+{
+	return CharacterOwner->GetCapsuleComponent()->GetScaledCapsuleRadius();
+}
+
+float UXMoveU_ModularMovementComponent::GetScaledCapsuleHalfHeight() const
+{
+	return CharacterOwner->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+}
+
+FVector UXMoveU_ModularMovementComponent::GetControllerForwardVector() const
+{
+	return CharacterOwner->GetControlRotation().Vector();
+}
+
+FVector UXMoveU_ModularMovementComponent::GetControllerRightVector() const
+{
+	return CharacterOwner->GetControlRotation().RotateVector(FVector::DownVector);
+}
+
+// ~Helpers
 /*====================================================================================================================*/
 
 /*====================================================================================================================*/
@@ -2120,6 +2150,30 @@ void UXMoveU_ModularMovementComponent::TryLeaveLayeredMovementModes(float DeltaS
 			}
 		}
 	}
+}
+
+bool UXMoveU_ModularMovementComponent::TryReplaceJumpWithLayeredMovementModes(float DeltaSeconds)
+{
+	// Proxies get replicated layered modes state.
+	if (CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		return false;
+	}
+	
+	for (FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
+	{
+		if (IsValid(RegisteredLayeredMove.Mode))
+		{
+			// Enter mode instead of jumping.
+			if (RegisteredLayeredMove.Mode->ShouldReplaceJump(DeltaSeconds))
+			{
+				RegisteredLayeredMove.Mode->EnterMode(false);
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 void UXMoveU_ModularMovementComponent::UpdateLayeredMovementModes(float DeltaSeconds)
