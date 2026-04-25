@@ -94,10 +94,11 @@ void UXMoveU_ModularMovementComponent::UpdateCharacterStateBeforeMovement(float 
 {
 	UpdateJumpBeforeMovement(DeltaSeconds);
 	UpdateCrouchBeforeMovement(DeltaSeconds);
-	UpdateMovementModes(DeltaSeconds);
-	CheckMovementModesTransition(DeltaSeconds);
 	CheckLayeredMovementModesTransition(DeltaSeconds);
 	UpdateLayeredMovementModes(DeltaSeconds);
+	
+	UpdateMovementModes(DeltaSeconds);
+	CheckMovementModesTransition(DeltaSeconds);
 
 	TickSyncedObjectsBeforeMovement(DeltaSeconds);
 }
