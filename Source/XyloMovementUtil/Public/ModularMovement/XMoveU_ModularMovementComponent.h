@@ -9,7 +9,6 @@
 #include "XMoveU_ModularMovementComponent.generated.h"
 
 
-class UXMoveU_SlideMoveMode;
 class UXMoveU_LayeredMovementMode;
 struct FXMoveU_RegisteredLayeredMovementMode;
 class UXMoveU_JumpProfile;
@@ -54,7 +53,8 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class XYLOMOVEMENTUTIL_API UXMoveU_ModularMovementComponent : public UXMoveU_PredictionMovementComponent
 {
 	GENERATED_BODY()
-	friend UXMoveU_SlideMoveMode;
+	friend class UXMoveU_SlideMoveMode;
+	friend class UXMoveU_MantleLayeredMoveMode;
 
 public:
 	UXMoveU_ModularMovementComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
