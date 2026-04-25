@@ -35,7 +35,8 @@ struct XYLOMOVEMENTUTIL_API FXMoveU_BitFlag
 };
 
 /**
- *
+ * Prediction proxy to use in combination with a FXMoveU_BitFlag. By default, it is set to use the variable BitFlag var
+ * as an input.
  */
 USTRUCT(BlueprintType, DisplayName="Prediction Proxy (Bit Flag)")
 struct XYLOMOVEMENTUTIL_API FXMoveU_PredictionProxy_BitFlag :
