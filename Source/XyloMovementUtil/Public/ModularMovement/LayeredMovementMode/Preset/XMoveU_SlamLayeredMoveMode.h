@@ -30,6 +30,7 @@ protected:
 	virtual void UpdateMode(float DeltaSeconds) override;
 
 	virtual void OnImpact(const FHitResult& Impact);
+	virtual void OnLeftModeAfterImpact(const FHitResult& Impact);
 
 protected:
 	UPROPERTY(Category="Slam", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
