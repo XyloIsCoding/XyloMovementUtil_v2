@@ -66,6 +66,7 @@ public:
 	virtual void ModifyBrakingDeceleration(float& OutBrakingDeceleration) const {}
 	
 public:
+	virtual bool CanRequestMode() { return true; }
 	virtual bool ShouldEnterMode(float DeltaSeconds) { return false; }
 	virtual bool ShouldLeaveMode(float DeltaSeconds) { return false; }
 	virtual bool ShouldForceLeaveMode(float DeltaSeconds) { return false; }

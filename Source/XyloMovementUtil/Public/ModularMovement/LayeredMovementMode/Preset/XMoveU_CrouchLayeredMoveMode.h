@@ -30,6 +30,7 @@ public:
 	virtual void ReplicateStateToSimProxies() override;
 
 public:
+	virtual bool CanRequestMode() override;
 	virtual bool ShouldEnterMode(float DeltaSeconds) override;
 	virtual bool ShouldLeaveMode(float DeltaSeconds) override;
 	virtual bool ShouldForceLeaveMode(float DeltaSeconds) override;

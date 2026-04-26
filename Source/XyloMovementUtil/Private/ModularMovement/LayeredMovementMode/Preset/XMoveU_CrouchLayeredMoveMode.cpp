@@ -44,6 +44,12 @@ void UXMoveU_CrouchLayeredMoveMode::ReplicateStateToSimProxies()
 	// Empty implementation because character class already deals with it.
 }
 
+bool UXMoveU_CrouchLayeredMoveMode::CanRequestMode()
+{
+	AXMoveU_ModularCharacter* Char = GetOwningCharacter();
+	return Char && Char->CanCrouch();
+}
+
 bool UXMoveU_CrouchLayeredMoveMode::ShouldEnterMode(float DeltaSeconds)
 {
 	return !IsInMode() && WantsToBeInMode() && CanCrouchInCurrentState();

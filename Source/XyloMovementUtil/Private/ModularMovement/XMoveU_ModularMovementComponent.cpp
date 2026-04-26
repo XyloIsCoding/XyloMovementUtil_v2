@@ -2006,7 +2006,12 @@ void UXMoveU_ModularMovementComponent::RequestLayeredMovementMode(const FGamepla
 		{
 			if (IsValid(RegisteredLayeredMove.Mode))
 			{
-				RegisteredLayeredMove.Mode->RequestMode(bWantsToEnterMode);
+				// If we want to request the mode, then check if we are allowed to. Instead, if we want to stop the
+				// request, just go ahead without checks.
+				if (!bWantsToEnterMode || RegisteredLayeredMove.Mode->CanRequestMode())
+				{
+					RegisteredLayeredMove.Mode->RequestMode(bWantsToEnterMode);
+				}
 			}
 			return;
 		}
