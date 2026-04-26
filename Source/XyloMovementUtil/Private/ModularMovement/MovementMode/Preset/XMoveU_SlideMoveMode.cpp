@@ -70,12 +70,6 @@ bool UXMoveU_SlideMoveMode::ShouldEnterModePostLanded(const FHitResult& Hit)
 	return false;
 }
 
-bool UXMoveU_SlideMoveMode::CanSlideInCurrentState() const
-{
-	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
-	return !IsInMode() && MoveComp->IsCrouching();
-}
-
 void UXMoveU_SlideMoveMode::OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode)
 {
 	Super::OnEnteredMovementMode(PreviousMovementMode, PreviousCustomMode);
@@ -371,6 +365,12 @@ void UXMoveU_SlideMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 	{
 		MaintainFloorPlaneGroundVelocity(); // @XMoveU - @Change
 	}
+}
+
+bool UXMoveU_SlideMoveMode::CanSlideInCurrentState() const
+{
+	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+	return !IsInMode() && MoveComp->IsCrouching();
 }
 
 void UXMoveU_SlideMoveMode::MaintainFloorPlaneGroundVelocity()
