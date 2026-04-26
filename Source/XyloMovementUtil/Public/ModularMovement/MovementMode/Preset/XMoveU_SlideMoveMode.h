@@ -21,8 +21,8 @@ public:
 	virtual void OnRegistered() override;
 
 public:
-	virtual bool ShouldEnterMode() const override;
-	virtual bool ShouldEnterModePostLanded(const FHitResult& Hit) const override;
+	virtual bool ShouldEnterMode() override;
+	virtual bool ShouldEnterModePostLanded(const FHitResult& Hit) override;
 protected:
 	virtual bool CanSlideInCurrentState() const;
 

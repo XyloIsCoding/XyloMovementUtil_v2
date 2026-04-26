@@ -71,8 +71,8 @@ public:
 	virtual bool CanCrouchInCurrentMode() const { return true; }
 
 public:
-	virtual bool ShouldEnterMode() const { return false; }
-	virtual bool ShouldEnterModePostLanded(const FHitResult& Hit) const { return false; }
+	virtual bool ShouldEnterMode() { return false; }
+	virtual bool ShouldEnterModePostLanded(const FHitResult& Hit) { return false; }
 	virtual void OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) {}
 	virtual void OnLeftMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode) {}
 	virtual void UpdateMode(float DeltaTime) {}

@@ -39,7 +39,7 @@ void UXMoveU_SlideMoveMode::OnRegistered()
 	TimeSinceLastSlide = SlideCooldown;
 }
 
-bool UXMoveU_SlideMoveMode::ShouldEnterMode() const
+bool UXMoveU_SlideMoveMode::ShouldEnterMode()
 {
 	// Start sliding if crouching and enough speed.
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
@@ -53,7 +53,7 @@ bool UXMoveU_SlideMoveMode::ShouldEnterMode() const
 	return false;
 }
 
-bool UXMoveU_SlideMoveMode::ShouldEnterModePostLanded(const FHitResult& Hit) const
+bool UXMoveU_SlideMoveMode::ShouldEnterModePostLanded(const FHitResult& Hit)
 {
 	// Enter sliding if landing while crouched with enough speed.
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
