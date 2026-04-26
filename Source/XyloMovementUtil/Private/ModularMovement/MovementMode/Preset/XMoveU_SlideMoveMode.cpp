@@ -152,7 +152,7 @@ void UXMoveU_SlideMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 	}
 	// ~@XMoveU - @Change
 
-	devCode(ensureMsgf(!MoveComp->Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN before Iteration (%s)\n%s"), *GetPathNameSafe(this), *MoveComp->Velocity.ToString()));
+	devCode(ensureMsgf(!MoveComp->Velocity.ContainsNaN(), TEXT("PhysSliding: Velocity contains NaN before Iteration (%s)\n%s"), *GetPathNameSafe(this), *MoveComp->Velocity.ToString()));
 	
 	MoveComp->bJustTeleported = false;
 	bool bCheckedFall = false;
@@ -193,11 +193,11 @@ void UXMoveU_SlideMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		if( !MoveComp->HasAnimRootMotion() && !MoveComp->CurrentRootMotion.HasOverrideVelocity() )
 		{
 			MoveComp->CalcVelocity(timeTick, SlidingFriction, false, MoveComp->GetMaxBrakingDeceleration()); // @XMoveU - @Change: using SlidingFriction
-			devCode(ensureMsgf(!MoveComp->Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN after CalcVelocity (%s)\n%s"), *GetPathNameSafe(this), *MoveComp->Velocity.ToString()));
+			devCode(ensureMsgf(!MoveComp->Velocity.ContainsNaN(), TEXT("PhysSliding: Velocity contains NaN after CalcVelocity (%s)\n%s"), *GetPathNameSafe(this), *MoveComp->Velocity.ToString()));
 		}
 		
 		MoveComp->ApplyRootMotionToVelocity(timeTick);
-		devCode(ensureMsgf(!MoveComp->Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN after Root Motion application (%s)\n%s"), *GetPathNameSafe(this), *MoveComp->Velocity.ToString()));
+		devCode(ensureMsgf(!MoveComp->Velocity.ContainsNaN(), TEXT("PhysSliding: Velocity contains NaN after Root Motion application (%s)\n%s"), *GetPathNameSafe(this), *MoveComp->Velocity.ToString()));
 
 		if (MoveComp->MovementMode != StartingMovementMode || MoveComp->CustomMovementMode != StartingCustomMovementMode)
 		{
