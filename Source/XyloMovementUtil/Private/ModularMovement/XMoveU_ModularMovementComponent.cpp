@@ -1655,9 +1655,14 @@ FVector UXMoveU_ModularMovementComponent::GetControllerForwardVector() const
 	return CharacterOwner->GetControlRotation().Vector();
 }
 
-FVector UXMoveU_ModularMovementComponent::GetControllerRightVector() const
+FVector UXMoveU_ModularMovementComponent::GetControllerDownVector() const
 {
 	return CharacterOwner->GetControlRotation().RotateVector(FVector::DownVector);
+}
+
+FVector UXMoveU_ModularMovementComponent::GetControllerRightVector() const
+{
+	return FVector::CrossProduct(GetControllerDownVector(), GetControllerForwardVector());
 }
 
 // ~Helpers
@@ -1921,7 +1926,7 @@ UXMoveU_MovementMode* UXMoveU_ModularMovementComponent::GetCustomMovementMode(EM
 	return nullptr;
 }
 
-UXMoveU_MovementMode* UXMoveU_ModularMovementComponent::GetCustomMovementModeByTag(const FGameplayTag& MovementModeTag) const
+UXMoveU_MovementMode* UXMoveU_ModularMovementComponent::GetCustomMovementModeByTag(FGameplayTag MovementModeTag) const
 {
 	for (const FXMoveU_RegisteredMovementMode& CustomMode : CustomMovementModes)
 	{
@@ -1935,7 +1940,7 @@ UXMoveU_MovementMode* UXMoveU_ModularMovementComponent::GetCustomMovementModeByT
 	return nullptr;
 }
 
-void UXMoveU_ModularMovementComponent::SetMovementModeByTag(const FGameplayTag& MovementModeTag)
+void UXMoveU_ModularMovementComponent::SetMovementModeByTag(FGameplayTag MovementModeTag)
 {
 	for (int32 MoveIndex = 0; MoveIndex < CustomMovementModes.Num(); ++MoveIndex)
 	{
@@ -1960,7 +1965,7 @@ FGameplayTag UXMoveU_ModularMovementComponent::GetCustomMovementModeTag(uint8 In
 	return FGameplayTag();
 }
 
-bool UXMoveU_ModularMovementComponent::IsInCustomMovementMode(const FGameplayTag& MovementModeTag) const
+bool UXMoveU_ModularMovementComponent::IsInCustomMovementMode(FGameplayTag MovementModeTag) const
 {
 	if (MovementMode != MOVE_Custom)
 	{
@@ -2050,7 +2055,7 @@ void UXMoveU_ModularMovementComponent::UpdateMovementModes(float DeltaSeconds)
 /*====================================================================================================================*/
 // LayeredMoves
 
-void UXMoveU_ModularMovementComponent::RequestLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag, bool bWantsToEnterMode)
+void UXMoveU_ModularMovementComponent::RequestLayeredMovementMode(FGameplayTag LayeredMovementModeTag, bool bWantsToEnterMode)
 {
 	for (FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
 	{
@@ -2072,7 +2077,7 @@ void UXMoveU_ModularMovementComponent::RequestLayeredMovementMode(const FGamepla
 	UE_LOG(LogXyloMovementUtil, Warning, TEXT("UXMoveU_ModularMovementComponent::RequestLayeredMovementMode >> No layered movement mode registered with tag [%s]"), *LayeredMovementModeTag.ToString())
 }
 
-bool UXMoveU_ModularMovementComponent::IsInLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const
+bool UXMoveU_ModularMovementComponent::IsInLayeredMovementMode(FGameplayTag LayeredMovementModeTag) const
 {
 	for (const FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
 	{
@@ -2277,7 +2282,7 @@ void UXMoveU_ModularMovementComponent::ApplyLayeredMovementModesBrakingDecelerat
 	}
 }
 
-UXMoveU_LayeredMovementMode* UXMoveU_ModularMovementComponent::GetLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const
+UXMoveU_LayeredMovementMode* UXMoveU_ModularMovementComponent::GetLayeredMovementMode(FGameplayTag LayeredMovementModeTag) const
 {
 	for (const FXMoveU_RegisteredLayeredMovementMode& RegisteredLayeredMove : LayeredMovementModes)
 	{

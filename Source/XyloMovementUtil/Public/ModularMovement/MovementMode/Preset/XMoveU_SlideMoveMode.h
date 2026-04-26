@@ -35,6 +35,7 @@ public:
 	virtual float GetModeMaxSpeed() const override { return MaxSlidingSpeed; }
 	virtual float GetModeMinAnalogSpeed() const override { return MinAnalogSlidingSpeed; }
 	virtual float GetModeMaxBrakingDeceleration() const override { return MaxBrakingDecelerationSliding; }
+	virtual float GetModeBrakingFriction() const override { return SlidingFriction; }
 
 	virtual void MaintainFloorPlaneGroundVelocity();
 

@@ -233,6 +233,9 @@ protected:
 	virtual FVector GetControllerForwardVector() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	virtual FVector GetControllerDownVector() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
 	virtual FVector GetControllerRightVector() const;
 	
 	// ~Helpers
@@ -351,16 +354,16 @@ public:
 	UXMoveU_MovementMode* GetCustomMovementMode(EMovementMode InMovementMode, uint8 InCustomMode) const;
 	
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
-	UXMoveU_MovementMode* GetCustomMovementModeByTag(const FGameplayTag& MovementModeTag) const;
+	UXMoveU_MovementMode* GetCustomMovementModeByTag(FGameplayTag MovementModeTag) const;
 
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
-	void SetMovementModeByTag(const FGameplayTag& MovementModeTag);
+	void SetMovementModeByTag(FGameplayTag MovementModeTag);
 
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
 	FGameplayTag GetCustomMovementModeTag(uint8 InCustomMode) const;
 
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|CustomMovementModes", BlueprintCallable)
-	virtual bool IsInCustomMovementMode(const FGameplayTag& MovementModeTag) const;
+	virtual bool IsInCustomMovementMode(FGameplayTag MovementModeTag) const;
 	
 protected:
 	virtual void RegisterMovementModes();
@@ -381,10 +384,10 @@ private:
 
 public:
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
-	virtual void RequestLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag, bool bWantsToEnterMode);
+	virtual void RequestLayeredMovementMode(FGameplayTag LayeredMovementModeTag, bool bWantsToEnterMode);
 
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
-	virtual bool IsInLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const;
+	virtual bool IsInLayeredMovementMode(FGameplayTag LayeredMovementModeTag) const;
 
 	// Compresses request states into a 32 bits bitflag
 	virtual uint32 GetLayeredMovementModesRequests() const;
@@ -407,7 +410,7 @@ protected:
 	
 public:
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
-	virtual UXMoveU_LayeredMovementMode* GetLayeredMovementMode(const FGameplayTag& LayeredMovementModeTag) const;
+	virtual UXMoveU_LayeredMovementMode* GetLayeredMovementMode(FGameplayTag LayeredMovementModeTag) const;
 
 	UFUNCTION(Category="Pawn|Components|CharacterMovement|LayeredMovementModes", BlueprintCallable)
 	const TArray<FXMoveU_RegisteredLayeredMovementMode>& GetLayeredMovementModes() const { return LayeredMovementModes; }
