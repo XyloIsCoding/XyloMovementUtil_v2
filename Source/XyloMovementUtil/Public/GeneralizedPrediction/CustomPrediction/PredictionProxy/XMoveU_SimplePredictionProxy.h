@@ -10,8 +10,10 @@
 UENUM()
 enum class EXMoveU_CorrectionMode : uint8
 {
-	// For each resimulated frame of a rollback, the value is reapplied as it was during the resimulated prediction frame.
+	// The value is only changed by simulation logic during rollbacks, with no external interference from rollback system.
 	None,
+	// For each resimulated frame of a rollback, the value is reapplied as it was during the resimulated prediction frame.
+	Replay,
 	// The correction packet contains the authoritative value, which is going to be applied to the client.
 	Authoritative,
 	// Apply the value the client had at the end of the frame that received the correction.
@@ -49,7 +51,7 @@ public:
 
 	/** How this value should be treated during server corrections. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EXMoveU_CorrectionMode CorrectionMode = EXMoveU_CorrectionMode::None;
+	EXMoveU_CorrectionMode CorrectionMode = EXMoveU_CorrectionMode::Replay;
 
 	/** When the correction from server is applied */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "CorrectionMode == EXMoveU_CorrectionMode::Authoritative", EditConditionHides))

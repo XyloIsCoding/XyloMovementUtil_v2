@@ -75,7 +75,7 @@ namespace XMoveU
 		virtual void OnCorrectionReceived(const T& AuthoritativeValue, const T& PredictedValue, EXMoveU_CorrectionContext Context, bool& bOutApplyCorrection) {}
 		
 		/** Called when the proxy is asked to roll back the value to a specific frame.
-		 * The proxy only rollbacks the value if CorrectionMode == EXMoveU_CorrectionMode::None, so this can be used
+		 * The proxy only rollbacks the value if CorrectionMode == EXMoveU_CorrectionMode::Replay, so this can be used
 		 * to implement extra logic. */
 		virtual void OnFrameRollback(const T& RollbackValue) {}
 		/** Called after a rollback before applying back the pre-rollback value.  */
@@ -326,7 +326,7 @@ namespace XMoveU
 			OnFrameRollback(BlackboardHelper.Get(PredictionFrame));
 
 			// We only need to rollback if CorrectionMode is None, otherwise we would be overwriting the correction.
-			if (CorrectionMode == EXMoveU_CorrectionMode::None)
+			if (CorrectionMode == EXMoveU_CorrectionMode::Replay)
 			{
 				if (ProxyVariable->IsValid())
 				{
