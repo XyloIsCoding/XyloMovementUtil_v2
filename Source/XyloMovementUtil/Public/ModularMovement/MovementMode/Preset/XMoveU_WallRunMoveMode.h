@@ -31,6 +31,8 @@ public:
 
 protected:
 	virtual bool CanWallRunInCurrentState() const;
+	virtual bool FindWall(FHitResult& OutWallHit, const FVector& Direction, float Distance);
+	virtual void MaintainWallPlaneVelocity();
 
 public:
 	UPROPERTY(Category = "WallRun", EditAnywhere, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
@@ -44,10 +46,23 @@ public:
 
 	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
 	float WallRunningFriction;
+
+	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
+	float MaxWallDistance;
+	
+	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+	float WallAttractionForce;
+
+	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
+	float WallRunGravityScale;
 	
 	UPROPERTY(Category = "WallRun", EditAnywhere, meta=(ForceUnits="cm/s"))
 	float WallRunVerticalSpeedDetachThreshold;
 
-	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
-	float WallAttractionForce;
+	UPROPERTY(Category = "WallRun", EditAnywhere)
+	float WallRunLeaveAngleCosine;
+
+
+	UPROPERTY(Category="WallRun", VisibleInstanceOnly, BlueprintReadOnly)
+	FHitResult CurrentWall;
 };

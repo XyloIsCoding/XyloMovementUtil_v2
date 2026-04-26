@@ -55,6 +55,7 @@ class XYLOMOVEMENTUTIL_API UXMoveU_ModularMovementComponent : public UXMoveU_Pre
 	GENERATED_BODY()
 	friend class UXMoveU_ModularMovementPredManager;
 	friend class UXMoveU_SlideMoveMode;
+	friend class UXMoveU_WallRunMoveMode;
 	friend class UXMoveU_MantleLayeredMoveMode;
 
 public:
