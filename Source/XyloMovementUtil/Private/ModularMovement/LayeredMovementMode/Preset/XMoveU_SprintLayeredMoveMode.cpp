@@ -15,7 +15,7 @@ UXMoveU_SprintLayeredMoveMode::UXMoveU_SprintLayeredMoveMode(const FObjectInitia
 void UXMoveU_SprintLayeredMoveMode::ModifyMaxSpeed(float& OutMaxSpeed) const
 {
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
-	if (MoveComp && MoveComp->IsWalking())
+	if (MoveComp && MoveComp->IsWalkingStrict())
 	{
 		OutMaxSpeed = MaxWalkSpeedSprinting;
 	}

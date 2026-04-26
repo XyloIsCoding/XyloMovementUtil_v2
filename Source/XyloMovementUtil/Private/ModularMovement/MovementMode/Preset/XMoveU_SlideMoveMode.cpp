@@ -43,7 +43,7 @@ bool UXMoveU_SlideMoveMode::ShouldEnterMode()
 {
 	// Start sliding if crouching and enough speed.
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
-	if (MoveComp->IsMovingOnGround() && CanSlideInCurrentState())
+	if (MoveComp->IsWalkingStrict() && CanSlideInCurrentState())
 	{
 		if (MoveComp->Velocity.SizeSquared() > FMath::Square(SlideEnterSpeed))
 		{
@@ -142,6 +142,7 @@ void UXMoveU_SlideMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 	if (!MoveComp->IsCrouching())
 	{
 		MoveComp->SetMovementMode(MOVE_Walking);
+		MoveComp->StartNewPhysics(DeltaTime, Iterations);
 		return;
 	}
 	// ~@XMoveU - @Change
@@ -337,6 +338,7 @@ void UXMoveU_SlideMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		if (MoveComp->Velocity.SizeSquared() < FMath::Square(SlideExitSpeed))
 		{
 			MoveComp->SetMovementMode(MOVE_Walking);
+			MoveComp->StartNewPhysics(remainingTime, Iterations);
 			return;
 		}
 		// ~@XMoveU - @Change
