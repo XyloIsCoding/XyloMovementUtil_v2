@@ -190,7 +190,7 @@ UXMoveU_MantleLayeredMoveMode::UXMoveU_MantleLayeredMoveMode(const FObjectInitia
 	MaxVerticalWallReach = 180.f;
 	MaxHorizontalWallReach = 60.f;
 	MinMantleAngleCosine = 0.5f;
-	MantleSpeed = 400.f;
+	MantleSpeed = 550.f;
 	PostMantleHorizontalVelocity = 450.f;
 	PostMantleVerticalVelocity = 300.f;
 }
