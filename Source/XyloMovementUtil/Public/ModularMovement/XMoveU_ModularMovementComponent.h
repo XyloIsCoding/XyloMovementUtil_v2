@@ -53,6 +53,7 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class XYLOMOVEMENTUTIL_API UXMoveU_ModularMovementComponent : public UXMoveU_PredictionMovementComponent
 {
 	GENERATED_BODY()
+	friend class UXMoveU_ModularMovementPredManager;
 	friend class UXMoveU_SlideMoveMode;
 	friend class UXMoveU_MantleLayeredMoveMode;
 
@@ -252,6 +253,46 @@ protected:
 	float GroundTraceDistance = 100000.0f;
 
 	// ~GroundInfo
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+	// CoyoteTime
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	virtual bool IsInCoyoteTime() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	virtual float GetCoyoteTimeDuration() const { return CoyoteTimeDurationLeft; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	virtual float GetMaxCoyoteTimeDuration() const { return MaxCoyoteTimeDuration; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Pawn|Components|CharacterMovement")
+	virtual float GetCoyoteTimeFullDurationVelocity() const { return CoyoteTimeFullDurationVelocity; }
+	
+protected:
+	/** Set the current duration left for coyote time. */
+	virtual void SetCoyoteTimeDuration(float NewCoyoteTimeDuration);
+	virtual void SetMaxCoyoteTimeDuration(float NewMaxCoyoteTimeDuration);
+	virtual void SetCoyoteTimeFullDurationVelocity(float NewCoyoteTimeVelocityScale);
+
+	virtual void StartCoyoteTime();
+	virtual void UpdateCoyoteTimeBeforeMovement(float DeltaSeconds);
+	
+protected:
+	/** Duration left for CoyoteTime */
+	UPROPERTY()
+	float CoyoteTimeDurationLeft = 0.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Character Movement: Jumping / Falling|CoyoteTime")
+	float MaxCoyoteTimeDuration;
+	
+	/** Velocity necessary to gain full coyote time duration */
+	UPROPERTY(EditDefaultsOnly, Category = "Character Movement: Jumping / Falling|CoyoteTime")
+	float CoyoteTimeFullDurationVelocity;
+
+	// ~CoyoteTime
 /*====================================================================================================================*/
 	
 /*====================================================================================================================*/

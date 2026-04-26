@@ -72,6 +72,9 @@ UXMoveU_ModularMovementComponent::UXMoveU_ModularMovementComponent(const FObject
 {
 	bCanJumpWhileCrouched = false;
 	JumpHorizontalVelocity = 300.f;
+
+	MaxCoyoteTimeDuration = 0.3f;
+	CoyoteTimeFullDurationVelocity = 800.f;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,6 +95,7 @@ void UXMoveU_ModularMovementComponent::BeginPlay()
 
 void UXMoveU_ModularMovementComponent::UpdateCharacterStateBeforeMovement(float DeltaSeconds)
 {
+	UpdateCoyoteTimeBeforeMovement(DeltaSeconds);
 	UpdateJumpBeforeMovement(DeltaSeconds);
 	UpdateCrouchBeforeMovement(DeltaSeconds);
 	CheckLayeredMovementModesTransition(DeltaSeconds);
@@ -393,6 +397,13 @@ void UXMoveU_ModularMovementComponent::OnMovementModeChanged(EMovementMode Previ
 	CharacterOwner->OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
 	ensureMsgf(GetGroundMovementMode() == MOVE_Walking || GetGroundMovementMode() == MOVE_NavWalking, TEXT("Invalid GroundMovementMode %d. MovementMode: %d, PreviousMovementMode: %d"), GetGroundMovementMode(), MovementMode.GetValue(), PreviousMovementMode);
 	// ~@XMoveU - @CopiedFromSuper
+
+
+	// Start coyote time
+	if (MovementMode == MOVE_Falling && PreviousMovementMode != MOVE_Falling)
+	{
+		StartCoyoteTime();
+	}
 }
 
 bool UXMoveU_ModularMovementComponent::CanCrouchInCurrentState() const
@@ -1518,7 +1529,8 @@ bool UXMoveU_ModularMovementComponent::TryJumpOverride(float DeltaTime)
 
 bool UXMoveU_ModularMovementComponent::ShouldSkipFirstJump()
 {
-	return IsFalling();
+	// Default cmc only checks for IsFalling, but we do not want to skip the first jump if we are in coyote time.
+	return IsFalling() && !IsInCoyoteTime();
 }
 
 bool UXMoveU_ModularMovementComponent::CanJumpInCurrentState() const
@@ -1701,6 +1713,46 @@ const FXMoveU_CharacterGroundInfo& UXMoveU_ModularMovementComponent::GetGroundIn
 }
 
 // ~GroundInfo
+/*====================================================================================================================*/
+
+/*====================================================================================================================*/
+// CoyoteTime
+
+bool UXMoveU_ModularMovementComponent::IsInCoyoteTime() const
+{
+	return GetCoyoteTimeDuration() > 0.f;
+}
+
+void UXMoveU_ModularMovementComponent::SetCoyoteTimeDuration(float NewCoyoteTimeDuration)
+{
+	CoyoteTimeDurationLeft = FMath::Clamp(NewCoyoteTimeDuration, 0.f, MaxCoyoteTimeDuration);
+}
+
+void UXMoveU_ModularMovementComponent::SetMaxCoyoteTimeDuration(float NewMaxCoyoteTimeDuration)
+{
+	MaxCoyoteTimeDuration = FMath::Max(0.f, NewMaxCoyoteTimeDuration);
+}
+
+void UXMoveU_ModularMovementComponent::SetCoyoteTimeFullDurationVelocity(float NewCoyoteTimeVelocityScale)
+{
+	CoyoteTimeFullDurationVelocity = FMath::Max(0.f, NewCoyoteTimeVelocityScale);
+}
+
+void UXMoveU_ModularMovementComponent::StartCoyoteTime()
+{
+	float HorizontalVelocity = (HasCustomGravity() ? RotateWorldToGravity(Velocity) : Velocity).Size2D();
+	SetCoyoteTimeDuration(GetMaxCoyoteTimeDuration() * HorizontalVelocity / GetCoyoteTimeFullDurationVelocity());
+}
+
+void UXMoveU_ModularMovementComponent::UpdateCoyoteTimeBeforeMovement(float DeltaSeconds)
+{
+	if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+	{
+		SetCoyoteTimeDuration(GetCoyoteTimeDuration() - DeltaSeconds);
+	}
+}
+
+// ~CoyoteTime
 /*====================================================================================================================*/
 
 /*====================================================================================================================*/
