@@ -19,7 +19,7 @@
 UXMoveU_WallRunMoveMode::UXMoveU_WallRunMoveMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	MovementModeType = EXMoveU_MovementModeType::Ground;
+	MovementModeType = EXMoveU_MovementModeType::Custom;
 }
 
 bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
@@ -38,7 +38,7 @@ bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
 		return false;
 	}
 	
-	FindWall(CurrentWall, (MoveComp->GetCurrentAcceleration().GetSafeNormal2D() + MoveComp->Velocity.GetSafeNormal2D() * 0.8).GetSafeNormal2D(), MaxWallDistance * 0.6);
+	FindWall(CurrentWall, (MoveComp->GetCurrentAcceleration().GetSafeNormal2D() + MoveComp->Velocity.GetSafeNormal2D() * 0.8), MaxWallDistance * 0.6);
 	DrawDebugDirectionalArrow(GetWorld(), CurrentWall.ImpactPoint, CurrentWall.ImpactPoint + CurrentWall.Normal * 10.f, 3.f, FColor::Green, false, 2.f, 0, 2.f);
 	
 	return CurrentWall.IsValidBlockingHit();
@@ -46,10 +46,12 @@ bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
 
 void UXMoveU_WallRunMoveMode::OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Entering Wallrun"))
 }
 
 void UXMoveU_WallRunMoveMode::OnLeftMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun"))
 }
 
 void UXMoveU_WallRunMoveMode::UpdateMode(float DeltaTime)
@@ -111,12 +113,13 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		MoveComp->RestorePreAdditiveRootMotionVelocity();
 
 		// Find wall
-		FindWall(CurrentWall, CurrentWall.ImpactPoint - CurrentWall.TraceStart, MaxWallDistance);
-		DrawDebugDirectionalArrow(GetWorld(), CurrentWall.ImpactPoint, CurrentWall.ImpactPoint + CurrentWall.Normal * 10.f, 3.f, FColor::Red, false, 0.1f, 0, 2.f);
+		FindWall(CurrentWall, -CurrentWall.Normal, MaxWallDistance);
+		DrawDebugDirectionalArrow(GetWorld(), CurrentWall.ImpactPoint, CurrentWall.ImpactPoint + CurrentWall.Normal * 10.f, 3.f, FColor::Orange, false, 0.1f, 0, 2.f);
 
 		
 		if (!CurrentWall.IsValidBlockingHit())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun cause invalid wall (begin tick)"))
 			MoveComp->SetMovementMode(MOVE_Falling);
 			MoveComp->StartNewPhysics(remainingTime, Iterations);
 			return;
@@ -125,6 +128,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		// If acceleration points away from the wall, quit wall run
 		if (!MoveComp->GetCurrentAcceleration().IsNearlyZero() && (CurrentWall.Normal | MoveComp->GetCurrentAcceleration().GetSafeNormal2D()) > WallRunLeaveAngleCosine)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun cause acceleration pointing away"))
 			MoveComp->SetMovementMode(MOVE_Falling);
 			MoveComp->StartNewPhysics(remainingTime, Iterations);
 			return;
@@ -134,7 +138,10 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		MaintainWallPlaneVelocity();
 		const FVector OldVelocity = MoveComp->Velocity;
 		const FVector OldAcceleration = MoveComp->Acceleration;
-		MoveComp->Acceleration = FVector::VectorPlaneProject(MoveComp->Acceleration, CurrentWall.Normal); 
+		FQuat ToWallSpace = FQuat::FindBetweenNormals(-MoveComp->GetGravityDirection(), CurrentWall.Normal);
+		MoveComp->Acceleration = ToWallSpace.RotateVector(MoveComp->Acceleration);
+
+		DrawDebugDirectionalArrow(GetWorld(), MoveComp->GetActorLocation(), MoveComp->GetActorLocation() + MoveComp->Acceleration.GetSafeNormal() * 50.f, 2.f, FColor::Yellow, false, 0.1f, 0, 1.f);
 
 		// Apply acceleration
 		if( !MoveComp->HasAnimRootMotion() && !MoveComp->CurrentRootMotion.HasOverrideVelocity() )
@@ -164,8 +171,11 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 			return;
 		}
 
+		// Calculate velocity to wall
+		const FVector ToWallVelocity = -CurrentWall.Normal * WallAttractionForce;
+
 		// Compute move parameters
-		const FVector MoveVelocity = MoveComp->Velocity;
+		const FVector MoveVelocity = MoveComp->Velocity + ToWallVelocity;
 		const FVector Delta = timeTick * MoveVelocity;
 		const bool bZeroDelta = Delta.IsNearlyZero();
 		FHitResult Hit;
@@ -178,8 +188,9 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		{
 			// try to move forward
 			MoveComp->SafeMoveUpdatedComponent(Delta, MoveComp->UpdatedComponent->GetComponentQuat(), true, Hit);
-			FVector WallAttractionDelta = -CurrentWall.Normal * WallAttractionForce * timeTick;
-			MoveComp->SafeMoveUpdatedComponent(WallAttractionDelta, MoveComp->UpdatedComponent->GetComponentQuat(), true, Hit);
+
+			MoveComp->HandleImpact(Hit, timeTick, Delta);
+			MoveComp->SlideAlongSurface(Delta, (1.f - Hit.Time), CurrentWall.Normal, Hit, true);
 			
 			if (MoveComp->IsSwimming()) //just entered water
 			{
@@ -210,9 +221,10 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 
 		
 		// See if we need to start falling.
-		FindWall(CurrentWall, CurrentWall.ImpactPoint - CurrentWall.TraceStart, MaxWallDistance);
+		FindWall(CurrentWall, -CurrentWall.Normal, MaxWallDistance);
 		if (!CurrentWall.IsValidBlockingHit())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun cause invalid wall (end tick)"))
 			MoveComp->SetMovementMode(MOVE_Falling);
 			MoveComp->StartNewPhysics(remainingTime, Iterations);
 			return;
@@ -231,7 +243,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		// TODO: check if we need to land
 
 		// Allow overlap events and such to change physics state and velocity
-		if (MoveComp->IsMovingOnGround())
+		if (IsInMode())
 		{
 			// Make velocity reflect actual move
 			if( !MoveComp->bJustTeleported && !MoveComp->HasAnimRootMotion() && !MoveComp->CurrentRootMotion.HasOverrideVelocity() && timeTick >= MoveComp->MIN_TICK_TIME)
@@ -250,7 +262,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		}	
 	}
 
-	if (MoveComp->IsMovingOnGround())
+	if (IsInMode())
 	{
 		MaintainWallPlaneVelocity();
 	}
@@ -264,11 +276,13 @@ bool UXMoveU_WallRunMoveMode::CanWallRunInCurrentState() const
 
 bool UXMoveU_WallRunMoveMode::FindWall(FHitResult& OutWallHit, const FVector& Direction, float Distance)
 {
+	OutWallHit.Reset();
+	
 	if (Direction.IsNearlyZero())
 	{
-		OutWallHit.Reset();
 		return false;
 	}
+	const FVector NormalizedDirection = Direction.GetSafeNormal2D();
 	
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 
@@ -277,16 +291,67 @@ bool UXMoveU_WallRunMoveMode::FindWall(FHitResult& OutWallHit, const FVector& Di
 	const float CapsuleHalfHeight = CapsuleComp->GetUnscaledCapsuleHalfHeight();
 	const ECollisionChannel CollisionChannel = (MoveComp->UpdatedComponent ? MoveComp->UpdatedComponent->GetCollisionObjectType() : ECC_Pawn);
 	const FVector TraceStart = MoveComp->GetActorLocation();
-	const FVector TraceEnd = TraceStart + Direction * (MoveComp->GetScaledCapsuleRadius() + Distance);
+	const FVector TraceEnd = TraceStart + NormalizedDirection * (MoveComp->GetScaledCapsuleRadius() + Distance);
 
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(XMoveU_CharacterMovementComponent_GetGroundInfo), false, MoveComp->CharacterOwner);
 	FCollisionResponseParams ResponseParam;
 	MoveComp->InitCollisionParams(QueryParams, ResponseParam);
 
-	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(0.3f);
+	FCollisionShape CollisionShape = FCollisionShape::MakeSphere(5.f);
 
-	// TODO: use multiple line traces and average them out to avoid getting stuck on corners. If this is a convex corner and the average normal is not close enough to either sides, abort.
-	return GetWorld()->SweepSingleByChannel(OutWallHit, TraceStart, TraceEnd, FQuat::Identity, CollisionChannel, CollisionShape, QueryParams, ResponseParam);
+	int32 NumberOfTraces = 7;
+	float TraceSeparationDistance = 15.f;
+
+	int32 SuccessfulHits = 0;
+	FVector AverageWallPosition = FVector::ZeroVector;
+	FVector AverageWallNormal = FVector::ZeroVector;
+	const float TraceRange = (NumberOfTraces - 1) / 2.f;
+	const FVector RightVector = FVector::CrossProduct(MoveComp->GetGravityDirection(), MoveComp->ProjectToGravityFloor(NormalizedDirection));
+	for (int32 i = 0; i < NumberOfTraces; ++i)
+	{
+		const FVector TraceOffset = RightVector * (TraceSeparationDistance * (i - TraceRange));
+		
+		FHitResult Hit;
+		// GetWorld()->SweepSingleByChannel(Hit, TraceStart + TraceOffset, TraceEnd + TraceOffset, FQuat::Identity, CollisionChannel, CollisionShape, QueryParams, ResponseParam);
+		GetWorld()->LineTraceSingleByChannel(Hit, TraceStart + TraceOffset, TraceEnd + TraceOffset, CollisionChannel, QueryParams, ResponseParam);
+		
+		DrawDebugDirectionalArrow(GetWorld(), Hit.TraceStart, Hit.bBlockingHit ? Hit.ImpactPoint : Hit.TraceEnd, 1.f, Hit.bBlockingHit ? FColor::Cyan : FColor::Red, false, 0.1f, 0, 0.5f);
+		
+		if (Hit.IsValidBlockingHit())
+		{
+			SuccessfulHits += 1;
+			AverageWallPosition += Hit.ImpactPoint;
+			AverageWallNormal += Hit.ImpactNormal;
+		}
+	}
+
+	if (SuccessfulHits > 0)
+	{
+		AverageWallPosition /= SuccessfulHits;
+		AverageWallNormal = (AverageWallNormal / SuccessfulHits).GetSafeNormal();
+
+		DrawDebugDirectionalArrow(GetWorld(), AverageWallPosition, AverageWallPosition + AverageWallNormal * 30.f, 1.f, FColor::Magenta, false, 0.1f, 0, 0.5f);
+	
+		// OutWallHit.ImpactPoint = AverageWallPosition;
+		// OutWallHit.Location = AverageWallPosition;
+		// OutWallHit.ImpactNormal = AverageWallNormal;
+		// OutWallHit.Normal = AverageWallNormal;
+		// OutWallHit.bBlockingHit = SuccessfulHits > 0;
+		// OutWallHit.bStartPenetrating = false;
+		// OutWallHit.TraceStart = TraceStart;
+		// OutWallHit.TraceEnd = TraceEnd;
+
+		const FVector ToWallAverage = (AverageWallPosition - TraceStart).GetSafeNormal() * Distance;
+		GetWorld()->SweepSingleByChannel(OutWallHit, TraceStart, TraceStart + ToWallAverage, FQuat::Identity, CollisionChannel, CollisionShape, QueryParams, ResponseParam);
+		
+		OutWallHit.Normal = AverageWallNormal;
+		OutWallHit.ImpactNormal = AverageWallNormal;
+		return OutWallHit.bBlockingHit;
+
+		//return GetWorld()->LineTraceSingleByChannel(OutWallHit, TraceStart, AverageWallPosition, CollisionChannel, QueryParams, ResponseParam);
+	}
+
+	return false;
 }
 
 void UXMoveU_WallRunMoveMode::MaintainWallPlaneVelocity()
