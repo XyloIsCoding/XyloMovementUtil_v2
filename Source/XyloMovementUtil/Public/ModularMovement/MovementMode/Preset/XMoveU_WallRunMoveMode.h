@@ -73,6 +73,15 @@ public:
 
 	UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
 	float AccelerationMultiplierWhenFacingWall;
+
+	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
+	float MinClimbWallAngleCosine;
+	
+	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+	float WallClimbVelocity;
+
+	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ForceUnits="cm/s"))
+	float ClimbMinVelocityZ;
 	
 public:
 	UPROPERTY(Category="WallRun", VisibleInstanceOnly, BlueprintReadOnly)

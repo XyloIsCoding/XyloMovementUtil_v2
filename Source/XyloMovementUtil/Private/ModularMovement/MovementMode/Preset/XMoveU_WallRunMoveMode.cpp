@@ -49,13 +49,17 @@ bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
 void UXMoveU_WallRunMoveMode::OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode)
 {
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+
+	float WallDirectionAlpha = FMath::Clamp(-CurrentWall.Normal | MoveComp->UpdatedComponent->GetForwardVector(), 0.f, 1.f);
+	float MinZVelocity = WallDirectionAlpha > MinClimbWallAngleCosine ? ClimbMinVelocityZ : 0.f;
+	
 	if (MoveComp->HasCustomGravity())
 	{
-		MoveComp->SetGravitySpaceZ(MoveComp->Velocity, FMath::Max(0.f, MoveComp->GetGravitySpaceZ(MoveComp->Velocity)));
+		MoveComp->SetGravitySpaceZ(MoveComp->Velocity, FMath::Max(MinZVelocity, MoveComp->GetGravitySpaceZ(MoveComp->Velocity)));
 	}
 	else
 	{
-		MoveComp->Velocity.Z = FMath::Max(0.f, MoveComp->Velocity.Z);
+		MoveComp->Velocity.Z = FMath::Max(MinZVelocity, MoveComp->Velocity.Z);
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Entering Wallrun"))
 }
@@ -148,17 +152,18 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		// Ensure velocity is aligned with wall.
 		MaintainWallPlaneVelocity();
 		const FVector OldVelocity = MoveComp->Velocity;
-		//FQuat ToWallSpace = FQuat::FindBetweenNormals(-MoveComp->GetGravityDirection(), CurrentWall.Normal);
-		//FVector WallAcceleration = ToWallSpace.RotateVector(MoveComp->Acceleration);
-		FVector WallAcceleration = FVector::VectorPlaneProject(MoveComp->Acceleration, CurrentWall.Normal);
-		WallAcceleration *= FMath::Max(AccelerationMultiplierWhenFacingWall, FMath::Abs(WallAcceleration.GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()));
+		FVector WallProjectedAcceleration = FVector::VectorPlaneProject(MoveComp->Acceleration, CurrentWall.Normal);
+		WallProjectedAcceleration *= FMath::Max(AccelerationMultiplierWhenFacingWall, FMath::Abs(WallProjectedAcceleration.GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()));
+
+		float WallDirectionAlpha = FMath::Clamp(-CurrentWall.Normal | MoveComp->UpdatedComponent->GetForwardVector(), 0.f, 1.f);
 
 		DrawDebugDirectionalArrow(GetWorld(), MoveComp->GetActorLocation(), MoveComp->GetActorLocation() + MoveComp->Acceleration.GetSafeNormal() * 50.f, 2.f, FColor::Yellow, false, 0.1f, 0, 1.f);
 
+		
 		// Apply acceleration
 		if( !MoveComp->HasAnimRootMotion() && !MoveComp->CurrentRootMotion.HasOverrideVelocity() )
 		{
-			TGuardValue<FVector> RestoreAcceleration(MoveComp->Acceleration, WallAcceleration);
+			TGuardValue<FVector> RestoreAcceleration(MoveComp->Acceleration, WallProjectedAcceleration);
 			if (MoveComp->HasCustomGravity())
 			{
 				MoveComp->Velocity = MoveComp->ProjectToGravityFloor(MoveComp->Velocity);
@@ -176,26 +181,41 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 			devCode(ensureMsgf(!MoveComp->Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN after CalcVelocity (%s)\n%s"), *GetPathNameSafe(this), *MoveComp->Velocity.ToString()));
 		}
 		
-		// Compute current gravity
-		float GravityScale;
-		const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
-		if (VerticalVelocity > 0.f)
+		
+		// Check if we want to climb
+		bool bIsInClimbDirection = WallDirectionAlpha > MinClimbWallAngleCosine;
+		float WallUpAcceleration = MoveComp->GetCurrentAcceleration() | -CurrentWall.Normal;
+		bool bClimbing = bIsInClimbDirection && WallUpAcceleration > 0.f;
+		if (bClimbing)
 		{
-			float WallDirectionAlpha = FMath::Clamp(-CurrentWall.Normal | MoveComp->Acceleration.GetSafeNormal(), 0.f, 1.f);
-
-			//UE_LOG(LogTemp, Warning, TEXT("Wall Run Ascending %f"), WallDirectionAlpha)
-			GravityScale = FMath::Lerp(WallRunMaxAscendingGravityScale, WallRunMinAscendingGravityScale, WallDirectionAlpha);
+			// Compute climb velocity
+			const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
+			MoveComp->SetGravitySpaceZ(MoveComp->Velocity, FMath::Max(VerticalVelocity, FMath::Clamp(WallUpAcceleration / MoveComp->GetMaxAcceleration(), 0.f, 1.f) * WallClimbVelocity));
 		}
-		else
+
+		
+		// Compute current gravity
+		float GravityScale = 1.f;
+		if (!bClimbing)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Wall Run Descending"))
-			GravityScale = WallRunDescendingGravityScale;
+			const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
+			if (VerticalVelocity > 0.f)
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Wall Run Ascending %f"), WallDirectionAlpha)
+				GravityScale = FMath::Lerp(WallRunMaxAscendingGravityScale, WallRunMinAscendingGravityScale, WallDirectionAlpha);
+			}
+			else
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Wall Run Descending"))
+				GravityScale = WallRunDescendingGravityScale;
+			}
 		}
 		const FVector Gravity = -MoveComp->GetGravityDirection() * MoveComp->GetGravityZ() * GravityScale;
 		float GravityTime = timeTick;
 
 		// Apply gravity
-		MoveComp->Velocity = MoveComp->NewFallVelocity(MoveComp->Velocity, Gravity, GravityTime);
+		MoveComp->Velocity = MoveComp->NewFallVelocity(MoveComp->Velocity, Gravity, GravityTime);	
+		
 		
 		MoveComp->ApplyRootMotionToVelocity(timeTick);
 		devCode(ensureMsgf(!MoveComp->Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN after Root Motion application (%s)\n%s"), *GetPathNameSafe(this), *MoveComp->Velocity.ToString()));
