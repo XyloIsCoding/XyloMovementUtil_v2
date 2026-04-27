@@ -17,4 +17,5 @@ enum class EXMoveU_MovementModeType : uint8
 	Falling,
 	Flying,
 	Swimming,
+	Custom,
 };
