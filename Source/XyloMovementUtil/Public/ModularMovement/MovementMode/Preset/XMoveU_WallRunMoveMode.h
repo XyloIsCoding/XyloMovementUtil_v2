@@ -49,12 +49,9 @@ public:
 
 	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
 	float MaxWallDistance;
-	
-	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
-	float WallAttractionForce;
 
-	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
-	float WallRunGravityScale;
+	UPROPERTY(Category = "WallRun", EditAnywhere, meta=(ForceUnits="cm/s"))
+	float WallRunMinEnterVerticalSpeed;
 	
 	UPROPERTY(Category = "WallRun", EditAnywhere, meta=(ForceUnits="cm/s"))
 	float WallRunVerticalSpeedDetachThreshold;
@@ -62,7 +59,19 @@ public:
 	UPROPERTY(Category = "WallRun", EditAnywhere)
 	float WallRunLeaveAngleCosine;
 
+	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+	float WallAttractionForce;
 
+	UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
+	float WallRunDescendingGravityScale;
+
+	UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
+	float WallRunMinAscendingGravityScale;
+
+	UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
+	float WallRunMaxAscendingGravityScale;
+
+public:
 	UPROPERTY(Category="WallRun", VisibleInstanceOnly, BlueprintReadOnly)
 	FHitResult CurrentWall;
 };

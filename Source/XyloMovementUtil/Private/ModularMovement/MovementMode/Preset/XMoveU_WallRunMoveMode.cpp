@@ -31,9 +31,9 @@ bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
 
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 
-	// Do not start wall run if we are already below detach threshold
+	// Do not start wall run if we are below the minimum allowed value
 	float VelocityZ = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
-	if (VelocityZ < WallRunVerticalSpeedDetachThreshold)
+	if (VelocityZ < WallRunMinEnterVerticalSpeed)
 	{
 		return false;
 	}
@@ -46,6 +46,15 @@ bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
 
 void UXMoveU_WallRunMoveMode::OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode)
 {
+	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+	if (MoveComp->HasCustomGravity())
+	{
+		MoveComp->SetGravitySpaceZ(MoveComp->Velocity, FMath::Max(0.f, MoveComp->GetGravitySpaceZ(MoveComp->Velocity)));
+	}
+	else
+	{
+		MoveComp->Velocity.Z = FMath::Max(0.f, MoveComp->Velocity.Z);
+	}
 	UE_LOG(LogTemp, Warning, TEXT("Entering Wallrun"))
 }
 
@@ -137,24 +146,49 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		// Ensure velocity is aligned with wall.
 		MaintainWallPlaneVelocity();
 		const FVector OldVelocity = MoveComp->Velocity;
-		const FVector OldAcceleration = MoveComp->Acceleration;
-		FQuat ToWallSpace = FQuat::FindBetweenNormals(-MoveComp->GetGravityDirection(), CurrentWall.Normal);
-		MoveComp->Acceleration = ToWallSpace.RotateVector(MoveComp->Acceleration);
+		//FQuat ToWallSpace = FQuat::FindBetweenNormals(-MoveComp->GetGravityDirection(), CurrentWall.Normal);
+		//FVector WallAcceleration = ToWallSpace.RotateVector(MoveComp->Acceleration);
+		FVector WallAcceleration = FVector::VectorPlaneProject(MoveComp->Acceleration, CurrentWall.Normal);
 
 		DrawDebugDirectionalArrow(GetWorld(), MoveComp->GetActorLocation(), MoveComp->GetActorLocation() + MoveComp->Acceleration.GetSafeNormal() * 50.f, 2.f, FColor::Yellow, false, 0.1f, 0, 1.f);
 
 		// Apply acceleration
 		if( !MoveComp->HasAnimRootMotion() && !MoveComp->CurrentRootMotion.HasOverrideVelocity() )
 		{
-			MoveComp->CalcVelocity(timeTick, MoveComp->GetBrakingFriction(), false, MoveComp->GetMaxBrakingDeceleration()); 
+			TGuardValue<FVector> RestoreAcceleration(MoveComp->Acceleration, WallAcceleration);
+			if (MoveComp->HasCustomGravity())
+			{
+				MoveComp->Velocity = MoveComp->ProjectToGravityFloor(MoveComp->Velocity);
+				const FVector GravityRelativeOffset = OldVelocity - MoveComp->Velocity;
+				MoveComp->CalcVelocity(timeTick, MoveComp->GetBrakingFriction(), false, MoveComp->GetMaxBrakingDeceleration());
+				MoveComp->Velocity += GravityRelativeOffset;
+			}
+			else
+			{
+				MoveComp->Velocity.Z = 0.f;
+				MoveComp->CalcVelocity(timeTick, MoveComp->GetBrakingFriction(), false, MoveComp->GetMaxBrakingDeceleration());
+				MoveComp->Velocity.Z = OldVelocity.Z;
+			}
+			
 			devCode(ensureMsgf(!MoveComp->Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN after CalcVelocity (%s)\n%s"), *GetPathNameSafe(this), *MoveComp->Velocity.ToString()));
 		}
-
-		// Restore acceleration
-		MoveComp->Acceleration = OldAcceleration;
 		
 		// Compute current gravity
-		const FVector Gravity = -MoveComp->GetGravityDirection() * MoveComp->GetGravityZ() * WallRunGravityScale;
+		float GravityScale;
+		const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
+		if (VerticalVelocity > 0.f)
+		{
+			float WallDirectionAlpha = FMath::Clamp(-CurrentWall.Normal | MoveComp->Acceleration.GetSafeNormal(), 0.f, 1.f);
+
+			//UE_LOG(LogTemp, Warning, TEXT("Wall Run Ascending %f"), WallDirectionAlpha)
+			GravityScale = FMath::Lerp(WallRunMaxAscendingGravityScale, WallRunMinAscendingGravityScale, WallDirectionAlpha);
+		}
+		else
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Wall Run Descending"))
+			GravityScale = WallRunDescendingGravityScale;
+		}
+		const FVector Gravity = -MoveComp->GetGravityDirection() * MoveComp->GetGravityZ() * GravityScale;
 		float GravityTime = timeTick;
 
 		// Apply gravity
@@ -231,7 +265,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		}
 		
 		
-		// Detach from wall if Z velocity is too low
+		// Detach from wall if Z velocity is lower than the detach threshold
 		float VelocityZ = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
 		if (VelocityZ < WallRunVerticalSpeedDetachThreshold)
 		{
@@ -287,12 +321,12 @@ bool UXMoveU_WallRunMoveMode::FindWall(FHitResult& OutWallHit, const FVector& Di
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 
 	const UCapsuleComponent* CapsuleComp = MoveComp->CharacterOwner->GetCapsuleComponent();
-	
 	const float CapsuleHalfHeight = CapsuleComp->GetUnscaledCapsuleHalfHeight();
-	const ECollisionChannel CollisionChannel = (MoveComp->UpdatedComponent ? MoveComp->UpdatedComponent->GetCollisionObjectType() : ECC_Pawn);
-	const FVector TraceStart = MoveComp->GetActorLocation();
+	
+	const FVector TraceStart = MoveComp->GetActorLocation() + ((-CapsuleHalfHeight + MoveComp->MaxStepHeight) * CapsuleComp->GetUpVector());
 	const FVector TraceEnd = TraceStart + NormalizedDirection * (MoveComp->GetScaledCapsuleRadius() + Distance);
 
+	const ECollisionChannel CollisionChannel = (MoveComp->UpdatedComponent ? MoveComp->UpdatedComponent->GetCollisionObjectType() : ECC_Pawn);
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(XMoveU_CharacterMovementComponent_GetGroundInfo), false, MoveComp->CharacterOwner);
 	FCollisionResponseParams ResponseParam;
 	MoveComp->InitCollisionParams(QueryParams, ResponseParam);
@@ -331,15 +365,6 @@ bool UXMoveU_WallRunMoveMode::FindWall(FHitResult& OutWallHit, const FVector& Di
 		AverageWallNormal = (AverageWallNormal / SuccessfulHits).GetSafeNormal();
 
 		DrawDebugDirectionalArrow(GetWorld(), AverageWallPosition, AverageWallPosition + AverageWallNormal * 30.f, 1.f, FColor::Magenta, false, 0.1f, 0, 0.5f);
-	
-		// OutWallHit.ImpactPoint = AverageWallPosition;
-		// OutWallHit.Location = AverageWallPosition;
-		// OutWallHit.ImpactNormal = AverageWallNormal;
-		// OutWallHit.Normal = AverageWallNormal;
-		// OutWallHit.bBlockingHit = SuccessfulHits > 0;
-		// OutWallHit.bStartPenetrating = false;
-		// OutWallHit.TraceStart = TraceStart;
-		// OutWallHit.TraceEnd = TraceEnd;
 
 		const FVector ToWallAverage = (AverageWallPosition - TraceStart).GetSafeNormal() * Distance;
 		GetWorld()->SweepSingleByChannel(OutWallHit, TraceStart, TraceStart + ToWallAverage, FQuat::Identity, CollisionChannel, CollisionShape, QueryParams, ResponseParam);
@@ -347,8 +372,6 @@ bool UXMoveU_WallRunMoveMode::FindWall(FHitResult& OutWallHit, const FVector& Di
 		OutWallHit.Normal = AverageWallNormal;
 		OutWallHit.ImpactNormal = AverageWallNormal;
 		return OutWallHit.bBlockingHit;
-
-		//return GetWorld()->LineTraceSingleByChannel(OutWallHit, TraceStart, AverageWallPosition, CollisionChannel, QueryParams, ResponseParam);
 	}
 
 	return false;
