@@ -71,6 +71,9 @@ public:
 	UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
 	float WallRunMaxAscendingGravityScale;
 
+	UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
+	float AccelerationMultiplierWhenFacingWall;
+	
 public:
 	UPROPERTY(Category="WallRun", VisibleInstanceOnly, BlueprintReadOnly)
 	FHitResult CurrentWall;

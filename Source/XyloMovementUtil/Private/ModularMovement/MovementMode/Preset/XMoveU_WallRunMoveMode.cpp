@@ -20,6 +20,8 @@ UXMoveU_WallRunMoveMode::UXMoveU_WallRunMoveMode(const FObjectInitializer& Objec
 	: Super(ObjectInitializer)
 {
 	MovementModeType = EXMoveU_MovementModeType::Custom;
+
+	AccelerationMultiplierWhenFacingWall = 0.3f;
 }
 
 bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
@@ -149,6 +151,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		//FQuat ToWallSpace = FQuat::FindBetweenNormals(-MoveComp->GetGravityDirection(), CurrentWall.Normal);
 		//FVector WallAcceleration = ToWallSpace.RotateVector(MoveComp->Acceleration);
 		FVector WallAcceleration = FVector::VectorPlaneProject(MoveComp->Acceleration, CurrentWall.Normal);
+		WallAcceleration *= FMath::Max(AccelerationMultiplierWhenFacingWall, FMath::Abs(WallAcceleration.GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()));
 
 		DrawDebugDirectionalArrow(GetWorld(), MoveComp->GetActorLocation(), MoveComp->GetActorLocation() + MoveComp->Acceleration.GetSafeNormal() * 50.f, 2.f, FColor::Yellow, false, 0.1f, 0, 1.f);
 
