@@ -24,7 +24,7 @@ public:
 	virtual void UpdateMode(float DeltaTime) override;
 	virtual void PhysUpdate(float DeltaTime, int32 Iterations) override;
 	
-	virtual float GetModeMaxSpeed() const override { return MaxWallRunningSpeed; }
+	virtual float GetModeMaxSpeed() const override;
 	virtual float GetModeMinAnalogSpeed() const override { return MinAnalogWallRunningSpeed; }
 	virtual float GetModeMaxBrakingDeceleration() const override { return MaxBrakingDecelerationWallRunning; }
 	virtual float GetModeBrakingFriction() const override { return WallRunningFriction; }
@@ -33,6 +33,8 @@ protected:
 	virtual bool CanWallRunInCurrentState() const;
 	virtual bool FindWall(FHitResult& OutWallHit, const FVector& Direction, float Distance);
 	virtual void MaintainWallPlaneVelocity();
+	virtual bool IsClimbing() const;
+	virtual void OnWallEnded(float remainingTime, int32 Iterations);
 
 public:
 	UPROPERTY(Category = "WallRun", EditAnywhere, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
@@ -71,14 +73,17 @@ public:
 	UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
 	float WallRunMaxAscendingGravityScale;
 
-	UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
-	float AccelerationMultiplierWhenFacingWall;
+	//UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
+	//float AccelerationMultiplierWhenFacingWall;
 
 	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
 	float MinClimbWallAngleCosine;
 	
 	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
-	float WallClimbVelocity;
+	float WallClimbLateralVelocity;
+
+	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
+	float WallClimbVerticalVelocity;
 
 	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ForceUnits="cm/s"))
 	float ClimbMinVelocityZ;

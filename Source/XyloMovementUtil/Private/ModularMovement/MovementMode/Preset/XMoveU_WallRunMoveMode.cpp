@@ -20,8 +20,6 @@ UXMoveU_WallRunMoveMode::UXMoveU_WallRunMoveMode(const FObjectInitializer& Objec
 	: Super(ObjectInitializer)
 {
 	MovementModeType = EXMoveU_MovementModeType::Custom;
-
-	AccelerationMultiplierWhenFacingWall = 0.3f;
 }
 
 bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
@@ -49,10 +47,7 @@ bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
 void UXMoveU_WallRunMoveMode::OnEnteredMovementMode(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode)
 {
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
-
-	float WallDirectionAlpha = FMath::Clamp(-CurrentWall.Normal | MoveComp->UpdatedComponent->GetForwardVector(), 0.f, 1.f);
-	float MinZVelocity = WallDirectionAlpha > MinClimbWallAngleCosine ? ClimbMinVelocityZ : 0.f;
-	
+	float MinZVelocity = IsClimbing() ? ClimbMinVelocityZ : 0.f;
 	if (MoveComp->HasCustomGravity())
 	{
 		MoveComp->SetGravitySpaceZ(MoveComp->Velocity, FMath::Max(MinZVelocity, MoveComp->GetGravitySpaceZ(MoveComp->Velocity)));
@@ -61,6 +56,7 @@ void UXMoveU_WallRunMoveMode::OnEnteredMovementMode(EMovementMode PreviousMoveme
 	{
 		MoveComp->Velocity.Z = FMath::Max(MinZVelocity, MoveComp->Velocity.Z);
 	}
+	
 	UE_LOG(LogTemp, Warning, TEXT("Entering Wallrun"))
 }
 
@@ -135,8 +131,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		if (!CurrentWall.IsValidBlockingHit())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun cause invalid wall (begin tick)"))
-			MoveComp->SetMovementMode(MOVE_Falling);
-			MoveComp->StartNewPhysics(remainingTime, Iterations);
+			OnWallEnded(remainingTime, Iterations);
 			return;
 		}
 
@@ -153,7 +148,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		MaintainWallPlaneVelocity();
 		const FVector OldVelocity = MoveComp->Velocity;
 		FVector WallProjectedAcceleration = FVector::VectorPlaneProject(MoveComp->Acceleration, CurrentWall.Normal);
-		WallProjectedAcceleration *= FMath::Max(AccelerationMultiplierWhenFacingWall, FMath::Abs(WallProjectedAcceleration.GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()));
+		//WallProjectedAcceleration *= FMath::Max(AccelerationMultiplierWhenFacingWall, FMath::Abs(WallProjectedAcceleration.GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()));
 
 		float WallDirectionAlpha = FMath::Clamp(-CurrentWall.Normal | MoveComp->UpdatedComponent->GetForwardVector(), 0.f, 1.f);
 
@@ -183,28 +178,31 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		
 		
 		// Check if we want to climb
-		bool bIsInClimbDirection = WallDirectionAlpha > MinClimbWallAngleCosine;
 		float WallUpAcceleration = MoveComp->GetCurrentAcceleration() | -CurrentWall.Normal;
-		bool bClimbing = bIsInClimbDirection && WallUpAcceleration > 0.f;
-		if (bClimbing)
+		const bool bIsActivelyClimbing = IsClimbing() && WallUpAcceleration > 0.f;
+		if (bIsActivelyClimbing)
 		{
 			// Compute climb velocity
 			const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
-			MoveComp->SetGravitySpaceZ(MoveComp->Velocity, FMath::Max(VerticalVelocity, FMath::Clamp(WallUpAcceleration / MoveComp->GetMaxAcceleration(), 0.f, 1.f) * WallClimbVelocity));
+			if (VerticalVelocity < WallClimbVerticalVelocity)
+			{
+				const float AddVelocity = FMath::Clamp(WallUpAcceleration / MoveComp->GetMaxAcceleration(), 0.f, 1.f) * WallClimbVerticalVelocity;
+				MoveComp->SetGravitySpaceZ(MoveComp->Velocity, FMath::Min(VerticalVelocity + AddVelocity, WallClimbVerticalVelocity));
+			}
 		}
 
 		
 		// Compute current gravity
 		float GravityScale = 1.f;
-		if (!bClimbing)
+		const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
+		if (VerticalVelocity > 0.f)
 		{
-			const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
-			if (VerticalVelocity > 0.f)
-			{
-				//UE_LOG(LogTemp, Warning, TEXT("Wall Run Ascending %f"), WallDirectionAlpha)
-				GravityScale = FMath::Lerp(WallRunMaxAscendingGravityScale, WallRunMinAscendingGravityScale, WallDirectionAlpha);
-			}
-			else
+			//UE_LOG(LogTemp, Warning, TEXT("Wall Run Ascending %f"), WallDirectionAlpha)
+			GravityScale = FMath::Lerp(WallRunMaxAscendingGravityScale, WallRunMinAscendingGravityScale, WallDirectionAlpha);
+		}
+		else
+		{
+			if (!bIsActivelyClimbing)
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("Wall Run Descending"))
 				GravityScale = WallRunDescendingGravityScale;
@@ -282,8 +280,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		if (!CurrentWall.IsValidBlockingHit())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun cause invalid wall (end tick)"))
-			MoveComp->SetMovementMode(MOVE_Falling);
-			MoveComp->StartNewPhysics(remainingTime, Iterations);
+			OnWallEnded(remainingTime, Iterations);
 			return;
 		}
 		
@@ -323,6 +320,11 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 	{
 		MaintainWallPlaneVelocity();
 	}
+}
+
+float UXMoveU_WallRunMoveMode::GetModeMaxSpeed() const
+{
+	return IsClimbing() ? WallClimbLateralVelocity : MaxWallRunningSpeed;
 }
 
 bool UXMoveU_WallRunMoveMode::CanWallRunInCurrentState() const
@@ -404,4 +406,21 @@ void UXMoveU_WallRunMoveMode::MaintainWallPlaneVelocity()
 {
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 	MoveComp->Velocity = FVector::VectorPlaneProject(MoveComp->Velocity, CurrentWall.Normal);
+}
+
+bool UXMoveU_WallRunMoveMode::IsClimbing() const
+{
+	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+	const float WallDirectionAlpha = -CurrentWall.Normal | MoveComp->UpdatedComponent->GetForwardVector();
+	return  WallDirectionAlpha > MinClimbWallAngleCosine;
+}
+
+void UXMoveU_WallRunMoveMode::OnWallEnded(float remainingTime, int32 Iterations)
+{
+	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+	AXMoveU_ModularCharacter* Character = GetOwningCharacter();
+	
+	MoveComp->DoJump(Character->bClientUpdating, Iterations);
+	MoveComp->SetMovementMode(MOVE_Falling);
+	MoveComp->StartNewPhysics(remainingTime, Iterations);
 }
