@@ -40,6 +40,12 @@ bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
 	
 	FindWall(CurrentWall, (MoveComp->GetCurrentAcceleration().GetSafeNormal2D() + MoveComp->Velocity.GetSafeNormal2D() * 0.8), MaxWallDistance * 0.6);
 	DrawDebugDirectionalArrow(GetWorld(), CurrentWall.WallHit.ImpactPoint, CurrentWall.WallHit.ImpactPoint + CurrentWall.WallHit.Normal * 10.f, 3.f, FColor::Green, false, 2.f, 0, 2.f);
+
+	FHitResult WallHit;
+	if (!FindWallAtHandsHeight(WallHit))
+	{
+		return false;
+	}
 	
 	return CurrentWall.WallHit.IsValidBlockingHit();
 }
@@ -62,11 +68,18 @@ void UXMoveU_WallRunMoveMode::OnEnteredMovementMode(EMovementMode PreviousMoveme
 
 void UXMoveU_WallRunMoveMode::OnLeftMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode)
 {
+	WallRunReentryLockTimeRemaining = WallRunReentryTime;
+	
 	UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun"))
 }
 
 void UXMoveU_WallRunMoveMode::UpdateMode(float DeltaTime)
 {
+	// Decrease Slide cooldown timer
+	if (WallRunReentryLockTimeRemaining > 0.f)
+	{
+		WallRunReentryLockTimeRemaining -= DeltaTime;
+	}
 }
 
 void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
@@ -182,12 +195,17 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		const bool bIsActivelyClimbing = IsClimbing() && WallUpAcceleration > 0.f;
 		if (bIsActivelyClimbing)
 		{
-			// Compute climb velocity
-			const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
-			if (VerticalVelocity < WallClimbVerticalVelocity)
+			FHitResult WallHit;
+			FindWallAtHandsHeight(WallHit);
+			if (WallHit.IsValidBlockingHit())
 			{
-				const float AddVelocity = FMath::Clamp(WallUpAcceleration / MoveComp->GetMaxAcceleration(), 0.f, 1.f) * WallClimbVerticalVelocity;
-				MoveComp->SetGravitySpaceZ(MoveComp->Velocity, FMath::Min(VerticalVelocity + AddVelocity, WallClimbVerticalVelocity));
+				// Compute climb velocity
+				const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
+				if (VerticalVelocity < WallClimbVerticalVelocity)
+				{
+					const float AddVelocity = FMath::Clamp(WallUpAcceleration / MoveComp->GetMaxAcceleration(), 0.f, 1.f) * WallClimbVerticalVelocity;
+					MoveComp->SetGravitySpaceZ(MoveComp->Velocity, FMath::Min(VerticalVelocity + AddVelocity, WallClimbVerticalVelocity));
+				}
 			}
 		}
 
@@ -231,7 +249,17 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 
 		// Compute move parameters
 		const FVector MoveVelocity = MoveComp->Velocity + ToWallVelocity;
-		const FVector Delta = timeTick * MoveVelocity;
+		FVector Delta = timeTick * MoveVelocity;
+
+		FHitResult PredictedWallHit;
+		float GravityUpDelta = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(Delta) : Delta.Z;
+		FindWallAtHandsHeight(PredictedWallHit, GravityUpDelta * (-MoveComp->GetGravityDirection()));
+		if (!PredictedWallHit.IsValidBlockingHit())
+		{
+			// Cannot move upward if no wall.
+			MoveComp->SetGravitySpaceZ(Delta, FMath::Min(GravityUpDelta, 0.f));
+		}
+		
 		const bool bZeroDelta = Delta.IsNearlyZero();
 		FHitResult Hit;
 
@@ -329,6 +357,11 @@ float UXMoveU_WallRunMoveMode::GetModeMaxSpeed() const
 
 bool UXMoveU_WallRunMoveMode::CanWallRunInCurrentState() const
 {
+	if (WallRunReentryLockTimeRemaining > 0.f)
+	{
+		return false;
+	}
+	
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 	return !IsInMode() && MoveComp->IsFalling() && !MoveComp->IsCrouching(); 
 }
@@ -352,7 +385,7 @@ bool UXMoveU_WallRunMoveMode::FindWall(FXMoveU_WallData& OutWallData, const FVec
 	const FVector TraceEnd = TraceStart + NormalizedDirection * (MoveComp->GetScaledCapsuleRadius() + Distance);
 
 	const ECollisionChannel CollisionChannel = (MoveComp->UpdatedComponent ? MoveComp->UpdatedComponent->GetCollisionObjectType() : ECC_Pawn);
-	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(XMoveU_CharacterMovementComponent_GetGroundInfo), false, MoveComp->CharacterOwner);
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(XMoveU_CharacterMovementComponent_GetWallInfo), false, MoveComp->CharacterOwner);
 	FCollisionResponseParams ResponseParam;
 	MoveComp->InitCollisionParams(QueryParams, ResponseParam);
 
@@ -408,6 +441,28 @@ bool UXMoveU_WallRunMoveMode::IsClimbing() const
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 	const float WallDirectionAlpha = -CurrentWall.WallHit.Normal | MoveComp->UpdatedComponent->GetForwardVector();
 	return  WallDirectionAlpha > MinClimbWallAngleCosine;
+}
+
+float UXMoveU_WallRunMoveMode::GetHandsHeight() const
+{
+	return IsClimbing() ? ClimbHandsHeight : 0.f;
+}
+
+bool UXMoveU_WallRunMoveMode::FindWallAtHandsHeight(FHitResult& OutWallHit, const FVector& PositionOffset)
+{
+	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
+	
+	const UCapsuleComponent* CapsuleComp = MoveComp->CharacterOwner->GetCapsuleComponent();
+	
+	const FVector TraceStart = MoveComp->GetActorLocation() + (GetHandsHeight() * CapsuleComp->GetUpVector()) + PositionOffset;
+	const FVector TraceEnd = TraceStart + (-CurrentWall.WallHit.Normal) * (MoveComp->GetScaledCapsuleRadius() + MaxWallDistance);
+
+	const ECollisionChannel CollisionChannel = (MoveComp->UpdatedComponent ? MoveComp->UpdatedComponent->GetCollisionObjectType() : ECC_Pawn);
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(XMoveU_CharacterMovementComponent_GetWallInfo), false, MoveComp->CharacterOwner);
+	FCollisionResponseParams ResponseParam;
+	MoveComp->InitCollisionParams(QueryParams, ResponseParam);
+
+	return GetWorld()->LineTraceSingleByChannel(OutWallHit, TraceStart, TraceEnd, CollisionChannel, QueryParams, ResponseParam);
 }
 
 void UXMoveU_WallRunMoveMode::MaintainWallPlaneVelocity()

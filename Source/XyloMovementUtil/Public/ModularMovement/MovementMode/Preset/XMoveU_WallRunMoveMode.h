@@ -49,6 +49,13 @@ public:
 	virtual bool CanWallRunInCurrentState() const;
 	virtual bool FindWall(FXMoveU_WallData& OutWallData, const FVector& Direction, float Distance);
 	virtual bool IsClimbing() const;
+
+	/** Get the height the hans are at relative to capsule center. This is just to calculate how high onto the
+	 * wall we can climb / run. A wall lower than CapsuleHalfHeight + HandsHeight is not suitable for wall run. */
+	virtual float GetHandsHeight() const;
+	/** Checks if there is still a wall where we need to place our hands. Requires a valid CurrentWall. */
+	virtual bool FindWallAtHandsHeight(FHitResult& OutWallHit, const FVector& PositionOffset = FVector::ZeroVector);
+	
 protected:
 	virtual void MaintainWallPlaneVelocity();
 	virtual void OnWallEnded(float remainingTime, int32 Iterations);
@@ -77,6 +84,9 @@ public:
 
 	UPROPERTY(Category = "WallRun", EditAnywhere)
 	float WallRunLeaveAngleCosine;
+	
+	UPROPERTY(Category = "WallRun", EditAnywhere)
+	float WallRunReentryTime;
 
 	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
 	float WallAttractionForce;
@@ -104,6 +114,10 @@ public:
 
 	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ForceUnits="cm/s"))
 	float ClimbMinVelocityZ;
+
+	/** Relative to capsule center */
+	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite)
+	float ClimbHandsHeight;
 	
 	UPROPERTY(Category="WallRun|Jump", EditDefaultsOnly, Instanced)
 	TObjectPtr<UXMoveU_JumpProfile> JumpProfile;
@@ -111,4 +125,7 @@ public:
 public:
 	UPROPERTY(Category="WallRun", VisibleInstanceOnly, BlueprintReadOnly)
 	FXMoveU_WallData CurrentWall;
+
+	UPROPERTY(Category="WallRun", VisibleInstanceOnly, BlueprintReadOnly)
+	float WallRunReentryLockTimeRemaining = 0.f;
 };
