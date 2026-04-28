@@ -20,9 +20,9 @@ class XYLOMOVEMENTUTIL_API UXMoveU_LayeredMovementMode : public UObject
 
 public:
 	UXMoveU_LayeredMovementMode(const FObjectInitializer& ObjectInitializer);
-protected:
-	UXMoveU_ModularMovementComponent* GetOwningMoveComp() const;
-	AXMoveU_ModularCharacter* GetOwningCharacter() const;
+public:
+	virtual UXMoveU_ModularMovementComponent* GetOwningMoveComp() const;
+	virtual AXMoveU_ModularCharacter* GetOwningCharacter() const;
 
 public:
 	UXMoveU_PredictionManager* GetPredictionManager() const { return PredictionManager; }

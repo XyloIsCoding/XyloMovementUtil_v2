@@ -7,6 +7,7 @@
 #include "UObject/Object.h"
 #include "XMoveU_MovementMode.generated.h"
 
+class UXMoveU_JumpProfile;
 class UXMoveU_PredictionManager;
 class AXMoveU_ModularCharacter;
 class UXMoveU_ModularMovementComponent;
@@ -21,9 +22,9 @@ class XYLOMOVEMENTUTIL_API UXMoveU_MovementMode : public UObject
 
 public:
 	UXMoveU_MovementMode(const FObjectInitializer& ObjectInitializer);
-protected:
-	UXMoveU_ModularMovementComponent* GetOwningMoveComp() const;
-	AXMoveU_ModularCharacter* GetOwningCharacter() const;
+public:
+	virtual UXMoveU_ModularMovementComponent* GetOwningMoveComp() const;
+	virtual AXMoveU_ModularCharacter* GetOwningCharacter() const;
 
 public:
 	UXMoveU_PredictionManager* GetPredictionManager() const { return PredictionManager; }
@@ -68,6 +69,7 @@ public:
 
 public:
 	virtual bool CanJumpInCurrentMode() const { return true; }
+	virtual UXMoveU_JumpProfile* GetJumpProfileOverride() const { return nullptr; } // TODO: Apply and Remove is never called on this jump profile
 	virtual bool CanCrouchInCurrentMode() const { return true; }
 
 public:

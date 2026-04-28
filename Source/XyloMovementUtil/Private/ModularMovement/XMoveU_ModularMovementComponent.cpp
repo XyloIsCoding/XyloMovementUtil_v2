@@ -1548,24 +1548,41 @@ bool UXMoveU_ModularMovementComponent::CanJumpInCurrentState() const
 
 bool UXMoveU_ModularMovementComponent::ApplyJumpImpulse(bool bReplayingMoves, float DeltaTime)
 {
-	// First time jump is called.
+	UXMoveU_MovementMode* CurrentMoveMode = GetCurrentCustomMovementMode();
+	UXMoveU_JumpProfile* CustomModeJumpProfile = CurrentMoveMode ? CurrentMoveMode->GetJumpProfileOverride() : nullptr;
+	
 	// We are using JumpKeyHoldTime instead of "JumpCurrentCountPreJump == 0" so it gets called every time jump input
 	// is pressed. It is up to JumpProfile to filter further.
 	if (CharacterOwner->JumpKeyHoldTime == 0.f)
 	{
+		// First time jump is called.
+		
+		if (CustomModeJumpProfile && CustomModeJumpProfile->OverrideInitialImpulse())
+		{
+			return CustomModeJumpProfile->JumpInitialImpulse(bReplayingMoves, DeltaTime);
+		}
+		
 		if (JumpProfile && JumpProfile->OverrideInitialImpulse())
 		{
 			return JumpProfile->JumpInitialImpulse(bReplayingMoves, DeltaTime);
 		}
 		return JumpInitialImpulse(bReplayingMoves, DeltaTime);
 	}
-
-	// Successive iterations
-	if (JumpProfile && JumpProfile->OverrideSustainImpulse())
+	else
 	{
-		return JumpProfile->JumpSustainImpulse(bReplayingMoves, DeltaTime);
+		// Successive iterations
+		
+		if (CustomModeJumpProfile && CustomModeJumpProfile->OverrideSustainImpulse())
+		{
+			return CustomModeJumpProfile->JumpSustainImpulse(bReplayingMoves, DeltaTime);
+		}
+	
+		if (JumpProfile && JumpProfile->OverrideSustainImpulse())
+		{
+			return JumpProfile->JumpSustainImpulse(bReplayingMoves, DeltaTime);
+		}
+		return JumpSustainImpulse(bReplayingMoves, DeltaTime);	
 	}
-	return JumpSustainImpulse(bReplayingMoves, DeltaTime);
 }
 
 bool UXMoveU_ModularMovementComponent::JumpInitialImpulse(bool bReplayingMoves, float DeltaTime)
@@ -1803,7 +1820,7 @@ void UXMoveU_ModularMovementComponent::OnJumpProfileSet(UXMoveU_JumpProfile* Old
 {
 	if (OldJumpProfile)
 	{
-		JumpProfile->RemoveJumpProfile();
+		OldJumpProfile->RemoveJumpProfile();
 	}
 	if (IsValid(JumpProfile))
 	{

@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
+#include "ModularMovement/MovementMode/XMoveU_MovementMode.h"
 
 UXMoveU_JumpProfile::UXMoveU_JumpProfile(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -14,7 +15,17 @@ UXMoveU_JumpProfile::UXMoveU_JumpProfile(const FObjectInitializer& ObjectInitial
 
 UXMoveU_ModularMovementComponent* UXMoveU_JumpProfile::GetOwningMovementComponent() const
 {
-	return Cast<UXMoveU_ModularMovementComponent>(GetOuter());
+	if (UXMoveU_ModularMovementComponent* MovementComponent = Cast<UXMoveU_ModularMovementComponent>(GetOuter()))
+	{
+		return MovementComponent;
+	}
+
+	if (UXMoveU_MovementMode* MovementMode = Cast<UXMoveU_MovementMode>(GetOuter()))
+	{
+		return MovementMode->GetOwningMoveComp();
+	}
+	
+	return nullptr;
 }
 
 AXMoveU_ModularCharacter* UXMoveU_JumpProfile::GetOwningCharacter() const

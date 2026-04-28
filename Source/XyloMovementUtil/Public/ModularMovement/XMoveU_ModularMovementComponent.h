@@ -187,10 +187,12 @@ public:
 protected:
 	virtual bool ApplyJumpImpulse(bool bReplayingMoves, float DeltaTime);
 
+public:
 	virtual bool JumpInitialImpulse(bool bReplayingMoves, float DeltaTime);
 	
 	virtual bool JumpSustainImpulse(bool bReplayingMoves, float DeltaTime);
 
+protected:
 	virtual bool EvaluatePostJumpedTransitions();
 
 public:

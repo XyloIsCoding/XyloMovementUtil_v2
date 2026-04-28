@@ -19,9 +19,9 @@ class XYLOMOVEMENTUTIL_API UXMoveU_JumpProfile : public UObject
 
 public:
 	UXMoveU_JumpProfile(const FObjectInitializer& ObjectInitializer);
-protected:
-	UXMoveU_ModularMovementComponent* GetOwningMovementComponent() const;
-	AXMoveU_ModularCharacter* GetOwningCharacter() const;
+public:
+	virtual UXMoveU_ModularMovementComponent* GetOwningMovementComponent() const;
+	virtual AXMoveU_ModularCharacter* GetOwningCharacter() const;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
