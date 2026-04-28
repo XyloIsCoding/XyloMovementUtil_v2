@@ -3,6 +3,7 @@
 
 #include "ModularMovement/JumpProfile/Preset/XMoveU_WallJump.h"
 
+#include "XyloMovementUtil.h"
 #include "ModularMovement/XMoveU_JumpStaticLibrary.h"
 #include "ModularMovement/XMoveU_ModularCharacter.h"
 #include "ModularMovement/XMoveU_ModularMovementComponent.h"
@@ -22,6 +23,7 @@ bool UXMoveU_WallJump::JumpInitialImpulse(bool bReplayingMoves, float DeltaTime)
 	UXMoveU_WallRunMoveMode* WallRunMode = Cast<UXMoveU_WallRunMoveMode>(MoveComp ? MoveComp->GetCurrentCustomMovementMode() : nullptr);
 	if (!WallRunMode)
 	{
+		UE_LOG(LogXyloMovementUtil, Warning, TEXT("Cannot use UXMoveU_WallJump without being in a movement mode derived from UXMoveU_WallRunMoveMode"))
 		return false;
 	}
 	
@@ -32,6 +34,7 @@ bool UXMoveU_WallJump::JumpInitialImpulse(bool bReplayingMoves, float DeltaTime)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Wall jump with wall"))
 		float OldJumpHorizontalVelocity = MoveComp->JumpHorizontalVelocity;
+		MoveComp->JumpHorizontalVelocity = 0.f;
 		MoveComp->JumpInitialImpulse(GetOwningCharacter()->bClientUpdating, DeltaTime);
 		MoveComp->JumpHorizontalVelocity = OldJumpHorizontalVelocity;
 	}
