@@ -244,7 +244,9 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 			return;
 		}
 
-		// Calculate velocity to wall
+		// Calculate velocity to wall (not adding it directly to cmc velocity, since it is not real physical state but
+		// just a pulling force we add in the movement Delta. Also adding it to velocity makes it so when jumping
+		// away from the wall we get pulled back.)
 		const FVector ToWallVelocity = -CurrentWall.WallHit.Normal * WallAttractionForce;
 
 		// Compute move parameters
