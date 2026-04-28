@@ -391,7 +391,7 @@ bool UXMoveU_WallRunMoveMode::FindWall(FXMoveU_WallData& OutWallData, const FVec
 
 		DrawDebugDirectionalArrow(GetWorld(), AverageWallPosition, AverageWallPosition + AverageWallNormal * 30.f, 1.f, FColor::Magenta, false, 0.1f, 0, 0.5f);
 
-		const FVector ToWallAverage = (AverageWallPosition - TraceStart).GetSafeNormal() * Distance;
+		const FVector ToWallAverage = -AverageWallNormal * Distance;
 		GetWorld()->SweepSingleByChannel(OutWallData.WallHit, TraceStart, TraceStart + ToWallAverage, FQuat::Identity, CollisionChannel, CollisionShape, QueryParams, ResponseParam);
 
 		OutWallData.LastWallNormal = AverageWallNormal;
