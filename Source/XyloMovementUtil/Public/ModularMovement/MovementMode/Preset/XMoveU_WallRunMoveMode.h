@@ -6,6 +6,20 @@
 #include "ModularMovement/MovementMode/XMoveU_MovementMode.h"
 #include "XMoveU_WallRunMoveMode.generated.h"
 
+class UXMoveU_JumpProfile;
+
+USTRUCT(BlueprintType)
+struct XYLOMOVEMENTUTIL_API FXMoveU_WallData
+{
+	GENERATED_BODY()
+
+	/** Last valid wall normal. */
+	FVector LastWallNormal;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FHitResult WallHit;
+};
+
 /**
  * 
  */
@@ -29,11 +43,14 @@ public:
 	virtual float GetModeMaxBrakingDeceleration() const override { return MaxBrakingDecelerationWallRunning; }
 	virtual float GetModeBrakingFriction() const override { return WallRunningFriction; }
 
-protected:
+	virtual UXMoveU_JumpProfile* GetJumpProfileOverride() const override { return JumpProfile; }
+
+public:
 	virtual bool CanWallRunInCurrentState() const;
-	virtual bool FindWall(FHitResult& OutWallHit, const FVector& Direction, float Distance);
-	virtual void MaintainWallPlaneVelocity();
+	virtual bool FindWall(FXMoveU_WallData& OutWallData, const FVector& Direction, float Distance);
 	virtual bool IsClimbing() const;
+protected:
+	virtual void MaintainWallPlaneVelocity();
 	virtual void OnWallEnded(float remainingTime, int32 Iterations);
 
 public:
@@ -88,7 +105,10 @@ public:
 	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ForceUnits="cm/s"))
 	float ClimbMinVelocityZ;
 	
+	UPROPERTY(Category="WallRun|Jump", EditDefaultsOnly, Instanced)
+	TObjectPtr<UXMoveU_JumpProfile> JumpProfile;
+	
 public:
 	UPROPERTY(Category="WallRun", VisibleInstanceOnly, BlueprintReadOnly)
-	FHitResult CurrentWall;
+	FXMoveU_WallData CurrentWall;
 };
