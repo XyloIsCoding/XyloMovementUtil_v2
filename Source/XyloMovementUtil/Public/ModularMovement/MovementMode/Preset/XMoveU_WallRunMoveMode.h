@@ -59,6 +59,7 @@ public:
 protected:
 	virtual void MaintainWallPlaneVelocity();
 	virtual void OnWallEnded(float remainingTime, int32 Iterations);
+	virtual FVector ProjectToWallNormalPlane(const FVector& WallNormal, const FVector& Vector) const;
 
 public:
 	UPROPERTY(Category = "WallRun", EditAnywhere, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
