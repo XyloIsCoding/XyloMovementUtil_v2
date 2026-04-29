@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "XMoveU_SimplePredictionProxy.h"
+#include "XyloMovementUtil.h"
 #include "GeneralizedPrediction/CustomPrediction/Helpers/XMoveU_BlackboardHelper.h"
 #include "GeneralizedPrediction/CustomPrediction/Helpers/XMoveU_ProxyVar.h"
 
@@ -64,12 +65,24 @@ namespace XMoveU
 		virtual T MakeDefaulted() = 0;
 
 		/** Serializes the value sent to server. */
-		virtual bool SerializeInputsAndCorrectionStates_Internal(T& Value, FArchive& Ar, UPackageMap* PackageMap) = 0;
+		virtual bool SerializeInputsAndCorrectionStates_Internal(T& Value, FArchive& Ar, UPackageMap* PackageMap)
+		{
+			UE_LOG(LogXyloMovementUtil, Warning, TEXT("TSimplePredictionProxy::SerializeInputsAndCorrectionStates_Internal must be implemented to send inputs or check values for errors on server."))
+			return true;
+		}
 
 		/** Checks the client value for discrepancies with the server value. */
-		virtual bool HasPredictionError_Internal(const T& ClientPredictedValue) = 0;
+		virtual bool HasPredictionError_Internal(const T& ClientPredictedValue)
+		{
+			UE_LOG(LogXyloMovementUtil, Warning, TEXT("TSimplePredictionProxy::HasPredictionError_Internal must be implemented to check for error in client predicted values."))
+			return false;
+		}
 		/** Serializes the value to send to client as the correct authoritative value. */
-		virtual bool SerializeCorrectedStates_Internal(T& Value, FArchive& Ar, UPackageMap* PackageMap) = 0;
+		virtual bool SerializeCorrectedStates_Internal(T& Value, FArchive& Ar, UPackageMap* PackageMap)
+		{
+			UE_LOG(LogXyloMovementUtil, Warning, TEXT("TSimplePredictionProxy::SerializeCorrectedStates_Internal must be implemented to send values as corrections to client."))
+			return true;
+		}
 
 		/** Respond to an authoritative correction being received. Can prevent the proxy from automatically applying the correction value */
 		virtual void OnCorrectionReceived(const T& AuthoritativeValue, const T& PredictedValue, EXMoveU_CorrectionContext Context, bool& bOutApplyCorrection) {}
