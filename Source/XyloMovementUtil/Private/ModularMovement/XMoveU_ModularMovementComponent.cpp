@@ -1692,7 +1692,10 @@ const FXMoveU_CharacterGroundInfo& UXMoveU_ModularMovementComponent::GetGroundIn
 {
 	if (!CharacterOwner || (GFrameCounter == CachedGroundInfo.LastUpdateFrame))
 	{
-		return CachedGroundInfo;
+		// This would be a good idea, but it creates desync inside networked movement related code, in particular
+		// inside phys functions.
+		
+		// return CachedGroundInfo;
 	}
 
 	if (MovementMode == MOVE_Walking)
