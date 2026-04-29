@@ -358,12 +358,19 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		float VelocityZ = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
 		if (VelocityZ < WallRunVerticalSpeedDetachThreshold)
 		{
-			MoveComp->SetMovementMode(MOVE_Falling);
-			MoveComp->StartNewPhysics(remainingTime, Iterations);
+			OnWallEnded(remainingTime, Iterations);
 			return;
 		}
 
-		// TODO: check if we need to land
+		// check if we need to land
+		FFindFloorResult Floor;
+		MoveComp->FindFloor(MoveComp->GetActorLocation(), Floor, false);
+		if (Floor.IsWalkableFloor() && Floor.FloorDist < 2.f)
+		{
+			MoveComp->SetMovementMode(MOVE_Walking);
+			MoveComp->StartNewPhysics(remainingTime, Iterations);
+			return;
+		}
 
 		// Allow overlap events and such to change physics state and velocity
 		if (IsInMode())
