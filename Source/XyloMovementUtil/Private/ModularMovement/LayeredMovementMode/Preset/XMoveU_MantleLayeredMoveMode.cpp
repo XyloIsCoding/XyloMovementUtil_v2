@@ -237,6 +237,11 @@ bool UXMoveU_MantleLayeredMoveMode::ShouldReplaceJump(float DeltaSeconds)
 
 bool UXMoveU_MantleLayeredMoveMode::ShouldForceLeaveMode(float DeltaSeconds)
 {
+	if (!IsInMode())
+	{
+		return false;
+	}
+	
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
 	TSharedPtr<FRootMotionSource> MantleRootMotion = MoveComp->GetRootMotionSourceByID(MantleRMS_ID);
 	return MantleRootMotion && MantleRootMotion->Status.HasFlag(ERootMotionSourceStatusFlags::Finished);
