@@ -24,4 +24,12 @@ void UXMoveU_WallRunMoveModePredManager::OnRegistered(UCharacterMovementComponen
 	WallRunReentryLockTimeRemaining->bAffectedBySimulation = true;
 	WallRunReentryLockTimeRemaining->CorrectionMode = EXMoveU_CorrectionMode::Local;
 	RegisterPredictionProxy(WallRunReentryLockTimeRemaining);
+
+	// Just register it to allow move combining to work properly.
+	TSharedPtr<FXMoveU_PredictionProxy_WallData> CurrentWall = MakeShared<FXMoveU_PredictionProxy_WallData>();
+	CurrentWall->SetName("XMoveU_WallRunMoveMode_CurrentWall");
+	CurrentWall->SetProxyVariable(XMoveU::TProxyVar_Object(WallRunMoveMode, &UXMoveU_WallRunMoveMode::CurrentWall));
+	CurrentWall->bAffectedBySimulation = true;
+	CurrentWall->CorrectionMode = EXMoveU_CorrectionMode::None;
+	RegisterPredictionProxy(CurrentWall);
 }
