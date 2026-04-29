@@ -20,15 +20,15 @@ UXMoveU_SlideMoveMode::UXMoveU_SlideMoveMode(const FObjectInitializer& ObjectIni
 	MovementModeType = EXMoveU_MovementModeType::Ground;
 
 	MaxSlidingSpeed = 0.f;
-	MaxBrakingDecelerationSliding = 500.f;
+	MaxBrakingDecelerationSliding = 300.f;
 	MinAnalogSlidingSpeed = 0.f;
 	
 	SlideEnterSpeed = 450.f;
 	SlideExitSpeed = 100.f;
-	InitialVelocityBoost = 400.f;
-	InitialVelocityBoostFalling = 400.f;
+	InitialVelocityBoost = 750.f;
+	InitialVelocityBoostFalling = 500.f;
 	SlideGravityScale = 0.2f;
-	SlidingFriction = 0.f;
+	SlidingFriction = 1.f;
 
 	SlideCooldown = 2.f;
 }

@@ -31,7 +31,7 @@ UXMoveU_WallRunMoveMode::UXMoveU_WallRunMoveMode(const FObjectInitializer& Objec
 
 	MaxWallDistance = 100.f;
 	WallRunMinEnterVerticalSpeed = -1000.f;
-	WallRunVerticalSpeedDetachThreshold = -100.f;
+	WallRunVerticalSpeedDetachThreshold = -400.f;
 	WallRunLeaveAngleCosine = FMath::Cos(FMath::DegreesToRadians(30));
 	WallAccelerationDeadZoneAngleCosine = FMath::Cos(FMath::DegreesToRadians(15));
 	WallRunHandsHeight = 0.f;
@@ -41,8 +41,8 @@ UXMoveU_WallRunMoveMode::UXMoveU_WallRunMoveMode(const FObjectInitializer& Objec
 	WallAttractionForce = 400.f;
 
 	WallRunDescendingGravityScale = 0.05;
-	WallRunMinAscendingGravityScale = 0.6;
-	WallRunMaxAscendingGravityScale = 0.7;
+	WallRunMinAscendingGravityScale = 0.5;
+	WallRunMaxAscendingGravityScale = 0.8;
 
 	MinClimbWallAngleCosine = FMath::Cos(FMath::DegreesToRadians(30));
 	WallClimbLateralVelocity = 150.f;
