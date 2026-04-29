@@ -387,7 +387,7 @@ bool UXMoveU_WallRunMoveMode::FindWall(FXMoveU_WallData& OutWallData, const FVec
 	const UCapsuleComponent* CapsuleComp = MoveComp->CharacterOwner->GetCapsuleComponent();
 	const float CapsuleHalfHeight = CapsuleComp->GetUnscaledCapsuleHalfHeight();
 	
-	const FVector TraceStart = MoveComp->GetActorLocation() + ((-CapsuleHalfHeight + MoveComp->MaxStepHeight) * CapsuleComp->GetUpVector());
+	const FVector TraceStart = MoveComp->GetActorLocation() + ((-CapsuleHalfHeight + WallRunFeetHeight) * CapsuleComp->GetUpVector());
 	const FVector TraceEnd = TraceStart + NormalizedDirection * (MoveComp->GetScaledCapsuleRadius() + Distance);
 
 	const ECollisionChannel CollisionChannel = (MoveComp->UpdatedComponent ? MoveComp->UpdatedComponent->GetCollisionObjectType() : ECC_Pawn);
@@ -451,7 +451,7 @@ bool UXMoveU_WallRunMoveMode::IsClimbing() const
 
 float UXMoveU_WallRunMoveMode::GetHandsHeight() const
 {
-	return IsClimbing() ? ClimbHandsHeight : 0.f;
+	return IsClimbing() ? ClimbHandsHeight : WallRunHandsHeight;
 }
 
 bool UXMoveU_WallRunMoveMode::FindWallAtHandsHeight(FHitResult& OutWallHit, const FVector& PositionOffset)

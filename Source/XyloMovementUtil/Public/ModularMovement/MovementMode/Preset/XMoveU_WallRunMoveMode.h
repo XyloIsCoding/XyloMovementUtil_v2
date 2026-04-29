@@ -87,6 +87,14 @@ public:
 
 	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
 	float WallAccelerationDeadZoneAngleCosine;
+
+	/** Relative to capsule center */
+	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite)
+	float WallRunHandsHeight;
+
+	/** Relative to capsule bottom */
+	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite)
+	float WallRunFeetHeight;
 	
 	UPROPERTY(Category = "WallRun", EditAnywhere)
 	float WallRunReentryTime;
