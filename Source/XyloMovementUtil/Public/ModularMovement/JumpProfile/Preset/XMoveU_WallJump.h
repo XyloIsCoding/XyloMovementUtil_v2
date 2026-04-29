@@ -15,6 +15,9 @@ class XYLOMOVEMENTUTIL_API UXMoveU_WallJump : public UXMoveU_JumpProfile
 	GENERATED_BODY()
 
 public:
+	UXMoveU_WallJump(const FObjectInitializer& ObjectInitializer);
+
+public:
 	virtual bool OverrideInitialImpulse() const override;
 	virtual bool JumpInitialImpulse(bool bReplayingMoves, float DeltaTime) override;
 

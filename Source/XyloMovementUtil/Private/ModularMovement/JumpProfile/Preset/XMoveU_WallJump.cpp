@@ -10,6 +10,13 @@
 #include "ModularMovement/MovementMode/XMoveU_MovementMode.h"
 #include "ModularMovement/MovementMode/Preset/XMoveU_WallRunMoveMode.h"
 
+UXMoveU_WallJump::UXMoveU_WallJump(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	WallPushVelocity = 500.f;
+	WallPushVelocityClimbing = 800.f;
+}
+
 bool UXMoveU_WallJump::OverrideInitialImpulse() const
 {
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMovementComponent();
