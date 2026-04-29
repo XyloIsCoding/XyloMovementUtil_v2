@@ -189,7 +189,7 @@ UXMoveU_MantleLayeredMoveMode::UXMoveU_MantleLayeredMoveMode(const FObjectInitia
 {
 	MaxVerticalWallReach = 180.f;
 	MaxHorizontalWallReach = 60.f;
-	MinMantleAngleCosine = 0.5f;
+	MinMantleAngleCosine = FMath::Cos(FMath::DegreesToRadians(60));
 	MantleSpeed = 550.f;
 	PostMantleHorizontalVelocity = 450.f;
 	PostMantleVerticalVelocity = 300.f;
@@ -204,17 +204,30 @@ bool UXMoveU_MantleLayeredMoveMode::ShouldReplaceJump(float DeltaSeconds)
 	
 	// UKismetSystemLibrary::PrintString(CharacterOwner, FString::Printf(TEXT("Mantle >> TRYING TO PERFORM MANTLE ----------------")));
 	UXMoveU_ModularMovementComponent* MoveComp = GetOwningMoveComp();
-	
 	FVector Direction = MoveComp->GetCurrentAcceleration().GetSafeNormal2D();
-	if ((Direction | MoveComp->GetControllerForwardVector()) < MinMantleAngleCosine) return false;
 	
 	FHitResult WallHit;
-	if (!FindWall(Direction, WallHit)) return false;
+	if (!FindWall(Direction, WallHit))
+	{
+		return false;
+	}
+
+	FVector WallNormal2D = WallHit.Normal.GetSafeNormal2D();
+	if (((Direction | -WallNormal2D) < MinMantleAngleCosine) || ((MoveComp->GetForwardVector().GetSafeNormal2D() | -WallNormal2D) < MinMantleAngleCosine))
+	{
+		return false;
+	}
 
 	FHitResult LedgeHit;
-	if (!FindLedge(Direction, WallHit, LedgeHit)) return false;
+	if (!FindLedge(Direction, WallHit, LedgeHit))
+	{
+		return false;
+	}
 
-	if (!IsLedgeValid(WallHit, LedgeHit)) return false;
+	if (!IsLedgeValid(WallHit, LedgeHit))
+	{
+		return false;
+	}
 
 	FVector OnLedge = LedgeHit.ImpactPoint + MoveComp->GetScaledCapsuleHalfHeight() * MoveComp->UpdatedComponent->GetUpVector();
 

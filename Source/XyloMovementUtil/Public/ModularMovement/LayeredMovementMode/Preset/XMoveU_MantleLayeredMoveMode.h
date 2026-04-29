@@ -94,7 +94,7 @@ protected:
 	virtual bool IsLedgeValid(const FHitResult& WallHit, const FHitResult& LedgeHit) const;
 
 public:
-	/** The cosine of the maximum angle between acceleration and view direction mantle is allowed. */
+	/** The cosine of the maximum allowed angle between wall normal and both acceleration and view direction. */
 	UPROPERTY(Category="Mantle", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
 	float MinMantleAngleCosine;
 	
