@@ -16,10 +16,39 @@
 #endif
 
 
+// TODO: a lot of dot products here are assuming that wall normal lays on the same plane of acceleration (horizontal plane). Fix by projecting onto the gravity plane and then normalize?
+
+
 UXMoveU_WallRunMoveMode::UXMoveU_WallRunMoveMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	MovementModeType = EXMoveU_MovementModeType::Custom;
+
+	MaxWallRunningSpeed = 750.f;
+	MaxBrakingDecelerationWallRunning = 0.f;
+	MinAnalogWallRunningSpeed = 0.f;
+	WallRunningFriction = 6.f;
+
+	MaxWallDistance = 100.f;
+	WallRunMinEnterVerticalSpeed = -1000.f;
+	WallRunVerticalSpeedDetachThreshold = -100.f;
+	WallRunLeaveAngleCosine = FMath::Cos(FMath::DegreesToRadians(30));
+	WallAccelerationDeadZoneAngleCosine = FMath::Cos(FMath::DegreesToRadians(15));
+	WallRunHandsHeight = 0.f;
+	WallRunFeetHeight = 30.f;
+	MinDistanceFromGround = 30.f;
+	WallRunReentryTime = 0.2f;
+	WallAttractionForce = 400.f;
+
+	WallRunDescendingGravityScale = 0.05;
+	WallRunMinAscendingGravityScale = 0.6;
+	WallRunMaxAscendingGravityScale = 0.7;
+
+	MinClimbWallAngleCosine = FMath::Cos(FMath::DegreesToRadians(30));
+	WallClimbLateralVelocity = 150.f;
+	WallClimbVerticalVelocity = 250.f;
+	ClimbMinVelocityZ = -250.f;
+	ClimbHandsHeight = 60.f;
 }
 
 bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
