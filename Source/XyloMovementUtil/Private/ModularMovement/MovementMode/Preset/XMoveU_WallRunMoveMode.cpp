@@ -37,6 +37,12 @@ bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
 	{
 		return false;
 	}
+
+	// Cannot start wall run if too close to ground
+	if (MoveComp->GetGroundInfo().GroundDistance < MinDistanceFromGround)
+	{
+		return false;
+	}
 	
 	FindWall(CurrentWall, (MoveComp->GetCurrentAcceleration().GetSafeNormal2D() + MoveComp->Velocity.GetSafeNormal2D() * 0.8), MaxWallDistance * 0.6);
 	DrawDebugDirectionalArrow(GetWorld(), CurrentWall.WallHit.ImpactPoint, CurrentWall.WallHit.ImpactPoint + CurrentWall.WallHit.Normal * 10.f, 3.f, FColor::Green, false, 2.f, 0, 2.f);

@@ -95,6 +95,9 @@ public:
 	/** Relative to capsule bottom */
 	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite)
 	float WallRunFeetHeight;
+
+	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite)
+	float MinDistanceFromGround;
 	
 	UPROPERTY(Category = "WallRun", EditAnywhere)
 	float WallRunReentryTime;
