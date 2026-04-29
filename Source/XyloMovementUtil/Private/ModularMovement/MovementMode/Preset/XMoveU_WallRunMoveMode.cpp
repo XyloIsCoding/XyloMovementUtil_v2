@@ -161,7 +161,11 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		MaintainWallPlaneVelocity();
 		const FVector OldVelocity = MoveComp->Velocity;
 		FVector WallProjectedAcceleration = FVector::VectorPlaneProject(MoveComp->Acceleration, CurrentWall.WallHit.Normal);
-		//WallProjectedAcceleration *= FMath::Max(AccelerationMultiplierWhenFacingWall, FMath::Abs(WallProjectedAcceleration.GetSafeNormal() | MoveComp->UpdatedComponent->GetForwardVector()));
+		if (FMath::Abs(MoveComp->Acceleration.GetSafeNormal() | CurrentWall.WallHit.Normal) > WallAccelerationDeadZoneAngleCosine)
+		{
+			// Delete wall projected acceleration if we are in dead-zone
+			WallProjectedAcceleration = FVector::ZeroVector;
+		}
 
 		float WallDirectionAlpha = FMath::Clamp(-CurrentWall.WallHit.Normal | MoveComp->UpdatedComponent->GetForwardVector(), 0.f, 1.f);
 

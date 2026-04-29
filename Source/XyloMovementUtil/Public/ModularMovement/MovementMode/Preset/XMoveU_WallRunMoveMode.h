@@ -84,6 +84,9 @@ public:
 
 	UPROPERTY(Category = "WallRun", EditAnywhere)
 	float WallRunLeaveAngleCosine;
+
+	UPROPERTY(Category = "WallRun", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
+	float WallAccelerationDeadZoneAngleCosine;
 	
 	UPROPERTY(Category = "WallRun", EditAnywhere)
 	float WallRunReentryTime;
@@ -99,9 +102,6 @@ public:
 
 	UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
 	float WallRunMaxAscendingGravityScale;
-
-	//UPROPERTY(Category = "WallRun|Gravity", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
-	//float AccelerationMultiplierWhenFacingWall;
 
 	UPROPERTY(Category = "WallRun|Climb", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ClampMax="1", UIMax="1"))
 	float MinClimbWallAngleCosine;
