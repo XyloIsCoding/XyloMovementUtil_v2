@@ -74,7 +74,7 @@ bool UXMoveU_WallRunMoveMode::ShouldEnterMode()
 	FVector GravityPlaneAccelDir = MoveComp->ProjectToGravityFloor(MoveComp->GetCurrentAcceleration()).GetSafeNormal();
 	FVector GravityPlaneVelDir = MoveComp->ProjectToGravityFloor(MoveComp->Velocity).GetSafeNormal();
 	FindWall(CurrentWall, (GravityPlaneAccelDir + GravityPlaneVelDir * 0.8), MaxWallDistance * 0.6);
-	DrawDebugDirectionalArrow(GetWorld(), CurrentWall.WallHit.ImpactPoint, CurrentWall.WallHit.ImpactPoint + CurrentWall.WallHit.Normal * 10.f, 3.f, FColor::Green, false, 2.f, 0, 2.f);
+	//DrawDebugDirectionalArrow(GetWorld(), CurrentWall.WallHit.ImpactPoint, CurrentWall.WallHit.ImpactPoint + CurrentWall.WallHit.Normal * 10.f, 3.f, FColor::Green, false, 2.f, 0, 2.f);
 
 	FHitResult WallHit;
 	if (!FindWallAtHandsHeight(WallHit))
@@ -97,15 +97,11 @@ void UXMoveU_WallRunMoveMode::OnEnteredMovementMode(EMovementMode PreviousMoveme
 	{
 		MoveComp->Velocity.Z = FMath::Max(MinZVelocity, MoveComp->Velocity.Z);
 	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("Entering Wallrun"))
 }
 
 void UXMoveU_WallRunMoveMode::OnLeftMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode)
 {
 	WallRunReentryLockTimeRemaining = WallRunReentryTime;
-	
-	UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun"))
 }
 
 void UXMoveU_WallRunMoveMode::UpdateMode(float DeltaTime)
@@ -173,12 +169,11 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 
 		// Find wall
 		FindWall(CurrentWall, -CurrentWall.WallHit.Normal, MaxWallDistance);
-		DrawDebugDirectionalArrow(GetWorld(), CurrentWall.WallHit.ImpactPoint, CurrentWall.WallHit.ImpactPoint + CurrentWall.WallHit.Normal * 10.f, 3.f, FColor::Orange, false, 0.1f, 0, 2.f);
+		//DrawDebugDirectionalArrow(GetWorld(), CurrentWall.WallHit.ImpactPoint, CurrentWall.WallHit.ImpactPoint + CurrentWall.WallHit.Normal * 10.f, 3.f, FColor::Orange, false, 0.1f, 0, 2.f);
 
 		
 		if (!CurrentWall.WallHit.IsValidBlockingHit())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun cause invalid wall (begin tick)"))
 			OnWallEnded(remainingTime, Iterations);
 			return;
 		}
@@ -187,7 +182,6 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		FVector WallNormalPlaneAccelDir = ProjectToWallNormalPlane(CurrentWall.WallHit.Normal, MoveComp->GetCurrentAcceleration()).GetSafeNormal();
 		if (!MoveComp->GetCurrentAcceleration().IsNearlyZero() && (CurrentWall.WallHit.Normal | WallNormalPlaneAccelDir) > WallRunLeaveAngleCosine)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun cause acceleration pointing away"))
 			MoveComp->SetMovementMode(MOVE_Falling);
 			MoveComp->StartNewPhysics(remainingTime, Iterations);
 			return;
@@ -206,7 +200,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		FVector WallNormalPlaneActorFwdDir = ProjectToWallNormalPlane(CurrentWall.WallHit.Normal, MoveComp->UpdatedComponent->GetForwardVector()).GetSafeNormal();
 		float WallDirectionAlpha = FMath::Clamp(-CurrentWall.WallHit.Normal | WallNormalPlaneActorFwdDir, 0.f, 1.f);
 
-		DrawDebugDirectionalArrow(GetWorld(), MoveComp->GetActorLocation(), MoveComp->GetActorLocation() + MoveComp->Acceleration.GetSafeNormal() * 50.f, 2.f, FColor::Yellow, false, 0.1f, 0, 1.f);
+		//DrawDebugDirectionalArrow(GetWorld(), MoveComp->GetActorLocation(), MoveComp->GetActorLocation() + MoveComp->Acceleration.GetSafeNormal() * 50.f, 2.f, FColor::Yellow, false, 0.1f, 0, 1.f);
 
 		
 		// Apply acceleration
@@ -257,14 +251,12 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		const float VerticalVelocity = MoveComp->HasCustomGravity() ? MoveComp->GetGravitySpaceZ(MoveComp->Velocity) : MoveComp->Velocity.Z;
 		if (VerticalVelocity > 0.f)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Wall Run Ascending %f"), WallDirectionAlpha)
 			GravityScale = FMath::Lerp(WallRunMaxAscendingGravityScale, WallRunMinAscendingGravityScale, WallDirectionAlpha);
 		}
 		else
 		{
 			if (!bIsActivelyClimbing)
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("Wall Run Descending"))
 				GravityScale = WallRunDescendingGravityScale;
 			}
 		}
@@ -351,7 +343,6 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		FindWall(CurrentWall, -CurrentWall.WallHit.Normal, MaxWallDistance);
 		if (!CurrentWall.WallHit.IsValidBlockingHit())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Leaving Wallrun cause invalid wall (end tick)"))
 			OnWallEnded(remainingTime, Iterations);
 			return;
 		}
@@ -455,10 +446,9 @@ bool UXMoveU_WallRunMoveMode::FindWall(FXMoveU_WallData& OutWallData, const FVec
 		const FVector TraceOffset = DirectionRightVector * (TraceSeparationDistance * (i - TraceRange));
 		
 		FHitResult Hit;
-		// GetWorld()->SweepSingleByChannel(Hit, TraceStart + TraceOffset, TraceEnd + TraceOffset, FQuat::Identity, CollisionChannel, CollisionShape, QueryParams, ResponseParam);
 		GetWorld()->LineTraceSingleByChannel(Hit, TraceStart + TraceOffset, TraceEnd + TraceOffset, CollisionChannel, QueryParams, ResponseParam);
 		
-		DrawDebugDirectionalArrow(GetWorld(), Hit.TraceStart, Hit.bBlockingHit ? Hit.ImpactPoint : Hit.TraceEnd, 1.f, Hit.bBlockingHit ? FColor::Cyan : FColor::Red, false, 0.1f, 0, 0.5f);
+		//DrawDebugDirectionalArrow(GetWorld(), Hit.TraceStart, Hit.bBlockingHit ? Hit.ImpactPoint : Hit.TraceEnd, 1.f, Hit.bBlockingHit ? FColor::Cyan : FColor::Red, false, 0.1f, 0, 0.5f);
 		
 		if (Hit.IsValidBlockingHit())
 		{
@@ -473,7 +463,7 @@ bool UXMoveU_WallRunMoveMode::FindWall(FXMoveU_WallData& OutWallData, const FVec
 		AverageWallPosition /= SuccessfulHits;
 		AverageWallNormal = (AverageWallNormal / SuccessfulHits).GetSafeNormal();
 
-		DrawDebugDirectionalArrow(GetWorld(), AverageWallPosition, AverageWallPosition + AverageWallNormal * 30.f, 1.f, FColor::Magenta, false, 0.1f, 0, 0.5f);
+		//DrawDebugDirectionalArrow(GetWorld(), AverageWallPosition, AverageWallPosition + AverageWallNormal * 30.f, 1.f, FColor::Magenta, false, 0.1f, 0, 0.5f);
 
 		const FVector ToWallAverage = -AverageWallNormal * Distance;
 		GetWorld()->SweepSingleByChannel(OutWallData.WallHit, TraceStart, TraceStart + ToWallAverage, FQuat::Identity, CollisionChannel, CollisionShape, QueryParams, ResponseParam);
