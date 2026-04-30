@@ -156,7 +156,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 	{
 		Iterations++;
 		MoveComp->bJustTeleported = false;
-		const float timeTick = MoveComp->GetSimulationTimeStep(remainingTime, Iterations);
+		float timeTick = MoveComp->GetSimulationTimeStep(remainingTime, Iterations);
 		remainingTime -= timeTick;
 
 		// Save current values
@@ -164,7 +164,7 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 		const FVector PreviousBaseLocation = (OldBase != NULL) ? OldBase->GetComponentLocation() : FVector::ZeroVector;
 		const FVector OldLocation = MoveComp->UpdatedComponent->GetComponentLocation();
 
-		
+		const FVector OldVelocityWithRootMotion = MoveComp->Velocity;
 		MoveComp->RestorePreAdditiveRootMotionVelocity();
 
 		// Find wall
@@ -277,6 +277,51 @@ void UXMoveU_WallRunMoveMode::PhysUpdate(float DeltaTime, int32 Iterations)
 			MoveComp->StartNewPhysics(remainingTime+timeTick, Iterations-1);
 			return;
 		}
+
+
+		// See if we need to sub-step to exactly reach the apex. This is important for avoiding "cutting off the top" of the trajectory as framerate varies.
+		const FVector::FReal GravityRelativeOldVelocityWithRootMotionZ = MoveComp->GetGravitySpaceZ(OldVelocityWithRootMotion);
+		if (/*CharacterMovementCVars::ForceJumpPeakSubstep*/ true && GravityRelativeOldVelocityWithRootMotionZ > 0.f && MoveComp->GetGravitySpaceZ(MoveComp->Velocity) <= 0.f && MoveComp->NumJumpApexAttempts < MoveComp->MaxJumpApexAttemptsPerSimulation)
+		{
+			const FVector DerivedAccel = (MoveComp->Velocity - OldVelocityWithRootMotion) / timeTick;
+			const FVector::FReal GravityRelativeDerivedAccelZ = MoveComp->GetGravitySpaceZ(DerivedAccel);
+			if (!FMath::IsNearlyZero(GravityRelativeDerivedAccelZ))
+			{
+				const float TimeToApex = -GravityRelativeOldVelocityWithRootMotionZ / GravityRelativeDerivedAccelZ;
+				
+				// The time-to-apex calculation should be precise, and we want to avoid adding a substep when we are basically already at the apex from the previous iteration's work.
+				const float ApexTimeMinimum = 0.0001f;
+				if (TimeToApex >= ApexTimeMinimum && TimeToApex < timeTick)
+				{
+					const FVector ApexVelocity = OldVelocityWithRootMotion + (DerivedAccel * TimeToApex);
+					if (MoveComp->HasCustomGravity())
+					{
+						MoveComp->Velocity = MoveComp->ProjectToGravityFloor(ApexVelocity); // Should be nearly zero anyway, but this makes apex notifications consistent.
+					}
+					else
+					{
+						MoveComp->Velocity = ApexVelocity;
+						MoveComp->Velocity.Z = 0.f; // Should be nearly zero anyway, but this makes apex notifications consistent.
+					}
+					
+					// We only want to move the amount of time it takes to reach the apex, and refund the unused time for next iteration.
+					const float TimeToRefund = (timeTick - TimeToApex);
+
+					remainingTime += TimeToRefund;
+					timeTick = TimeToApex;
+					Iterations--;
+					MoveComp->NumJumpApexAttempts++;
+
+					// Refund time to any active Root Motion Sources as well
+					for (TSharedPtr<FRootMotionSource> RootMotionSource : MoveComp->CurrentRootMotion.RootMotionSources)
+					{
+						const float RewoundRMSTime = FMath::Max(0.0f, RootMotionSource->GetTime() - TimeToRefund);
+						RootMotionSource->SetTime(RewoundRMSTime);
+					}
+				}
+			}
+		}
+		
 
 		// Calculate velocity to wall (not adding it directly to cmc velocity, since it is not real physical state but
 		// just a pulling force we add in the movement Delta. Also adding it to velocity makes it so when jumping
